@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply font-sans text-gray-800 bg-white;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 { @apply font-bold; }
+}
+
+@layer components {
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full
+           bg-brand-gradient text-white font-semibold text-sm
+           hover:opacity-90 transition-opacity cursor-pointer select-none
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-brand-outline {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full
+           border border-brand text-brand font-semibold text-sm
+           hover:bg-brand-50 transition-colors cursor-pointer select-none;
+  }
+  .input-base {
+    @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-sm
+           focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand
+           placeholder:text-gray-400 bg-white transition;
+  }
+  .page-wrapper {
+    @apply min-h-screen bg-page-gradient flex flex-col;
+  }
+  .editor-wrapper {
+    @apply min-h-screen bg-page-gradient flex flex-col;
+  }
+  .upload-zone {
+    @apply border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center
+           justify-center gap-2 cursor-pointer hover:border-brand transition-colors
+           bg-gray-50 text-gray-400 text-sm;
+  }
+}
+
+/* Drag handle cursor */
+.draggable { cursor: grab; }
+.draggable:active { cursor: grabbing; }
