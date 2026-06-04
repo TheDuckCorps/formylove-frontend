@@ -85,7 +85,7 @@ export interface PageTypeMeta {
   type: PageType
   label: string
   description: string
-  icon: string        // emoji or SVG path reference
+  svgIcon: string
   defaultData: AnyPageData
 }
 
@@ -94,42 +94,42 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     type: 'DESENHO_LIVRE',
     label: 'Desenho Livre',
     description: 'Faça um desenho à mão livre para expressar seu amor.',
-    icon: '🎨',
+    svgIcon: '/draw.svg',
     defaultData: { drawingDataUrl: null } satisfies DesenhoLivreData,
   },
   {
     type: 'MEDIDOR_AMOR',
     label: 'Medidor de Amor',
     description: 'Um coração que revela uma frase secreta conforme os cliques.',
-    icon: '❤️',
+    svgIcon: '/love-meditor.svg',
     defaultData: { question: '', secret: '', imageUrl: null } satisfies MedidorAmorData,
   },
   {
     type: 'TOQUE_CONTINUAR',
     label: 'Toque para Continuar',
     description: 'Uma frase acima do botão de avanço interativo.',
-    icon: '👆',
+    svgIcon: '/click-to-continue.svg',
     defaultData: { phrase: '' } satisfies ToqueContinuarData,
   },
   {
     type: 'MUSICA_FUNDO',
     label: 'Música de Fundo',
     description: 'Adicione uma trilha sonora via YouTube ou arquivo.',
-    icon: '🎵',
+    svgIcon: '/music.svg',
     defaultData: { youtubeUrl: '', audioUrl: null } satisfies MusicaFundoData,
   },
   {
     type: 'PALAVRA_SECRETA',
     label: 'Palavra Secreta',
     description: 'Uma dica e uma frase secreta para adivinhar.',
-    icon: '🔑',
+    svgIcon: '/secret-word.svg',
     defaultData: { hint: '', secret: '' } satisfies PalavraSecretaData,
   },
   {
     type: 'QUIZ_AFETIVO',
     label: 'Quiz Afetivo',
     description: 'Quiz personalizado com respostas e uma correta.',
-    icon: '❓',
+    svgIcon: '/quiz.svg',
     defaultData: {
       question: '',
       answers: [
@@ -144,21 +144,21 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     type: 'RASPADINHA_SURPRESA',
     label: 'Raspadinha Surpresa',
     description: 'Raspe para revelar uma imagem especial.',
-    icon: '🎟️',
+    svgIcon: '/photo-surprise.svg',
     defaultData: { imageUrl: null } satisfies RaspadinhaSurpresaData,
   },
   {
     type: 'ROLETA_ESCOLHAS',
     label: 'Roleta das Escolhas',
     description: 'Gire a roleta para sortear entre opções do casal.',
-    icon: '🎡',
+    svgIcon: '/lucky-choose.svg',
     defaultData: { phrase: '', options: ['', '', ''] } satisfies RoletaEscolhasData,
   },
   {
     type: 'MENSAGEM_MULTIMIDIA',
     label: 'Mensagem Multimídia',
     description: 'Envie um vídeo especial via YouTube ou arquivo.',
-    icon: '🎬',
+    svgIcon: '/videos.svg',
     defaultData: { youtubeUrl: '', videoUrl: null } satisfies MensagemMultimidiaData,
   },
 ]
