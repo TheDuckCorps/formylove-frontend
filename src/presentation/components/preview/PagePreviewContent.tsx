@@ -6,10 +6,18 @@ import type {
   MusicaFundoData,
   PalavraSecretaData,
   QuizAfetivoData,
+  RaspadinhaSurpresaData,
   RoletaEscolhasData,
   MensagemMultimidiaData,
 } from '@/core/entities/Page'
 import { SpinWheelDisplay } from '../pages/SpinWheelDisplay'
+import { MedidorAmorDisplay } from '../display/MedidorAmorDisplay'
+import { ToqueContinuarDisplay } from '../display/ToqueContinuarDisplay'
+import { MusicaFundoDisplay } from '../display/MusicaFundoDisplay'
+import { PalavraSecretaDisplay } from '../display/PalavraSecretaDisplay'
+import { QuizAfetivoDisplay } from '../display/QuizAfetivoDisplay'
+import { RaspadinhaSurpresaDisplay } from '../display/RaspadinhaSurpresaDisplay'
+import { MensagemMultimidiaDisplay } from '../display/MensagemMultimidiaDisplay'
 
 export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPageData }) {
   switch (type) {
@@ -25,86 +33,27 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
     }
     case 'MEDIDOR_AMOR': {
       const d = data as MedidorAmorData
-      return (
-        <div className="space-y-2 text-sm text-gray-600">
-          {d.question && <p><span className="font-semibold text-gray-800">Pergunta:</span> {d.question}</p>}
-          {d.secret && <p><span className="font-semibold text-gray-800">Segredo:</span> {d.secret}</p>}
-          {!d.question && !d.secret && <p className="text-gray-400 italic">Sem conteúdo definido</p>}
-        </div>
-      )
+      return <MedidorAmorDisplay question={d.question} imageUrl={d.imageUrl} />
     }
     case 'TOQUE_CONTINUAR': {
       const d = data as ToqueContinuarData
-      return (
-        <div className="text-center">
-          <p className="text-base font-medium text-gray-800 mb-4">{d.phrase || 'Sem frase definida'}</p>
-          <div className="inline-flex items-center gap-2 bg-brand text-white text-sm px-4 py-2 rounded-full opacity-70">
-            <span>👆</span> Toque para continuar
-          </div>
-        </div>
-      )
+      return <ToqueContinuarDisplay phrase={d.phrase} />
     }
     case 'MUSICA_FUNDO': {
       const d = data as MusicaFundoData
-      return (
-        <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
-          <div className="w-10 h-10 bg-brand/10 rounded-lg flex items-center justify-center text-lg">🎵</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800 truncate">Música de fundo</p>
-            <p className="text-xs text-gray-400 truncate">{d.youtubeUrl || 'URL não definida'}</p>
-          </div>
-        </div>
-      )
+      return <MusicaFundoDisplay youtubeUrl={d.youtubeUrl} compact />
     }
     case 'PALAVRA_SECRETA': {
       const d = data as PalavraSecretaData
-      return (
-        <div className="space-y-2">
-          {d.hint && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-xs text-yellow-600 font-semibold uppercase tracking-wide mb-1">Dica</p>
-              <p className="text-sm text-gray-800">{d.hint}</p>
-            </div>
-          )}
-          {d.secret && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">Palavra secreta</p>
-              <p className="text-sm text-gray-800 blur-sm select-none">{d.secret}</p>
-            </div>
-          )}
-          {!d.hint && !d.secret && <p className="text-gray-400 italic text-sm">Sem conteúdo definido</p>}
-        </div>
-      )
+      return <PalavraSecretaDisplay hint={d.hint} secret={d.secret} />
     }
     case 'QUIZ_AFETIVO': {
       const d = data as QuizAfetivoData
-      return (
-        <div className="space-y-3">
-          <p className="text-sm font-semibold text-gray-800">{d.question || 'Pergunta não definida'}</p>
-          <div className="grid grid-cols-2 gap-2">
-            {d.answers.map((a) => (
-              <div
-                key={a.id}
-                className={[
-                  'text-xs px-3 py-2 rounded-lg text-center border',
-                  a.isCorrect
-                    ? 'border-green-400 bg-green-50 text-green-700 font-semibold'
-                    : 'border-gray-200 bg-white text-gray-600',
-                ].join(' ')}
-              >
-                {a.text || 'Opção'}
-              </div>
-            ))}
-          </div>
-        </div>
-      )
+      return <QuizAfetivoDisplay question={d.question} answers={d.answers} />
     }
     case 'RASPADINHA_SURPRESA': {
-      return (
-        <div className="h-28 bg-gray-100 rounded-xl flex items-center justify-center text-4xl">
-          🎟️
-        </div>
-      )
+      const d = data as RaspadinhaSurpresaData
+      return <RaspadinhaSurpresaDisplay imageUrl={d.imageUrl} title={d.title} />
     }
     case 'ROLETA_ESCOLHAS': {
       const d = data as RoletaEscolhasData
@@ -120,15 +69,7 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
     }
     case 'MENSAGEM_MULTIMIDIA': {
       const d = data as MensagemMultimidiaData
-      return (
-        <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
-          <div className="w-10 h-10 bg-brand/10 rounded-lg flex items-center justify-center text-lg">🎬</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800 truncate">Mensagem em vídeo</p>
-            <p className="text-xs text-gray-400 truncate">{d.youtubeUrl || 'URL não definida'}</p>
-          </div>
-        </div>
-      )
+      return <MensagemMultimidiaDisplay youtubeUrl={d.youtubeUrl} />
     }
     default:
       return null

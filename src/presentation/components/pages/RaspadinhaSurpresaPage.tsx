@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { RaspadinhaSurpresaData } from '@/core/entities/Page'
+import { Input } from '../common/Input'
 
 interface Props {
   data: RaspadinhaSurpresaData
@@ -19,6 +20,13 @@ export function RaspadinhaSurpresaPage({ data, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      <Input
+        label="Título (opcional)"
+        placeholder="Ex: Uma surpresa pra você"
+        value={data.title ?? ''}
+        onChange={(e) => onChange({ title: e.target.value })}
+      />
+
       <div
         onClick={() => fileRef.current?.click()}
         className="upload-zone h-72 cursor-pointer"

@@ -17,10 +17,10 @@ import type {
 // Maps frontend page types to backend TemplateType enum values
 const PAGE_TYPE_TO_BACKEND: Record<PageType, string> = {
   DESENHO_LIVRE: 'FREE_DRAWING',
-  MEDIDOR_AMOR: 'MYSTERY_WORD',
+  MEDIDOR_AMOR: 'LOVE_METER',
   TOQUE_CONTINUAR: 'TAP_TO_CONTINUE',
   MUSICA_FUNDO: 'BACKGROUND_MUSIC',
-  PALAVRA_SECRETA: 'SECRET_WORD',
+  PALAVRA_SECRETA: 'MYSTERY_WORD',
   QUIZ_AFETIVO: 'QUIZ',
   RASPADINHA_SURPRESA: 'GALLERY',
   ROLETA_ESCOLHAS: 'SPIN_WHEEL',
@@ -44,8 +44,8 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
     case 'MEDIDOR_AMOR': {
       const d = data as MedidorAmorData
       return {
-        word: d.secret || 'segredo',
-        hint: d.question || 'dica',
+        question: d.question || 'O quanto você me ama?',
+        imageDataUrl: d.imageUrl ?? null,
       }
     }
 
@@ -54,7 +54,7 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
 
     case 'MUSICA_FUNDO': {
       const d = data as MusicaFundoData
-      const trackUrl = d.youtubeUrl || d.audioUrl || ''
+      const trackUrl = d.youtubeUrl || ''
       return {
         trackUrl: isValidUrl(trackUrl) ? trackUrl : 'https://www.youtube.com',
         title: 'Música de fundo',
@@ -81,9 +81,10 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
 
     case 'RASPADINHA_SURPRESA': {
       const d = data as RaspadinhaSurpresaData
-      const imageUrl =
-        d.imageUrl && isValidUrl(d.imageUrl) ? d.imageUrl : 'https://placehold.co/400'
-      return { images: [imageUrl] }
+      return {
+        imageDataUrl: d.imageUrl ?? null,
+        title: d.title || '',
+      }
     }
 
     case 'ROLETA_ESCOLHAS': {
@@ -95,10 +96,9 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
 
     case 'MENSAGEM_MULTIMIDIA': {
       const d = data as MensagemMultimidiaData
-      const mediaUrl = d.youtubeUrl || d.videoUrl || ''
       return {
         text: 'Mensagem em vídeo',
-        mediaUrl: isValidUrl(mediaUrl) ? mediaUrl : 'https://www.youtube.com',
+        mediaUrl: isValidUrl(d.youtubeUrl) ? d.youtubeUrl : 'https://www.youtube.com',
         mediaType: 'video',
       }
     }
