@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
@@ -6,6 +6,45 @@ import { Button } from '../components/common/Button'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
+
+const TYPEWRITER_PHRASES = ['Seu Amor', 'Sua Família', 'Seu Amigo', 'Alguém Especial']
+
+function useTypewriter(phrases: string[]) {
+  const [phraseIndex, setPhraseIndex] = useState(0)
+  const [displayed, setDisplayed] = useState('')
+  const [phase, setPhase] = useState<'typing' | 'waiting' | 'deleting'>('typing')
+
+  useEffect(() => {
+    const current = phrases[phraseIndex]
+
+    if (phase === 'typing') {
+      if (displayed.length < current.length) {
+        const t = setTimeout(() => setDisplayed(current.slice(0, displayed.length + 1)), 80)
+        return () => clearTimeout(t)
+      } else {
+        const t = setTimeout(() => setPhase('waiting'), 1800)
+        return () => clearTimeout(t)
+      }
+    }
+
+    if (phase === 'waiting') {
+      const t = setTimeout(() => setPhase('deleting'), 400)
+      return () => clearTimeout(t)
+    }
+
+    if (phase === 'deleting') {
+      if (displayed.length > 0) {
+        const t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 45)
+        return () => clearTimeout(t)
+      } else {
+        setPhraseIndex((i) => (i + 1) % phrases.length)
+        setPhase('typing')
+      }
+    }
+  }, [displayed, phase, phraseIndex, phrases])
+
+  return displayed
+}
 
 const HOW_IT_WORKS = [
   { number: '01', title: 'Escolha suas páginas', desc: 'Selecione as páginas interativas que deseja incluir no seu presente personalizado.', icon: '📄' },
@@ -55,6 +94,7 @@ const FAQ = [
 export function LandingView() {
   const navigate = useNavigate()
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const typedText = useTypewriter(TYPEWRITER_PHRASES)
 
   return (
     <div className="page-wrapper">
@@ -66,7 +106,7 @@ export function LandingView() {
           <span className="text-brand">Surpreenda</span> com uma página tão{' '}
           <br className="hidden md:block" />
           única quanto{' '}
-          <span className="text-brand italic">Seu Amor</span>
+          <span className="text-brand italic">{typedText}</span>
           <span className="animate-blink ml-0.5">|</span>
         </h1>
         <p className="text-gray-500 text-sm max-w-xl mx-auto mb-6">
