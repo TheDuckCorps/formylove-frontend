@@ -84,7 +84,7 @@ export function PaymentView() {
         <div className="flex flex-col items-center gap-4 bg-white border border-gray-200 rounded-2xl p-6 mb-6 shadow-sm">
           {qrCodeImage ? (
             <img
-              src={`data:image/png;base64,${qrCodeImage}`}
+              src={qrCodeImage.startsWith('data:') ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
               alt="QR Code PIX"
               className="w-52 h-52 rounded-xl"
             />
