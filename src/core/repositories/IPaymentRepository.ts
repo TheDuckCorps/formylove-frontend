@@ -9,6 +9,7 @@ export namespace IPaymentRepository {
     qrCode: string
     qrCodeImage?: string
     amount: number
+    expiresIn: number
   }
 }
 
