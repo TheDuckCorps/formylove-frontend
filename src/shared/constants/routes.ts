@@ -3,6 +3,8 @@ export const ROUTES = {
   CRIAR: '/criar',
   CRIAR_EDITOR: '/criar/editor',
   CRIAR_QRCODE: '/criar/qrcode',
+  CRIAR_PREVIEW: '/criar/preview',
+  CRIAR_PLANO: '/criar/plano',
   CRIAR_PAGAMENTO: '/criar/pagamento',
   CRIAR_SUCESSO: '/criar/sucesso',
   PAINEL: '/painel',

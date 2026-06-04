@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import type { DesenhoLivreData } from '@/core/entities/Page'
+import { useDrawingStore } from '@/shared/store/drawingStore'
 
 interface Props {
   data: DesenhoLivreData
@@ -14,13 +15,18 @@ export function DesenhoLivrePage({ data, onChange }: Props) {
   const [color, setColor] = useState(COLORS[0])
   const [lineWidth] = useState(3)
   const lastPos = useRef<{ x: number; y: number } | null>(null)
+  const { drawingDataUrl: persistedDrawing, setDrawingDataUrl, clearDrawing } = useDrawingStore()
 
-  // Restore saved drawing on mount
+  // Restore drawing on mount: prefer in-page data, fall back to persisted
   useEffect(() => {
-    if (!canvasRef.current || !data.drawingDataUrl) return
+    const source = data.drawingDataUrl ?? persistedDrawing
+    if (!canvasRef.current || !source) return
     const img = new Image()
     img.onload = () => canvasRef.current?.getContext('2d')?.drawImage(img, 0, 0)
-    img.src = data.drawingDataUrl
+    img.src = source
+    if (!data.drawingDataUrl && source) {
+      onChange({ drawingDataUrl: source })
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function getPos(e: React.MouseEvent | React.TouchEvent) {
@@ -63,7 +69,9 @@ export function DesenhoLivrePage({ data, onChange }: Props) {
   function endDraw() {
     setIsDrawing(false)
     lastPos.current = null
-    onChange({ drawingDataUrl: canvasRef.current?.toDataURL() ?? null })
+    const url = canvasRef.current?.toDataURL() ?? null
+    onChange({ drawingDataUrl: url })
+    setDrawingDataUrl(url)
   }
 
   function handleClear() {
@@ -71,6 +79,7 @@ export function DesenhoLivrePage({ data, onChange }: Props) {
     if (!ctx || !canvasRef.current) return
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
     onChange({ drawingDataUrl: null })
+    clearDrawing()
   }
 
   function handleUndo() {

@@ -6,10 +6,15 @@ import { LandingView } from '@/presentation/views/LandingView'
 import { EscolherPaginasView } from '@/presentation/views/EscolherPaginasView'
 import { EditorView } from '@/presentation/views/EditorView'
 import { QRCodeTemplateView } from '@/presentation/views/QRCodeTemplateView'
+import { EscolherPlanoView } from '@/presentation/views/EscolherPlanoView'
+import { PreviewView } from '@/presentation/views/PreviewView'
+import { PaymentView } from '@/presentation/views/PaymentView'
 import { PrivacidadeView } from '@/presentation/views/PrivacidadeView'
 import { TermosUsoView } from '@/presentation/views/TermosUsoView'
 
-// Lazy placeholders for screens not yet implemented
+// Layout
+import { CreationFlowLayout } from '@/presentation/layouts/CreationFlowLayout'
+
 function PlaceholderView({ title }: { title: string }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-page-gradient">
@@ -29,18 +34,19 @@ export default function App() {
         {/* ── Public ─────────────────────────────────────── */}
         <Route path={ROUTES.HOME} element={<LandingView />} />
 
-        {/* ── Creation flow ───────────────────────────────── */}
-        <Route path={ROUTES.CRIAR} element={<EscolherPaginasView />} />
-        <Route path={ROUTES.CRIAR_EDITOR} element={<EditorView />} />
-        <Route path={ROUTES.CRIAR_QRCODE} element={<QRCodeTemplateView />} />
-        <Route
-          path={ROUTES.CRIAR_PAGAMENTO}
-          element={<PlaceholderView title="Pagamento via Pix" />}
-        />
-        <Route
-          path={ROUTES.CRIAR_SUCESSO}
-          element={<PlaceholderView title="Presente enviado! 🎉" />}
-        />
+        {/* ── Creation flow (state is reset when leaving this layout) ─── */}
+        <Route element={<CreationFlowLayout />}>
+          <Route path={ROUTES.CRIAR} element={<EscolherPaginasView />} />
+          <Route path={ROUTES.CRIAR_EDITOR} element={<EditorView />} />
+          <Route path={ROUTES.CRIAR_QRCODE} element={<QRCodeTemplateView />} />
+          <Route path={ROUTES.CRIAR_PREVIEW} element={<PreviewView />} />
+          <Route path={ROUTES.CRIAR_PLANO} element={<EscolherPlanoView />} />
+          <Route path={ROUTES.CRIAR_PAGAMENTO} element={<PaymentView />} />
+          <Route
+            path={ROUTES.CRIAR_SUCESSO}
+            element={<PlaceholderView title="Presente enviado! 🎉" />}
+          />
+        </Route>
 
         {/* ── User panel ──────────────────────────────────── */}
         <Route

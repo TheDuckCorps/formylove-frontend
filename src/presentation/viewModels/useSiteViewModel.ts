@@ -21,7 +21,7 @@ export function useSiteViewModel() {
         pages: store.selectedPages,
         qrTemplate: store.qrTemplate,
       })
-      setCreatedSite(result.site)
+      setCreatedSite(result)
       return result
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erro ao criar presente'
