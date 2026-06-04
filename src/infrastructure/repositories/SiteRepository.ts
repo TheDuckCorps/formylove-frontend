@@ -129,6 +129,7 @@ export class SiteRepository implements ISiteRepository {
         backgroundUrl: null,
         musicUrl: null,
         transition: null,
+        qrTemplate: input.qrTemplate ?? null,
       },
       pages,
     })
