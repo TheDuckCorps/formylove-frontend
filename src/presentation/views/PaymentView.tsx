@@ -5,6 +5,7 @@ import { Button } from '../components/common/Button'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
+import { usePaymentViewModel } from '../viewModels/usePaymentViewModel'
 
 interface LocationState {
   qrCode?: string
@@ -12,7 +13,8 @@ interface LocationState {
   siteId?: string
   planType?: PlanType
   email?: string
-  amount?: number  // in centavos, from backend
+  amount?: number
+  expiresIn?: number
 }
 
 function formatCurrency(cents: number) {
@@ -24,13 +26,28 @@ export function PaymentView() {
   const location = useLocation()
   const state = (location.state as LocationState) ?? {}
 
-  const { qrCode, qrCodeImage, planType = 'BASIC', email, amount } = state
+  const { qrCode: initialQrCode, qrCodeImage: initialQrCodeImage, siteId, planType = 'BASIC', email, amount, expiresIn = 3000 } = state
   const plan = PLANS.find((p) => p.type === planType) ?? PLANS[0]
-
-  // Prefer amount from backend (already calculated with surcharge), fallback to plan price
   const displayAmount = amount ?? plan.price
 
-  if (!qrCode) {
+  const {
+    qrCode,
+    qrCodeImage,
+    isExpired,
+    isRefreshing,
+    isWarning,
+    formattedTime,
+    error,
+    refreshQrCode,
+  } = usePaymentViewModel({
+    initialQrCode: initialQrCode ?? '',
+    initialQrCodeImage,
+    siteId: siteId ?? '',
+    email,
+    expiresIn,
+  })
+
+  if (!initialQrCode) {
     return (
       <div className="page-wrapper">
         <Header />
@@ -46,7 +63,7 @@ export function PaymentView() {
   }
 
   function handleCopyPix() {
-    navigator.clipboard.writeText(qrCode!)
+    navigator.clipboard.writeText(qrCode)
       .then(() => alert('Código PIX copiado!'))
       .catch(() => {})
   }
@@ -81,22 +98,73 @@ export function PaymentView() {
         </div>
 
         {/* QR Code */}
-        <div className="flex flex-col items-center gap-4 bg-white border border-gray-200 rounded-2xl p-6 mb-6 shadow-sm">
-          {qrCodeImage ? (
-            <img
-              src={qrCodeImage.startsWith('data:') ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
-              alt="QR Code PIX"
-              className="w-52 h-52 rounded-xl"
-            />
-          ) : (
-            <div className="w-52 h-52 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-sm">
-              QR Code indisponível
-            </div>
-          )}
+        <div className="flex flex-col items-center gap-4 bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow-sm">
+          <div className="relative">
+            {qrCodeImage ? (
+              <img
+                src={qrCodeImage.startsWith('data:') ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
+                alt="QR Code PIX"
+                className={[
+                  'w-52 h-52 rounded-xl transition-opacity',
+                  isExpired ? 'opacity-30' : '',
+                ].join(' ')}
+              />
+            ) : (
+              <div className="w-52 h-52 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 text-sm">
+                QR Code indisponível
+              </div>
+            )}
+
+            {isExpired && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl">
+                <p className="text-sm font-semibold text-gray-700 text-center px-2">QR Code expirado</p>
+                <button
+                  onClick={refreshQrCode}
+                  disabled={isRefreshing}
+                  className="bg-brand text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-brand-light disabled:opacity-60 transition-colors"
+                >
+                  {isRefreshing ? 'Gerando...' : 'Gerar novo código'}
+                </button>
+              </div>
+            )}
+          </div>
+
           <p className="text-xs text-gray-400 text-center">
             Escaneie com o app do seu banco
           </p>
+
+          {/* Countdown */}
+          <div className={[
+            'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+            isExpired
+              ? 'bg-red-50 text-red-600 border border-red-200'
+              : isWarning
+              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+              : 'bg-gray-50 text-gray-500 border border-gray-200',
+          ].join(' ')}>
+            <span className={[
+              'w-1.5 h-1.5 rounded-full',
+              isExpired ? 'bg-red-400' : isWarning ? 'bg-amber-400 animate-pulse' : 'bg-gray-400',
+            ].join(' ')} />
+            {isExpired ? 'QR Code expirado' : `Válido por ${formattedTime}`}
+          </div>
+
+          {!isExpired && (
+            <button
+              onClick={refreshQrCode}
+              disabled={isRefreshing}
+              className="text-xs text-gray-400 hover:text-brand disabled:opacity-50 transition-colors underline underline-offset-2"
+            >
+              {isRefreshing ? 'Gerando novo código...' : 'Gerar novo QR Code'}
+            </button>
+          )}
         </div>
+
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-xs text-center px-4 py-3 rounded-xl">
+            {error}
+          </div>
+        )}
 
         {/* PIX code copy */}
         <div className="mb-6">
