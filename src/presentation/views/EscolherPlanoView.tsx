@@ -157,6 +157,7 @@ export function EscolherPlanoView() {
           qrCode: payment.qrCode,
           qrCodeImage: payment.qrCodeImage,
           amount: payment.amount,
+          expiresIn: payment.expiresIn,
           siteId: site.id,
           planType: chosen,
           email: submittedEmail,

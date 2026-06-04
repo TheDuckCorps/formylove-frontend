@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
@@ -220,6 +220,19 @@ export function SitePublicoView() {
       .catch(() => setLoadState('not-found'))
   }, [slug])
 
+  const pages = (site?.pages ?? []).sort((a, b) => a.order - b.order)
+  const musicPages = pages.filter((p) => p.type === 'BACKGROUND_MUSIC')
+  const storyPages = pages.filter((p) => p.type !== 'BACKGROUND_MUSIC')
+  const storyCount = storyPages.length
+
+  const handleNext = useCallback(() => {
+    setCurrentIdx((i) => Math.min(i + 1, storyCount - 1))
+  }, [storyCount])
+
+  const handlePrev = useCallback(() => {
+    setCurrentIdx((i) => Math.max(i - 1, 0))
+  }, [])
+
   if (loadState === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-page-gradient">
@@ -246,33 +259,58 @@ export function SitePublicoView() {
     )
   }
 
-  const pages = (site.pages ?? []).sort((a, b) => a.order - b.order)
-  const musicPages = pages.filter((p) => p.type === 'BACKGROUND_MUSIC')
-  const storyPages = pages.filter((p) => p.type !== 'BACKGROUND_MUSIC')
-  const currentPage = storyPages[currentIdx]
-
-  function goNext() {
-    setCurrentIdx((prev) => Math.min(prev + 1, storyPages.length - 1))
+  if (pages.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-page-gradient px-6">
+        <div className="text-center">
+          <div className="text-5xl mb-4">🎁</div>
+          <h2 className="text-xl font-bold text-gray-700">Este presente está vazio</h2>
+          <p className="text-sm text-gray-400 mt-2">Nenhuma página configurada ainda.</p>
+        </div>
+      </div>
+    )
   }
 
+  const currentPage = storyPages[currentIdx]
+  const isFirst = currentIdx === 0
+  const isLast = currentIdx === storyCount - 1
+
   return (
-    <div className="min-h-screen bg-page-gradient">
+    <div className="min-h-screen bg-page-gradient flex flex-col">
+      {musicPages[0] ? (
+        <MusicaFundoDisplay
+          youtubeUrl={(musicPages[0].content.trackUrl as string) ?? ''}
+        />
+      ) : null}
+
       {/* Header */}
-      <div className="flex justify-center py-5">
+      <div className="flex justify-center pt-5 pb-2">
         <Logo size="sm" />
       </div>
 
-      {/* Pages */}
-      <div className="max-w-lg mx-auto px-4 pb-16 flex flex-col gap-6">
-        {musicPages[0] ? (
-          <MusicaFundoDisplay
-            youtubeUrl={(musicPages[0].content.trackUrl as string) ?? ''}
-          />
-        ) : null}
+      {/* Progress dots */}
+      {storyCount > 1 && (
+        <div className="flex justify-center gap-1.5 pb-2">
+          {storyPages.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrentIdx(i)}
+              aria-label={`Ir para página ${i + 1}`}
+              className={[
+                'h-1.5 rounded-full transition-all duration-300',
+                i === currentIdx ? 'w-6 bg-brand' : 'w-1.5 bg-gray-300 hover:bg-gray-400',
+              ].join(' ')}
+            />
+          ))}
+        </div>
+      )}
 
-        {storyPages.length === 0 ? (
-          <p className="text-center text-gray-400 text-sm mt-10">Este presente ainda não tem páginas.</p>
-        ) : currentIdx >= storyPages.length ? (
+      {/* Page content */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto">
+        {storyCount === 0 ? (
+          <p className="text-center text-gray-400 text-sm">Este presente ainda não tem páginas.</p>
+        ) : currentIdx >= storyCount ? (
           <PageCard>
             <p className="text-center text-lg font-semibold text-gray-800">Fim do presente</p>
             <p className="text-center text-sm text-gray-500 mt-2">
@@ -280,19 +318,15 @@ export function SitePublicoView() {
             </p>
           </PageCard>
         ) : (
-          <>
-            <p className="text-center text-xs text-gray-400">
-              Página {currentIdx + 1} de {storyPages.length}
-            </p>
-
+          <div key={currentPage.id} className="w-full flex flex-col items-center gap-6 animate-fade-in">
             {(() => {
-              const render = renderPage(currentPage, goNext)
+              const render = renderPage(currentPage, handleNext)
               return (
                 <>
                   {render.node}
-                  {render.showNextButton !== false && currentIdx < storyPages.length - 1 && (
+                  {render.showNextButton !== false && !isLast && (
                     <div className="flex justify-center">
-                      <Button onClick={goNext}>
+                      <Button onClick={handleNext}>
                         Próxima página →
                       </Button>
                     </div>
@@ -300,14 +334,47 @@ export function SitePublicoView() {
                 </>
               )
             })()}
-          </>
+          </div>
         )}
-      </div>
+      </main>
 
-      {/* Footer watermark */}
-      <div className="text-center pb-8">
+      {/* Navigation */}
+      {storyCount > 1 && (
+        <div className="flex items-center justify-between px-8 py-4 border-t border-gray-100 bg-white/80 backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={handlePrev}
+            disabled={isFirst}
+            aria-label="Página anterior"
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand hover:text-brand transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <span className="text-xs text-gray-400 font-medium tabular-nums">
+            {currentIdx + 1} / {storyCount}
+          </span>
+
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={isLast}
+            aria-label="Próxima página"
+            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand hover:text-brand transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Watermark */}
+      <div className="text-center py-3">
         <p className="text-xs text-gray-400">
-          Presente criado com{' '}
+          Criado com{' '}
           <span
             className="text-brand font-semibold cursor-pointer hover:underline"
             onClick={() => navigate(ROUTES.HOME)}

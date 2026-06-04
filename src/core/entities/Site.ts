@@ -3,6 +3,14 @@ import type { PageItem } from './Page'
 export type PlanType = 'BASIC' | 'INTERMEDIATE' | 'PREMIUM'
 export type SiteStatus = 'ACTIVE' | 'BLOCKED' | 'EXPIRED' | 'PENDING_PAYMENT'
 
+export interface SiteGlobalSettings {
+  primaryColor: string
+  backgroundUrl: string | null
+  musicUrl: string | null
+  transition: string | null
+  qrTemplate?: string | null
+}
+
 export interface Plan {
   type: PlanType
   label: string
@@ -50,4 +58,5 @@ export interface Site {
   expirationDate: string
   createdAt: string
   updatedAt: string
+  globalSettings?: SiteGlobalSettings
 }
