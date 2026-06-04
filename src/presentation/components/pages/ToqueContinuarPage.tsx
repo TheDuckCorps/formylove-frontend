@@ -21,15 +21,6 @@ export function ToqueContinuarPage({ data, onChange }: Props) {
         onChange={(e) => onChange({ phrase: e.target.value })}
       />
 
-      {/* Live preview */}
-      {data.phrase && (
-        <div className="bg-brand-50 border border-brand/20 rounded-xl p-6 flex flex-col items-center gap-4 text-center">
-          <p className="text-sm text-gray-700 font-medium">{data.phrase}</p>
-          <button className="btn-brand text-sm px-8 py-2 pointer-events-none opacity-80">
-            Continuar
-          </button>
-        </div>
-      )}
     </div>
   )
 }

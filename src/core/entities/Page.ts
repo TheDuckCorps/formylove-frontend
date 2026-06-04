@@ -18,7 +18,6 @@ export interface DesenhoLivreData {
 
 export interface MedidorAmorData {
   question: string
-  secret: string
   imageUrl: string | null
 }
 
@@ -28,7 +27,6 @@ export interface ToqueContinuarData {
 
 export interface MusicaFundoData {
   youtubeUrl: string
-  audioUrl: string | null
 }
 
 export interface PalavraSecretaData {
@@ -49,6 +47,7 @@ export interface QuizAfetivoData {
 
 export interface RaspadinhaSurpresaData {
   imageUrl: string | null
+  title?: string
 }
 
 export interface RoletaEscolhasData {
@@ -58,7 +57,6 @@ export interface RoletaEscolhasData {
 
 export interface MensagemMultimidiaData {
   youtubeUrl: string
-  videoUrl: string | null
 }
 
 // ─── Union of all data types ──────────────────────────────────────────────────
@@ -103,7 +101,7 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Medidor de Amor',
     description: 'Um coração que revela uma frase secreta conforme os cliques.',
     svgIcon: '/love-meditor.svg',
-    defaultData: { question: '', secret: '', imageUrl: null } satisfies MedidorAmorData,
+    defaultData: { question: '', imageUrl: null } satisfies MedidorAmorData,
   },
   {
     type: 'TOQUE_CONTINUAR',
@@ -117,7 +115,7 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Música de Fundo',
     description: 'Adicione uma trilha sonora via YouTube ou arquivo.',
     svgIcon: '/music.svg',
-    defaultData: { youtubeUrl: '', audioUrl: null } satisfies MusicaFundoData,
+    defaultData: { youtubeUrl: '' } satisfies MusicaFundoData,
   },
   {
     type: 'PALAVRA_SECRETA',
@@ -146,7 +144,7 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Raspadinha Surpresa',
     description: 'Raspe para revelar uma imagem especial.',
     svgIcon: '/photo-surprise.svg',
-    defaultData: { imageUrl: null } satisfies RaspadinhaSurpresaData,
+    defaultData: { imageUrl: null, title: '' } satisfies RaspadinhaSurpresaData,
   },
   {
     type: 'ROLETA_ESCOLHAS',
@@ -160,6 +158,6 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Mensagem Multimídia',
     description: 'Envie um vídeo especial via YouTube ou arquivo.',
     svgIcon: '/videos.svg',
-    defaultData: { youtubeUrl: '', videoUrl: null } satisfies MensagemMultimidiaData,
+    defaultData: { youtubeUrl: '' } satisfies MensagemMultimidiaData,
   },
 ]
