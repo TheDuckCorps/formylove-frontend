@@ -11,6 +11,7 @@ import { PreviewView } from '@/presentation/views/PreviewView'
 import { PaymentView } from '@/presentation/views/PaymentView'
 import { PrivacidadeView } from '@/presentation/views/PrivacidadeView'
 import { TermosUsoView } from '@/presentation/views/TermosUsoView'
+import { SitePublicoView } from '@/presentation/views/SitePublicoView'
 
 // Layout
 import { CreationFlowLayout } from '@/presentation/layouts/CreationFlowLayout'
@@ -63,10 +64,7 @@ export default function App() {
         />
 
         {/* ── Public site view ─────────────────────────────── */}
-        <Route
-          path={ROUTES.SITE_PUBLICO}
-          element={<PlaceholderView title="Visualizando presente..." />}
-        />
+        <Route path={ROUTES.SITE_PUBLICO} element={<SitePublicoView />} />
 
         {/* ── Legal ────────────────────────────────────────── */}
         <Route path={ROUTES.POLITICA} element={<PrivacidadeView />} />
