@@ -13,6 +13,7 @@ export type PageType =
 // ─── Per-type data shapes (saved in `pages` JSONB) ───────────────────────────
 export interface DesenhoLivreData {
   drawingDataUrl: string | null
+  excalidrawData?: string | null
 }
 
 export interface MedidorAmorData {
@@ -95,7 +96,7 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Desenho Livre',
     description: 'Faça um desenho à mão livre para expressar seu amor.',
     svgIcon: '/draw.svg',
-    defaultData: { drawingDataUrl: null } satisfies DesenhoLivreData,
+    defaultData: { drawingDataUrl: null, excalidrawData: null } satisfies DesenhoLivreData,
   },
   {
     type: 'MEDIDOR_AMOR',
