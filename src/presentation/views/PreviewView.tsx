@@ -148,8 +148,10 @@ function PagePreviewCard({ page, index, total }: { page: PageItem; index: number
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center text-base">
-            {meta?.icon ?? '📄'}
+          <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center overflow-hidden">
+            {meta?.svgIcon ? (
+              <img src={meta.svgIcon} alt="" className="w-6 h-6 object-contain" draggable={false} />
+            ) : null}
           </div>
           <div>
             <p className="text-xs text-gray-400 font-medium">Página {index + 1} de {total}</p>

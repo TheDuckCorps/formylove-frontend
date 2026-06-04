@@ -9,6 +9,9 @@ import type { PlanType } from '@/core/entities/Site'
 
 const TYPEWRITER_PHRASES = ['Seu Amor', 'Sua Família', 'Seu Amigo', 'Alguém Especial']
 
+const CARD_RADIAL_BG =
+  'radial-gradient(circle 38% at 50% 50%, rgba(252,228,243,0.38) 0%, transparent 100%), #ffffff'
+
 function useTypewriter(phrases: string[]) {
   const [phraseIndex, setPhraseIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
@@ -310,25 +313,25 @@ export function LandingView() {
             especial com uma lembrança única que ficará para sempre no coração
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
             {HOW_IT_WORKS.map((step) => (
               <div
                 key={step.number}
-                className="relative flex flex-col items-center text-center rounded-2xl bg-brand-50 border border-brand-100 p-6 pt-10 gap-4 shadow-sm hover:shadow-card transition-shadow"
+                className="relative w-full flex flex-col items-center text-center rounded-2xl border-2 border-brand-100 p-6 pt-10 gap-4 shadow-sm hover:shadow-card transition-shadow"
+                style={{ background: CARD_RADIAL_BG }}
               >
-                {/* Concentric step number badge */}
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border-[3px] border-brand flex items-center justify-center bg-white">
                   <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center">
                     <span className="text-white text-sm font-extrabold leading-none">{step.number}</span>
                   </div>
                 </div>
 
-                {/* Icon illustration area */}
-                <div className="w-28 h-28 rounded-2xl bg-white flex items-center justify-center p-4 shadow-sm border border-brand-50">
-                  {step.icon}
+                <div className="w-full max-w-[328px] min-h-[104px] rounded-2xl bg-white flex items-center justify-center p-4 shadow-sm border border-brand-50">
+                  <div className="w-full h-full min-h-[80px] max-h-[104px] flex items-center justify-center">
+                    {step.icon}
+                  </div>
                 </div>
 
-                {/* Text */}
                 <h3 className="font-bold text-gray-800 text-base leading-snug">{step.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
               </div>

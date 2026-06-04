@@ -66,7 +66,14 @@ export function EditarPaginasModal({ onClose }: Props) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16"/>
                   </svg>
 
-                  <span className="text-base">{meta?.icon}</span>
+                  {meta?.svgIcon && (
+                    <img
+                      src={meta.svgIcon}
+                      alt=""
+                      className="w-8 h-8 object-contain flex-shrink-0"
+                      draggable={false}
+                    />
+                  )}
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{meta?.label}</p>
