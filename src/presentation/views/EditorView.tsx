@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { EditorHeader } from '../components/layout/EditorHeader'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
+import { StepIndicator } from '../components/layout/StepIndicator'
 import { EditarPaginasModal } from '../modals/EditarPaginasModal'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { ROUTES } from '@/shared/constants/routes'
 
-// Page editor components
 import { DesenhoLivrePage } from '../components/pages/DesenhoLivrePage'
 import { MedidorAmorPage } from '../components/pages/MedidorAmorPage'
 import { ToqueContinuarPage } from '../components/pages/ToqueContinuarPage'
@@ -102,6 +102,8 @@ export function EditorView() {
     }
   }
 
+  const isLastPage = currentPageIndex === selectedPages.length - 1
+
   return (
     <div className="editor-wrapper">
       <EditorHeader
@@ -113,6 +115,8 @@ export function EditorView() {
         onChangePages={() => setShowEditModal(true)}
       />
 
+      <StepIndicator currentStep={2} />
+
       <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-8">
         <PageEditorSwitch
           type={currentPage.type}
@@ -122,13 +126,13 @@ export function EditorView() {
 
         <div className="mt-10 flex flex-col items-center gap-3">
           <Button size="lg" fullWidth onClick={handleNext}>
-            Continuar
+            {isLastPage ? 'Ir para capa do QR Code →' : 'Próxima página →'}
           </Button>
           <button
-            onClick={() => navigate(ROUTES.CRIAR_QRCODE)}
+            onClick={() => navigate(ROUTES.CRIAR_PREVIEW)}
             className="text-sm text-brand hover:underline"
           >
-            Pré-visualizar resultado
+            Pré-visualizar meu presente
           </button>
         </div>
       </main>
