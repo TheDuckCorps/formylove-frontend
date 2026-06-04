@@ -15,6 +15,7 @@ import type {
 } from '@/core/entities/Page'
 import { Button } from '../components/common/Button'
 import { Logo } from '../components/common/Logo'
+import { SpinWheelDisplay } from '../components/pages/SpinWheelDisplay'
 
 function PagePreviewContent({ type, data }: { type: PageType; data: AnyPageData }) {
   switch (type) {
@@ -113,21 +114,15 @@ function PagePreviewContent({ type, data }: { type: PageType; data: AnyPageData 
     }
     case 'ROLETA_ESCOLHAS': {
       const d = data as RoletaEscolhasData
-      return (
-        <div className="space-y-2">
-          {d.phrase && <p className="text-sm text-gray-600 italic">"{d.phrase}"</p>}
-          <div className="flex flex-wrap gap-1">
-            {d.options.filter(Boolean).map((opt, i) => (
-              <span key={i} className="text-xs bg-brand/10 text-brand px-2 py-1 rounded-full">
-                {opt}
-              </span>
-            ))}
-            {d.options.filter(Boolean).length === 0 && (
-              <p className="text-gray-400 italic text-sm">Sem opções definidas</p>
-            )}
-          </div>
-        </div>
-      )
+      const validOptions = d.options.filter(Boolean)
+      if (validOptions.length < 2) {
+        return (
+          <p className="text-gray-400 italic text-sm text-center py-4">
+            Adicione pelo menos 2 opções para ver a roleta.
+          </p>
+        )
+      }
+      return <SpinWheelDisplay phrase={d.phrase || undefined} options={validOptions} />
     }
     case 'MENSAGEM_MULTIMIDIA': {
       const d = data as MensagemMultimidiaData

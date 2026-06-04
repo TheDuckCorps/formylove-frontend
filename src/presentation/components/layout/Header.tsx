@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Logo } from '../common/Logo'
 import { Button } from '../common/Button'
+import { ProfileModal } from '@/presentation/modals/ProfileModal'
 import { ROUTES } from '@/shared/constants/routes'
 
 interface HeaderProps {
@@ -9,6 +11,7 @@ interface HeaderProps {
 
 export function Header({ showCta = true }: HeaderProps) {
   const navigate = useNavigate()
+  const [showProfileModal, setShowProfileModal] = useState(false)
 
   return (
     <header className="w-full border-b border-gray-100 bg-white sticky top-0 z-40">
@@ -42,9 +45,9 @@ export function Header({ showCta = true }: HeaderProps) {
           </button>
 
           <button
-            onClick={() => navigate(ROUTES.PAINEL)}
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-brand hover:text-brand transition flex-shrink-0"
-            aria-label="Minha conta"
+            onClick={() => setShowProfileModal(true)}
+            className="w-8 h-8 rounded-full border-2 border-brand text-brand flex items-center justify-center hover:bg-brand/10 transition flex-shrink-0"
+            aria-label="Meus presentes"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
@@ -52,6 +55,10 @@ export function Header({ showCta = true }: HeaderProps) {
           </button>
         </div>
       </div>
+
+      {showProfileModal && (
+        <ProfileModal onClose={() => setShowProfileModal(false)} />
+      )}
     </header>
   )
 }
