@@ -220,7 +220,7 @@ export function SitePublicoView() {
       .catch(() => setLoadState('not-found'))
   }, [slug])
 
-  const pages = (site?.pages ?? []).sort((a, b) => a.order - b.order)
+  const pages = [...(site?.pages ?? [])].sort((a, b) => a.order - b.order)
   const musicPages = pages.filter((p) => p.type === 'BACKGROUND_MUSIC')
   const storyPages = pages.filter((p) => p.type !== 'BACKGROUND_MUSIC')
   const storyCount = storyPages.length

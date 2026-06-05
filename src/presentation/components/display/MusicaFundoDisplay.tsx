@@ -44,7 +44,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   function postToPlayer(command: string, args: unknown[] = []) {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: command, args }),
-      '*',
+      'https://www.youtube.com',
     )
   }
 

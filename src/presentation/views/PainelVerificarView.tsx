@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
 import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
@@ -20,8 +20,7 @@ export function PainelVerificarView() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   if (!email) {
-    navigate(ROUTES.PAINEL, { replace: true })
-    return null
+    return <Navigate to={ROUTES.PAINEL} replace />
   }
 
   function handleDigit(index: number, value: string) {
