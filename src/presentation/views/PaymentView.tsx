@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
@@ -39,6 +40,11 @@ export function PaymentView() {
     formattedTime,
     error,
     refreshQrCode,
+    isPaid,
+    siteSlug,
+    isCheckingPayment,
+    checkMessage,
+    checkPaymentNow,
   } = usePaymentViewModel({
     initialQrCode: initialQrCode ?? '',
     initialQrCodeImage,
@@ -46,6 +52,15 @@ export function PaymentView() {
     email,
     expiresIn,
   })
+
+  useEffect(() => {
+    if (isPaid) {
+      navigate(ROUTES.CRIAR_SUCESSO, {
+        state: { slug: siteSlug, email },
+        replace: true,
+      })
+    }
+  }, [isPaid, siteSlug, email, navigate])
 
   if (!initialQrCode) {
     return (
@@ -195,6 +210,25 @@ export function PaymentView() {
         <p className="text-xs text-gray-400 text-center mb-6">
           Após a confirmação do pagamento, você receberá o link do site
           {email ? ` no email ${email}` : ''} automaticamente.
+        </p>
+
+        {/* "Já paguei" — manual payment check */}
+        <Button
+          fullWidth
+          onClick={checkPaymentNow}
+          disabled={isCheckingPayment}
+        >
+          {isCheckingPayment ? 'Verificando pagamento...' : 'Já paguei'}
+        </Button>
+
+        {checkMessage && (
+          <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-700 text-xs text-center px-4 py-3 rounded-xl">
+            {checkMessage}
+          </div>
+        )}
+
+        <p className="text-[11px] text-gray-400 text-center mt-3 mb-4">
+          Verificamos seu pagamento automaticamente a cada poucos segundos.
         </p>
 
         <Button variant="ghost" size="sm" fullWidth onClick={() => navigate(ROUTES.CRIAR)}>
