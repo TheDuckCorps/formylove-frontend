@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
@@ -8,6 +8,9 @@ import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
 
 const TYPEWRITER_PHRASES = ['Seu Amor', 'Sua Família', 'Seu Amigo', 'Alguém Especial']
+
+const CARD_RADIAL_BG =
+  'radial-gradient(circle 38% at 50% 50%, rgba(252,228,243,0.38) 0%, transparent 100%), #ffffff'
 
 function useTypewriter(phrases: string[]) {
   const [phraseIndex, setPhraseIndex] = useState(0)
@@ -46,11 +49,156 @@ function useTypewriter(phrases: string[]) {
   return displayed
 }
 
-const HOW_IT_WORKS = [
-  { number: '01', title: 'Escolha suas páginas', desc: 'Selecione as páginas interativas que deseja incluir no seu presente personalizado.', icon: '📄' },
-  { number: '02', title: 'Personalize seu site', desc: 'Adicione textos, fotos, músicas e muito mais para tornar único.', icon: '✏️' },
-  { number: '03', title: 'Faça o pagamento', desc: 'Pagamento simples e seguro via Pix. Rápido e sem complicações.', icon: '💳' },
-  { number: '04', title: 'Receba seu link e QR Code', desc: 'Receba no e-mail o link e o QR Code para compartilhar.', icon: '🔗' },
+type HeartPosition = {
+  top?: string
+  bottom?: string
+  left?: string
+  right?: string
+  size: number
+  opacity: number
+  rotate: number
+}
+
+const HERO_HEARTS: readonly HeartPosition[] = [
+  { top: '4%', left: '2%', size: 32, opacity: 0.3, rotate: -15 },
+  { top: '6%', right: '3%', size: 22, opacity: 0.28, rotate: 20 },
+  { bottom: '6%', left: '5%', size: 26, opacity: 0.25, rotate: 8 },
+  { bottom: '10%', right: '4%', size: 18, opacity: 0.32, rotate: -10 },
+  { top: '45%', left: '0%', size: 14, opacity: 0.2, rotate: 5 },
+]
+
+const HOW_HEARTS: readonly HeartPosition[] = [
+  { top: '5%', left: '1%', size: 30, opacity: 0.22, rotate: -8 },
+  { top: '8%', right: '2%', size: 20, opacity: 0.2, rotate: 15 },
+  { bottom: '8%', left: '2%', size: 24, opacity: 0.18, rotate: 10 },
+  { bottom: '5%', right: '1%', size: 28, opacity: 0.22, rotate: -18 },
+  { top: '50%', right: '0%', size: 16, opacity: 0.15, rotate: 6 },
+]
+
+function FloatingHearts({ hearts }: { hearts: readonly HeartPosition[] }) {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+      {hearts.map((heart, i) => (
+        <img
+          key={i}
+          src="/heart.svg"
+          alt=""
+          className="absolute"
+          style={{
+            top: heart.top,
+            bottom: heart.bottom,
+            left: heart.left,
+            right: heart.right,
+            width: heart.size,
+            height: heart.size,
+            opacity: heart.opacity,
+            transform: `rotate(${heart.rotate}deg)`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+interface PhoneMockupProps {
+  className?: string
+  mediaClassName?: string
+}
+
+function PhoneMockup({ className = '', mediaClassName = '' }: PhoneMockupProps) {
+  return (
+    <div
+      className={[
+        'relative w-32 md:w-44 h-64 md:h-80 rounded-3xl border-4 border-white shadow-card overflow-hidden flex-shrink-0',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div className="absolute inset-0 overflow-hidden rounded-[1.15rem]">
+        {/* Swap placeholder with <img> or <video className="w-full h-full object-cover" /> */}
+        <div
+          className={[
+            'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500',
+            mediaClassName,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        />
+      </div>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1/3 h-1 rounded-full bg-white/60 z-10" />
+    </div>
+  )
+}
+
+const HOW_IT_WORKS: Array<{
+  number: string
+  title: string
+  desc: string
+  icon: React.ReactNode
+}> = [
+  {
+    number: '1',
+    title: 'Escolha suas páginas',
+    desc: 'Selecione as páginas que tocam seu coração, com opções ilimitadas para expressar seus sentimentos.',
+    icon: (
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <rect x="14" y="8" width="36" height="48" rx="4" fill="#E9D5FF" />
+        <rect x="20" y="18" width="24" height="3" rx="1.5" fill="#A855F7" />
+        <rect x="20" y="25" width="18" height="3" rx="1.5" fill="#C084FC" />
+        <rect x="20" y="32" width="22" height="3" rx="1.5" fill="#C084FC" />
+        <circle cx="44" cy="46" r="9" fill="#7C3AED" />
+        <path d="M40 46l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    number: '2',
+    title: 'Personalize do seu jeito',
+    desc: 'Dê vida à sua mensagem com textos, imagens e detalhes que tornam seu presente único.',
+    icon: (
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="18" fill="#FBCFE8" />
+        <path d="M24 36l8-16 8 16" stroke="#DB2777" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M26.5 31h11" stroke="#DB2777" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M42 20l4-4M44 22l-6 6" stroke="#DB2777" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="46" cy="18" r="2.5" fill="#EC4899" />
+      </svg>
+    ),
+  },
+  {
+    number: '3',
+    title: 'Faça o pagamento',
+    desc: 'Invista um valor único de acordo com o tempo que seu presente especial ficará disponível.',
+    icon: (
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="18" width="44" height="30" rx="5" fill="#BBF7D0" />
+        <rect x="10" y="26" width="44" height="8" fill="#4ADE80" />
+        <rect x="16" y="36" width="12" height="4" rx="2" fill="#16A34A" />
+        <circle cx="46" cy="38" r="4" fill="#15803D" />
+        <circle cx="52" cy="38" r="4" fill="#4ADE80" />
+      </svg>
+    ),
+  },
+  {
+    number: '4',
+    title: 'Receba seu link e QR Code',
+    desc: 'Seu link e QR Code chegam direto ao seu email para compartilhar com quem você ama.',
+    icon: (
+      <svg viewBox="0 0 64 64" fill="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <rect x="14" y="14" width="16" height="16" rx="2" fill="#FDE68A" />
+        <rect x="18" y="18" width="8" height="8" rx="1" fill="#D97706" />
+        <rect x="34" y="14" width="16" height="16" rx="2" fill="#FDE68A" />
+        <rect x="38" y="18" width="8" height="8" rx="1" fill="#D97706" />
+        <rect x="14" y="34" width="16" height="16" rx="2" fill="#FDE68A" />
+        <rect x="18" y="38" width="8" height="8" rx="1" fill="#D97706" />
+        <rect x="34" y="34" width="4" height="4" rx="1" fill="#D97706" />
+        <rect x="46" y="34" width="4" height="4" rx="1" fill="#D97706" />
+        <rect x="34" y="46" width="4" height="4" rx="1" fill="#D97706" />
+        <rect x="46" y="46" width="4" height="4" rx="1" fill="#D97706" />
+      </svg>
+    ),
+  },
 ]
 
 const PLAN_FEATURES: Record<PlanType, string[]> = {
@@ -101,70 +249,110 @@ export function LandingView() {
       <Header />
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="max-w-5xl mx-auto w-full px-6 pt-14 pb-10 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-4">
-          <span className="text-brand">Surpreenda</span> com uma página tão{' '}
-          <br className="hidden md:block" />
-          única quanto{' '}
-          <span className="text-brand italic">{typedText}</span>
-          <span className="animate-blink ml-0.5">|</span>
-        </h1>
-        <p className="text-gray-500 text-sm max-w-xl mx-auto mb-6">
-          Crie um site interativo personalizado para quem você ama. Escolha as
-          páginas, personalize cada detalhe e compartilhe via link ou QR Code.
-          Simples, rápido e inesquecível.
-        </p>
-        <Button size="lg" onClick={() => navigate(ROUTES.CRIAR)}>
-          Criar meu presente agora
-        </Button>
+      <section
+        className="w-full px-6 pt-14 pb-16"
+        style={{
+          background:
+            'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(252,228,243,0.45) 0%, rgba(255,255,255,0) 55%)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+          {/* Left: copy + CTA */}
+          <div className="text-left order-1">
+            <h1 className="text-5xl font-extrabold text-gray-800 leading-tight mb-5">
+              <span className="text-brand">Surpreenda</span> com uma página{' '}
+              <br className="hidden md:block" />
+              tão única quanto
+              <span className="block min-h-[1.2em]">
+                <span className="text-brand italic">{typedText}</span>
+                <span className="animate-blink ml-0.5 text-brand">|</span>
+              </span>
+            </h1>
+            <p className="text-gray-500 text-sm md:text-base max-w-lg mb-8 leading-relaxed">
+              Crie uma{' '}
+              <span className="text-brand font-semibold">experiência única e interativa</span> com raspadinhas,
+              quizzes, músicas e muito mais —{' '}
+              <span className="text-brand font-semibold">simples de criar</span>,{' '}
+              <span className="text-brand font-semibold">inesquecível de receber</span>.
+            </p>
+            <Button size="lg" onClick={() => navigate(ROUTES.CRIAR)}>
+              Criar meu presente agora
+            </Button>
+          </div>
 
-        {/* Phone mockups */}
-        <div className="mt-14 flex justify-center items-end gap-4">
-          {[
-            { scale: 'scale-90 opacity-70', z: 'z-0' },
-            { scale: 'scale-105 shadow-2xl', z: 'z-10' },
-            { scale: 'scale-90 opacity-70', z: 'z-0' },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className={`${s.scale} ${s.z} w-32 md:w-44 h-64 md:h-80 rounded-3xl bg-gradient-to-b from-purple-800 to-purple-500 border-4 border-white shadow-card flex items-end justify-center pb-4 transition-transform`}
-            >
-              <div className="w-1/3 h-1 rounded-full bg-white opacity-60" />
-            </div>
-          ))}
+          {/* Right: mockups + hearts */}
+          <div className="relative flex justify-center items-end min-h-[260px] md:min-h-[340px] order-2">
+            <FloatingHearts hearts={HERO_HEARTS} />
+            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end" />
+            <PhoneMockup className="relative z-10 scale-100 shadow-2xl self-end" />
+            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" />
+          </div>
         </div>
       </section>
 
       {/* ── How it works ──────────────────────────────────────────── */}
-      <section className="max-w-5xl mx-auto w-full px-6 py-16">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          Descubra como criar o{' '}
-          <span className="text-brand">presente perfeito</span> para quem você ama
-        </h2>
-        <p className="text-center text-sm text-gray-500 mb-10">
-          Siga os passos abaixo e monte seu site personalizado em minutos.
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {HOW_IT_WORKS.map((step) => (
-            <div key={step.number} className="flex flex-col items-center text-center gap-3">
-              <div className="w-14 h-14 rounded-full bg-brand-50 flex items-center justify-center text-2xl">
-                {step.icon}
-              </div>
-              <span className="text-xs font-bold text-brand">{step.number}</span>
-              <h3 className="font-semibold text-gray-800 text-sm">{step.title}</h3>
-              <p className="text-xs text-gray-500">{step.desc}</p>
-            </div>
-          ))}
+      <section
+        className="w-full px-6 py-16 relative overflow-hidden"
+        style={{
+          background:
+            'radial-gradient(ellipse 100% 60% at 50% 50%, rgba(252,228,243,0.35) 0%, rgba(255,255,255,0) 65%)',
+        }}
+      >
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <FloatingHearts hearts={HOW_HEARTS} />
         </div>
 
-        <div className="mt-10 text-center">
-          <Button onClick={() => navigate(ROUTES.CRIAR)}>Criar agora</Button>
+        <div className="max-w-5xl mx-auto relative z-10">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-center text-gray-800 mb-2">
+            Descubra como criar o{' '}
+            <span className="text-brand">presente perfeito</span>{' '}
+            para quem você ama
+          </h2>
+          <p className="text-center text-sm text-gray-500 mb-12">
+            Siga estes <span className="font-semibold text-brand">4 passos simples</span> e surpreenda aquela pessoa
+            especial com uma lembrança única que ficará para sempre no coração
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
+            {HOW_IT_WORKS.map((step) => (
+              <div
+                key={step.number}
+                className="relative w-full flex flex-col items-center text-center rounded-2xl border-2 border-brand-100 p-6 pt-10 gap-4 shadow-sm hover:shadow-card transition-shadow"
+                style={{ background: CARD_RADIAL_BG }}
+              >
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border-[3px] border-brand flex items-center justify-center bg-white">
+                  <div className="w-8 h-8 rounded-full bg-brand flex items-center justify-center">
+                    <span className="text-white text-sm font-extrabold leading-none">{step.number}</span>
+                  </div>
+                </div>
+
+                <div className="w-full max-w-[328px] min-h-[104px] rounded-2xl bg-white flex items-center justify-center p-4 shadow-sm border border-brand-50">
+                  <div className="w-full h-full min-h-[80px] max-h-[104px] flex items-center justify-center">
+                    {step.icon}
+                  </div>
+                </div>
+
+                <h3 className="font-bold text-gray-800 text-base leading-snug">{step.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Button size="lg" onClick={() => navigate(ROUTES.CRIAR)}>Criar agora</Button>
+          </div>
         </div>
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────── */}
-      <section className="max-w-5xl mx-auto w-full px-6 py-16">
+      <section
+        className="w-full px-6 py-16"
+        style={{
+          background:
+            'radial-gradient(ellipse 100% 50% at 50% 50%, rgba(252,228,243,0.28) 0%, rgba(255,255,255,0) 65%)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           Planos e preços
         </h2>
@@ -233,32 +421,65 @@ export function LandingView() {
             )
           })}
         </div>
+        </div>
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <section className="max-w-3xl mx-auto w-full px-6 py-12">
-        <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
-          Perguntas Frequentes
-        </h2>
-        <div className="divide-y divide-gray-100">
-          {FAQ.map((item, i) => (
-            <div key={i} className="py-4">
-              <button
-                className="w-full flex justify-between items-center text-left gap-4"
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-              >
-                <span className="text-sm font-medium text-gray-700">{item.q}</span>
-                <span className={`text-brand font-bold text-lg transition-transform ${openFaq === i ? 'rotate-45' : ''}`}>
-                  +
-                </span>
-              </button>
-              {openFaq === i && (
-                <p className="mt-3 text-sm text-gray-500 animate-fade-in pr-8">
-                  {item.a}
-                </p>
-              )}
+      <section
+        className="w-full px-6 py-16"
+        style={{
+          background:
+            'radial-gradient(ellipse 100% 50% at 50% 100%, rgba(252,228,243,0.4) 0%, rgba(255,255,255,0) 60%)',
+        }}
+      >
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-10 text-center">
+            Perguntas Frequentes
+          </h2>
+
+          <div className="flex flex-col md:flex-row gap-10 md:gap-14 items-start">
+            {/* Animated illustration — desktop only, larger */}
+            <div className="hidden md:flex md:w-96 lg:w-128 flex-shrink-0 justify-center md:sticky md:top-20">
+              <img
+                src="/questions-animate.svg"
+                alt="Perguntas frequentes"
+                className="w-full max-w-none select-none pointer-events-none"
+                draggable={false}
+              />
             </div>
-          ))}
+
+            {/* Accordion questions */}
+            <div className="flex-1 w-full divide-y divide-gray-200">
+              {FAQ.map((item, i) => (
+                <div key={i} className="py-5">
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between gap-4 text-left group min-h-[2rem]"
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  >
+                    <span className="text-sm font-semibold text-gray-700 group-hover:text-brand transition-colors flex-1">
+                      {item.q}
+                    </span>
+                    <span
+                      className="flex-shrink-0 w-7 h-7 rounded-full border-2 border-brand text-brand inline-flex items-center justify-center font-bold text-lg leading-none"
+                      aria-hidden
+                    >
+                      {openFaq === i ? (
+                        <span className="leading-none translate-y-[-0.5px]">×</span>
+                      ) : (
+                        <span className="leading-none">+</span>
+                      )}
+                    </span>
+                  </button>
+                  {openFaq === i && (
+                    <p className="mt-3 text-sm text-gray-500 animate-fade-in leading-relaxed pr-12">
+                      {item.a}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

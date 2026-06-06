@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
+import { QRCodeViewer } from '../components/common/QRCodeViewer'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
 import { PLANS } from '@/core/entities/Site'
 import { ROUTES } from '@/shared/constants/routes'
@@ -11,7 +12,7 @@ interface Props {
   onClose: () => void
 }
 
-type ViewState = 'form' | 'loading' | 'results' | 'empty' | 'error'
+type ViewState = 'form' | 'loading' | 'results' | 'empty' | 'error' | 'qrcode'
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   ACTIVE:          { label: 'Ativo',                color: 'text-green-600 bg-green-50 border-green-200' },
@@ -43,6 +44,7 @@ export function ProfileModal({ onClose }: Props) {
   const [view, setView] = useState<ViewState>('form')
   const [sites, setSites] = useState<Site[]>([])
   const [errorMsg, setErrorMsg] = useState('')
+  const [qrSite, setQrSite] = useState<Site | null>(null)
 
   function validate(val: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
@@ -59,8 +61,9 @@ export function ProfileModal({ onClose }: Props) {
     try {
       const repo = new SiteRepository()
       const result = await repo.listByEmail({ email })
-      setSites(result)
-      setView(result.length === 0 ? 'empty' : 'results')
+      const active = result.filter((s) => ((s as any).status ?? s.status) === 'ACTIVE')
+      setSites(active)
+      setView(active.length === 0 ? 'empty' : 'results')
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : 'Erro ao buscar presentes')
       setView('error')
@@ -73,8 +76,14 @@ export function ProfileModal({ onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md p-8 animate-fade-in relative max-h-[90vh] flex flex-col">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-modal w-full max-w-md p-8 animate-fade-in relative max-h-[90vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Close */}
         <button
           onClick={onClose}
@@ -157,23 +166,34 @@ export function ProfileModal({ onClose }: Props) {
         {view === 'results' && (
           <div className="flex flex-col gap-3 overflow-y-auto flex-1">
             <p className="text-xs text-gray-400 mb-1">
-              {sites.length} presente{sites.length !== 1 ? 's' : ''} encontrado{sites.length !== 1 ? 's' : ''} para <strong className="text-gray-600">{email}</strong>
+              {sites.length} presente{sites.length !== 1 ? 's' : ''} ativo{sites.length !== 1 ? 's' : ''} para <strong className="text-gray-600">{email}</strong>
             </p>
             {sites.map((site) => {
-              const status = getStatus(site)
               const expiry = formatDate((site as any).expiresAt ?? site.expirationDate)
+              const status = getStatus(site)
               return (
-                <div key={site.id} className="border border-gray-100 rounded-xl p-4 flex items-start justify-between gap-3 hover:border-brand/30 transition">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-400 font-mono truncate">{site.slug}</p>
-                    <p className="text-sm font-semibold text-gray-700 mt-0.5">Plano {getPlan(site)}</p>
-                    {expiry && (
-                      <p className="text-xs text-gray-400 mt-0.5">Expira em {expiry}</p>
-                    )}
+                <div key={site.id} className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3 hover:border-brand/30 transition">
+                  <div
+                    className="flex items-start justify-between gap-3 cursor-pointer"
+                    onClick={() => { onClose(); navigate(`/site/${site.slug}`) }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-400 font-mono truncate">{site.slug}</p>
+                      <p className="text-sm font-semibold text-gray-700 mt-0.5">Plano {getPlan(site)}</p>
+                      {expiry && (
+                        <p className="text-xs text-gray-400 mt-0.5">Expira em {expiry}</p>
+                      )}
+                    </div>
+                    <span className={['text-[11px] font-semibold border px-2 py-0.5 rounded-full whitespace-nowrap', status.color].join(' ')}>
+                      {status.label}
+                    </span>
                   </div>
-                  <span className={`text-[11px] font-semibold border px-2 py-0.5 rounded-full whitespace-nowrap ${status.color}`}>
-                    {status.label}
-                  </span>
+                  <button
+                    onClick={() => { setQrSite(site); setView('qrcode') }}
+                    className="text-xs font-semibold text-brand border border-brand/30 rounded-lg py-1.5 hover:bg-brand/5 transition"
+                  >
+                    Visualizar QRCode do site
+                  </button>
                 </div>
               )
             })}
@@ -183,6 +203,25 @@ export function ProfileModal({ onClose }: Props) {
             >
               Buscar outro e-mail
             </button>
+          </div>
+        )}
+
+        {/* QR Code view */}
+        {view === 'qrcode' && qrSite && (
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={() => setView('results')}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-brand transition self-start"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
+              Voltar
+            </button>
+            <QRCodeViewer slug={qrSite.slug} qrTemplate={qrSite.globalSettings?.qrTemplate ?? qrSite.qrTemplate} />
+            <p className="text-xs text-gray-400 text-center">
+              Aponte a câmera do celular para abrir o presente.
+            </p>
           </div>
         )}
       </div>

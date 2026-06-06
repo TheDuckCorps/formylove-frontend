@@ -13,11 +13,11 @@ export type PageType =
 // ─── Per-type data shapes (saved in `pages` JSONB) ───────────────────────────
 export interface DesenhoLivreData {
   drawingDataUrl: string | null
+  excalidrawData?: string | null
 }
 
 export interface MedidorAmorData {
   question: string
-  secret: string
   imageUrl: string | null
 }
 
@@ -27,7 +27,6 @@ export interface ToqueContinuarData {
 
 export interface MusicaFundoData {
   youtubeUrl: string
-  audioUrl: string | null
 }
 
 export interface PalavraSecretaData {
@@ -48,6 +47,7 @@ export interface QuizAfetivoData {
 
 export interface RaspadinhaSurpresaData {
   imageUrl: string | null
+  title?: string
 }
 
 export interface RoletaEscolhasData {
@@ -57,7 +57,6 @@ export interface RoletaEscolhasData {
 
 export interface MensagemMultimidiaData {
   youtubeUrl: string
-  videoUrl: string | null
 }
 
 // ─── Union of all data types ──────────────────────────────────────────────────
@@ -85,8 +84,9 @@ export interface PageTypeMeta {
   type: PageType
   label: string
   description: string
-  icon: string        // emoji or SVG path reference
+  svgIcon: string
   defaultData: AnyPageData
+  disabled?: boolean
 }
 
 export const PAGE_TYPES_META: PageTypeMeta[] = [
@@ -94,42 +94,42 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     type: 'DESENHO_LIVRE',
     label: 'Desenho Livre',
     description: 'Faça um desenho à mão livre para expressar seu amor.',
-    icon: '🎨',
-    defaultData: { drawingDataUrl: null } satisfies DesenhoLivreData,
+    svgIcon: '/draw.svg',
+    defaultData: { drawingDataUrl: null, excalidrawData: null } satisfies DesenhoLivreData,
   },
   {
     type: 'MEDIDOR_AMOR',
     label: 'Medidor de Amor',
     description: 'Um coração que revela uma frase secreta conforme os cliques.',
-    icon: '❤️',
-    defaultData: { question: '', secret: '', imageUrl: null } satisfies MedidorAmorData,
+    svgIcon: '/love-meditor.svg',
+    defaultData: { question: '', imageUrl: null } satisfies MedidorAmorData,
   },
   {
     type: 'TOQUE_CONTINUAR',
     label: 'Toque para Continuar',
     description: 'Uma frase acima do botão de avanço interativo.',
-    icon: '👆',
+    svgIcon: '/click-to-continue.svg',
     defaultData: { phrase: '' } satisfies ToqueContinuarData,
   },
   {
     type: 'MUSICA_FUNDO',
     label: 'Música de Fundo',
     description: 'Adicione uma trilha sonora via YouTube ou arquivo.',
-    icon: '🎵',
-    defaultData: { youtubeUrl: '', audioUrl: null } satisfies MusicaFundoData,
+    svgIcon: '/music.svg',
+    defaultData: { youtubeUrl: '' } satisfies MusicaFundoData,
   },
   {
     type: 'PALAVRA_SECRETA',
     label: 'Palavra Secreta',
     description: 'Uma dica e uma frase secreta para adivinhar.',
-    icon: '🔑',
+    svgIcon: '/secret-word.svg',
     defaultData: { hint: '', secret: '' } satisfies PalavraSecretaData,
   },
   {
     type: 'QUIZ_AFETIVO',
     label: 'Quiz Afetivo',
     description: 'Quiz personalizado com respostas e uma correta.',
-    icon: '❓',
+    svgIcon: '/quiz.svg',
     defaultData: {
       question: '',
       answers: [
@@ -144,21 +144,22 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     type: 'RASPADINHA_SURPRESA',
     label: 'Raspadinha Surpresa',
     description: 'Raspe para revelar uma imagem especial.',
-    icon: '🎟️',
-    defaultData: { imageUrl: null } satisfies RaspadinhaSurpresaData,
+    svgIcon: '/photo-surprise.svg',
+    defaultData: { imageUrl: null, title: '' } satisfies RaspadinhaSurpresaData,
   },
   {
     type: 'ROLETA_ESCOLHAS',
     label: 'Roleta das Escolhas',
     description: 'Gire a roleta para sortear entre opções do casal.',
-    icon: '🎡',
+    svgIcon: '/lucky-choose.svg',
     defaultData: { phrase: '', options: ['', '', ''] } satisfies RoletaEscolhasData,
   },
   {
     type: 'MENSAGEM_MULTIMIDIA',
     label: 'Mensagem Multimídia',
     description: 'Envie um vídeo especial via YouTube ou arquivo.',
-    icon: '🎬',
-    defaultData: { youtubeUrl: '', videoUrl: null } satisfies MensagemMultimidiaData,
+    svgIcon: '/videos.svg',
+    defaultData: { youtubeUrl: '' } satisfies MensagemMultimidiaData,
+    disabled: true,
   },
 ]

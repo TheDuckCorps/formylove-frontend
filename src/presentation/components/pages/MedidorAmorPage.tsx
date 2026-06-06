@@ -8,7 +8,6 @@ interface Props {
 }
 
 const MAX_Q = 150
-const MAX_S = 150
 
 export function MedidorAmorPage({ data, onChange }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
@@ -31,16 +30,6 @@ export function MedidorAmorPage({ data, onChange }: Props) {
         charCount={data.question.length}
         maxChars={MAX_Q}
         onChange={(e) => onChange({ question: e.target.value })}
-      />
-
-      <Input
-        label="Digite a frase secreta que aparecerá conforme os cliques no coração"
-        placeholder="Ex: Mais do que qualquer um poderia contar"
-        value={data.secret}
-        maxLength={MAX_S}
-        charCount={data.secret.length}
-        maxChars={MAX_S}
-        onChange={(e) => onChange({ secret: e.target.value })}
       />
 
       {/* Image upload */}

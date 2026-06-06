@@ -4,9 +4,14 @@ import { ROUTES } from '@/shared/constants/routes'
 
 export function Footer() {
   return (
-    <footer className="w-full">
+    <footer
+      className="w-full"
+      style={{
+        background: 'linear-gradient(to bottom, rgba(252,228,243,0.55) 0%, #ffffff 60%)',
+      }}
+    >
       {/* Tagline band */}
-      <div className="bg-white py-10 text-center px-4">
+      <div className="py-10 text-center px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Simples. Emocionante. Inesquecível.
         </h2>
@@ -18,7 +23,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-gray-100 bg-white py-3 px-6">
+      <div className="border-t border-gray-100 py-3 px-6">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400">
           <Logo size="sm" />
 
