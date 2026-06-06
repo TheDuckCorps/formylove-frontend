@@ -2,7 +2,9 @@ import { create } from 'zustand'
 import { nanoid } from '../utils/nanoid'
 import type { PageItem, PageType, AnyPageData } from '@/core/entities/Page'
 import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
+import { validateAllPages } from '@/core/validation/pageSchemas'
 import type { PlanType } from '@/core/entities/Site'
+import type { PageValidationResult } from '@/core/validation/pageSchemas'
 
 const MAX_FREE_PAGES = 15  // users pick freely; plan is chosen at the end
 
@@ -14,6 +16,7 @@ interface SiteBuilderState {
 
   selectedPages: PageItem[]
   currentPageIndex: number
+  validationResults: PageValidationResult[]
 
   qrTemplate: string
   qrCodeDetailed: boolean
@@ -33,6 +36,8 @@ interface SiteBuilderActions {
   setCurrentPageIndex: (idx: number) => void
 
   setQrTemplate: (template: string, detailed: boolean) => void
+  setValidationResults: (results: PageValidationResult[]) => void
+  clearValidationResults: () => void
 
   reset: () => void
 }
@@ -49,6 +54,7 @@ const initialState: SiteBuilderState = {
   planType: null,
   selectedPages: [],
   currentPageIndex: 0,
+  validationResults: [],
   qrTemplate: 'template-2',
   qrCodeDetailed: false,
   maxPages: MAX_FREE_PAGES,
@@ -99,11 +105,17 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
           p.id === id ? { ...p, data: { ...p.data, ...data } } : p,
         ),
       })
+      if (get().validationResults.length > 0) {
+        set({ validationResults: validateAllPages(get().selectedPages) })
+      }
     },
 
     setCurrentPageIndex: (currentPageIndex) => set({ currentPageIndex }),
 
     setQrTemplate: (qrTemplate, qrCodeDetailed) => set({ qrTemplate, qrCodeDetailed }),
+
+    setValidationResults: (validationResults) => set({ validationResults }),
+    clearValidationResults: () => set({ validationResults: [] }),
 
     reset: () => set(initialState),
   }),

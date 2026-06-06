@@ -5,12 +5,15 @@ import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
 import { StepIndicator } from '../components/layout/StepIndicator'
 import { EmailModal } from '../modals/EmailModal'
+import { ValidationSummaryModal } from '../modals/ValidationSummaryModal'
 import { useSiteBuilderStore, MAX_PAGES_PER_PLAN } from '@/shared/store/siteBuilderStore'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
 import { PaymentRepository } from '@/infrastructure/repositories/PaymentRepository'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
+import { validateAllPages } from '@/core/validation/pageSchemas'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 const PLAN_FEATURES: Record<PlanType, string[]> = {
   BASIC: [
@@ -95,10 +98,20 @@ function PageLimitModal({ pageCount, plan, onAdjust, onUpgrade, onClose }: PageL
 
 export function EscolherPlanoView() {
   const navigate = useNavigate()
-  const { setPlan, selectedPages, qrTemplate, qrCodeDetailed, planType } = useSiteBuilderStore()
+  const {
+    setPlan,
+    selectedPages,
+    qrTemplate,
+    qrCodeDetailed,
+    planType,
+    setValidationResults,
+    setCurrentPageIndex,
+  } = useSiteBuilderStore()
   const [chosen, setChosen] = useState<PlanType | null>(planType)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showPageLimitModal, setShowPageLimitModal] = useState(false)
+  const [showValidationModal, setShowValidationModal] = useState(false)
+  const [validationResults, setLocalValidationResults] = useState<ReturnType<typeof validateAllPages>>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -117,8 +130,24 @@ export function EscolherPlanoView() {
       setShowPageLimitModal(true)
       return
     }
+
+    const results = validateAllPages(selectedPages)
+    const hasInvalid = results.some((r) => !r.isValid)
+    if (hasInvalid) {
+      setValidationResults(results)
+      setLocalValidationResults(results)
+      setShowValidationModal(true)
+      return
+    }
+
     setPlan(chosen)
     setShowEmailModal(true)
+  }
+
+  function handleFixValidation(pageIndex: number) {
+    setShowValidationModal(false)
+    setCurrentPageIndex(pageIndex)
+    navigate(ROUTES.CRIAR_EDITOR)
   }
 
   function handleUpgradeToPremium() {
@@ -164,7 +193,7 @@ export function EscolherPlanoView() {
         },
       })
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : 'Ocorreu um erro. Tente novamente.')
+      setErrorMessage(getFriendlyMessage(err))
     } finally {
       setIsLoading(false)
     }
@@ -322,6 +351,14 @@ export function EscolherPlanoView() {
           onSubmit={handleEmailSubmit}
           isLoading={isLoading}
           planPrice={chosenPlan.price + (qrCodeDetailed && chosen !== 'PREMIUM' ? 200 : 0)}
+        />
+      )}
+
+      {showValidationModal && (
+        <ValidationSummaryModal
+          results={validationResults}
+          onFix={handleFixValidation}
+          onClose={() => setShowValidationModal(false)}
         />
       )}
     </div>

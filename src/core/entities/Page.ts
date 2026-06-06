@@ -142,10 +142,8 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     defaultData: {
       question: '',
       answers: [
-        { id: '1', text: '', isCorrect: false },
+        { id: '1', text: '', isCorrect: true },
         { id: '2', text: '', isCorrect: false },
-        { id: '3', text: '', isCorrect: true },
-        { id: '4', text: '', isCorrect: false },
       ],
     } satisfies QuizAfetivoData,
   },

@@ -1,13 +1,15 @@
 import { nanoid } from '@/shared/utils/nanoid'
 import type { QuizAfetivoData, QuizAfetivoAnswer } from '@/core/entities/Page'
 import { Input } from '../common/Input'
+import { FieldError } from '../common/FieldError'
 
 interface Props {
   data: QuizAfetivoData
   onChange: (data: Partial<QuizAfetivoData>) => void
+  fieldErrors?: Record<string, string>
 }
 
-export function QuizAfetivoPage({ data, onChange }: Props) {
+export function QuizAfetivoPage({ data, onChange, fieldErrors = {} }: Props) {
   function updateAnswer(id: string, patch: Partial<QuizAfetivoAnswer>) {
     onChange({
       answers: data.answers.map((a) => (a.id === id ? { ...a, ...patch } : a)),
@@ -36,18 +38,19 @@ export function QuizAfetivoPage({ data, onChange }: Props) {
         label="Digite a pergunta principal do quiz"
         placeholder="Ex: Quando eu nasci?"
         value={data.question}
+        error={fieldErrors.question}
         onChange={(e) => onChange({ question: e.target.value })}
       />
 
       <div>
         <p className="text-sm font-medium text-gray-700 mb-3">Escolha a opção correta</p>
         <div className="flex flex-col gap-2">
-          {data.answers.map((answer) => (
+          {data.answers.map((answer, index) => (
             <div key={answer.id} className="flex items-center gap-2">
-              {/* Radio */}
               <button
                 type="button"
                 onClick={() => setCorrect(answer.id)}
+                aria-label={`Marcar opção ${index + 1} como correta`}
                 className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition ${
                   answer.isCorrect
                     ? 'border-brand bg-brand'
@@ -62,8 +65,11 @@ export function QuizAfetivoPage({ data, onChange }: Props) {
               </button>
 
               <input
-                className="input-base flex-1 text-sm py-2"
-                placeholder={`RESPOSTA ${data.answers.indexOf(answer) + 1}`}
+                className={[
+                  'input-base flex-1 text-sm py-2',
+                  fieldErrors[`answers.${index}.text`] || fieldErrors.answers ? 'border-red-400' : '',
+                ].join(' ')}
+                placeholder={`RESPOSTA ${index + 1}`}
                 value={answer.text}
                 onChange={(e) => updateAnswer(answer.id, { text: e.target.value })}
               />
@@ -80,6 +86,7 @@ export function QuizAfetivoPage({ data, onChange }: Props) {
             </div>
           ))}
         </div>
+        <FieldError message={fieldErrors.answers} />
 
         {data.answers.length < 6 && (
           <button

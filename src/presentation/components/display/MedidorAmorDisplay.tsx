@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { HeartConfetti } from './HeartConfetti'
+import { RewardReveal } from './RewardReveal'
 
 interface HeartMark {
   id: string
@@ -10,15 +10,17 @@ interface HeartMark {
 interface Props {
   question: string
   imageUrl: string | null
+  onComplete?: () => void
+  previewMode?: boolean
 }
 
 const MAX_CLICKS = 40
 
 const REVEAL_POINTS = [
   { percent: 0, visible: 0 },
-  { percent: 25, visible: 15 },
-  { percent: 50, visible: 40 },
-  { percent: 75, visible: 60 },
+  { percent: 25, visible: 10 },
+  { percent: 50, visible: 28 },
+  { percent: 75, visible: 45 },
   { percent: 100, visible: 100 },
 ]
 
@@ -36,18 +38,20 @@ function getVisiblePercent(percent: number) {
   return 100
 }
 
-export function MedidorAmorDisplay({ question, imageUrl }: Props) {
+export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode = false }: Props) {
   const [clicks, setClicks] = useState(0)
   const [hearts, setHearts] = useState<HeartMark[]>([])
   const [hasStarted, setHasStarted] = useState(false)
   const inactivityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const decayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const completedRef = useRef(false)
 
   const percent = useMemo(
     () => Math.max(0, Math.min(100, Math.round((clicks / MAX_CLICKS) * 100))),
     [clicks],
   )
   const overlayOpacity = 1 - getVisiblePercent(percent) / 100
+  const isComplete = percent >= 100
 
   useEffect(() => {
     return () => {
@@ -55,6 +59,13 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
       if (decayIntervalRef.current) clearInterval(decayIntervalRef.current)
     }
   }, [])
+
+  useEffect(() => {
+    if (isComplete && !completedRef.current) {
+      completedRef.current = true
+      onComplete?.()
+    }
+  }, [isComplete, onComplete])
 
   function resetDecayTimer() {
     if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current)
@@ -96,14 +107,19 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
 
   return (
     <div className="space-y-3">
-      <HeartConfetti active={percent >= 100} />
+      <RewardReveal
+        active={isComplete}
+        message="Amor no máximo!"
+        subtitle="Você revelou a surpresa"
+        previewMode={previewMode}
+      />
 
-      <p className="text-center text-sm font-semibold text-gray-800">
+      <p className="text-center text-base font-semibold text-gray-800">
         {question || 'O quanto você me ama?'}
       </p>
 
       <div className="space-y-2">
-        <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+        <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
           <div
             className="h-full bg-brand transition-all duration-200"
             style={{ width: `${percent}%` }}
@@ -113,11 +129,20 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
       </div>
 
       <div
-        className="relative w-full h-72 rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none"
+        className="relative w-full h-80 md:h-96 rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
         onClick={registerClick}
+        onContextMenu={(e) => e.preventDefault()}
+        style={{ WebkitTouchCallout: 'none' }}
+        role="button"
+        aria-label="Clique várias vezes para revelar a imagem"
       >
         {imageUrl ? (
-          <img src={imageUrl} alt="Imagem do medidor" className="w-full h-full object-cover" />
+          <img
+            src={imageUrl}
+            alt=""
+            draggable={false}
+            className="w-full h-full object-cover pointer-events-none select-none"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
             Adicione uma imagem para o medidor
@@ -125,8 +150,9 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
         )}
 
         <div
-          className="absolute inset-0 bg-gray-500 pointer-events-none transition-opacity duration-200"
+          className="absolute inset-0 bg-gray-600/70 backdrop-blur-xl pointer-events-none transition-opacity duration-200"
           style={{ opacity: overlayOpacity }}
+          aria-hidden
         />
 
         {hearts.map((heart) => (

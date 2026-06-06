@@ -36,13 +36,14 @@ export function Header({ showCta = true }: HeaderProps) {
             <Logo size="sm" />
           </Link>
 
-          {/* Right: Entrar */}
+          {/* Right: Meus links */}
           <button
             onClick={() => setShowProfileModal(true)}
-            className="flex-shrink-0 text-sm font-semibold text-brand border-2 border-brand rounded-xl px-4 py-1 hover:bg-brand hover:text-white transition-all duration-200"
-            aria-label="Entrar"
+            className="flex-shrink-0 text-sm font-semibold text-brand border-2 border-brand rounded-xl px-3 sm:px-4 py-1 hover:bg-brand hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            aria-label="Acessar meus links por e-mail"
+            title="Acessar meus links por e-mail"
           >
-            Entrar
+            Meus links
           </button>
         </div>
       </header>

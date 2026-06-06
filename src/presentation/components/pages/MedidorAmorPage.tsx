@@ -1,15 +1,17 @@
 import { useRef } from 'react'
 import type { MedidorAmorData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
+import { FieldError } from '../common/FieldError'
 
 interface Props {
   data: MedidorAmorData
   onChange: (data: Partial<MedidorAmorData>) => void
+  fieldErrors?: Record<string, string>
 }
 
 const MAX_Q = 150
 
-export function MedidorAmorPage({ data, onChange }: Props) {
+export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
 
   function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
@@ -29,17 +31,23 @@ export function MedidorAmorPage({ data, onChange }: Props) {
         maxLength={MAX_Q}
         charCount={data.question.length}
         maxChars={MAX_Q}
+        error={fieldErrors.question}
         onChange={(e) => onChange({ question: e.target.value })}
       />
 
-      {/* Image upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Imagem principal
         </label>
         <div
           onClick={() => fileRef.current?.click()}
-          className="upload-zone h-56 md:h-80 cursor-pointer"
+          className={[
+            'upload-zone h-56 md:h-80 cursor-pointer',
+            fieldErrors.imageUrl ? 'border-red-400 ring-1 ring-red-200' : '',
+          ].join(' ')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
         >
           {data.imageUrl ? (
             <img
@@ -56,6 +64,7 @@ export function MedidorAmorPage({ data, onChange }: Props) {
             </>
           )}
         </div>
+        <FieldError message={fieldErrors.imageUrl} />
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       </div>
     </div>

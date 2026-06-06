@@ -5,8 +5,9 @@ import { Input } from '../components/common/Input'
 import { QRCodeViewer } from '../components/common/QRCodeViewer'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
 import { PLANS } from '@/core/entities/Site'
-import { ROUTES } from '@/shared/constants/routes'
 import type { Site } from '@/core/entities/Site'
+import { ROUTES } from '@/shared/constants/routes'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 interface Props {
   onClose: () => void
@@ -65,7 +66,7 @@ export function ProfileModal({ onClose }: Props) {
       setSites(active)
       setView(active.length === 0 ? 'empty' : 'results')
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Erro ao buscar presentes')
+      setErrorMsg(getFriendlyMessage(err, 'Não foi possível buscar seus presentes. Tente novamente.'))
       setView('error')
     }
   }

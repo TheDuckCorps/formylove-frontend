@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { HeartConfetti } from './HeartConfetti'
+import { useEffect, useRef, useState } from 'react'
+import { RewardReveal } from './RewardReveal'
 
 interface Answer {
   id: string
@@ -11,16 +11,18 @@ interface Props {
   question: string
   answers: Answer[]
   onComplete?: () => void
+  previewMode?: boolean
 }
 
-export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
+export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode = false }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const completedRef = useRef(false)
 
   useEffect(() => {
-    if (isCorrect === true) {
-      const t = setTimeout(() => onComplete?.(), 1200)
-      return () => clearTimeout(t)
+    if (isCorrect === true && !completedRef.current) {
+      completedRef.current = true
+      onComplete?.()
     }
     if (isCorrect === false) {
       const t = setTimeout(() => {
@@ -40,13 +42,13 @@ export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
 
   return (
     <div className="space-y-4">
-      <HeartConfetti active={isCorrect === true} />
+      <RewardReveal active={isCorrect === true} message="Resposta certa!" previewMode={previewMode} />
 
-      <p className="text-base font-semibold text-gray-800 text-center">
+      <p className="text-lg font-semibold text-gray-800 text-center">
         {question || 'Pergunta não definida'}
       </p>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         {answers.map((answer) => {
           const selected = selectedId === answer.id
           return (
@@ -56,7 +58,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
               disabled={isCorrect === true}
               onClick={() => handleSelect(answer)}
               className={[
-                'text-sm px-3 py-3 rounded-lg border text-center transition',
+                'text-sm px-3 py-4 rounded-xl border text-center transition font-medium',
                 selected
                   ? isCorrect
                     ? 'border-green-500 bg-green-50 text-green-700 animate-bounce'

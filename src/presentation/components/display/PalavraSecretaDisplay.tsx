@@ -1,18 +1,21 @@
-import { useMemo, useState } from 'react'
-import { HeartConfetti } from './HeartConfetti'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { RewardReveal } from './RewardReveal'
 
 interface Props {
   hint: string
   secret: string
+  onComplete?: () => void
+  previewMode?: boolean
 }
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
-export function PalavraSecretaDisplay({ hint, secret }: Props) {
+export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = false }: Props) {
   const normalizedSecret = useMemo(() => secret.toUpperCase(), [secret])
   const [guessed, setGuessed] = useState<string[]>([])
   const [wrongGuessed, setWrongGuessed] = useState<string[]>([])
   const [wrongFlash, setWrongFlash] = useState<string[]>([])
+  const completedRef = useRef(false)
 
   const guessedSet = useMemo(() => new Set(guessed), [guessed])
   const wrongGuessedSet = useMemo(() => new Set(wrongGuessed), [wrongGuessed])
@@ -21,6 +24,13 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
   const hasWord = lettersOnly.length > 0
   const isComplete =
     hasWord && [...lettersOnly].every((letter) => guessedSet.has(letter))
+
+  useEffect(() => {
+    if (isComplete && !completedRef.current) {
+      completedRef.current = true
+      onComplete?.()
+    }
+  }, [isComplete, onComplete])
 
   function handleGuess(letter: string) {
     if (!hasWord || isComplete) return
@@ -40,7 +50,12 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
 
   return (
     <div className="space-y-4">
-      <HeartConfetti active={isComplete} />
+      <RewardReveal
+        active={isComplete}
+        message="Você acertou!"
+        subtitle="Palavra secreta revelada"
+        previewMode={previewMode}
+      />
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
         <p className="text-xs text-yellow-700 font-semibold uppercase tracking-wide mb-1">Dica</p>
@@ -57,9 +72,9 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
             return (
               <div
                 key={`${char}-${idx}`}
-                className="w-8 h-10 border-b-2 border-gray-400 flex items-center justify-center"
+                className="w-9 h-11 border-b-2 border-gray-400 flex items-center justify-center"
               >
-                <span className="font-bold text-gray-800">{revealed ? char : '_'}</span>
+                <span className="font-bold text-lg text-gray-800">{revealed ? char : '_'}</span>
               </div>
             )
           })
@@ -84,10 +99,10 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
                 disabled={disabled}
                 onClick={() => handleGuess(letter)}
                 className={[
-                  'text-xs font-semibold rounded-md py-2 border transition',
+                  'text-xs font-semibold rounded-md py-2.5 border transition',
                   selected && 'bg-brand text-white border-brand',
                   flashingWrong && 'bg-red-50 text-red-600 border-red-400 animate-bounce',
-                  unavailable && 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-70',
+                  unavailable && 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50',
                   disabled && !selected && !flashingWrong && !unavailable &&
                     'bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed',
                   !disabled && !flashingWrong &&
@@ -102,8 +117,8 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
       )}
 
       {isComplete && (
-        <div className="text-center rounded-lg bg-green-50 border border-green-200 py-2 animate-bounce">
-          <p className="text-sm font-semibold text-green-700">Você acertou!</p>
+        <div className="text-center rounded-lg bg-green-50 border border-green-200 py-3 animate-fade-in">
+          <p className="text-sm font-semibold text-green-700">Parabéns! Você descobriu a palavra!</p>
         </div>
       )}
     </div>

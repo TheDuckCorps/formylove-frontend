@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { PaymentRepository } from '@/infrastructure/repositories/PaymentRepository'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 interface UsePaymentViewModelInput {
   initialQrCode: string
@@ -65,7 +66,7 @@ export function usePaymentViewModel({
       setQrCodeImage(result.qrCodeImage)
       startCountdown(result.expiresIn)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao gerar novo QR Code')
+      setError(getFriendlyMessage(err, 'Não foi possível gerar um novo QR Code.'))
     } finally {
       setIsRefreshing(false)
     }

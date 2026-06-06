@@ -4,11 +4,12 @@ import { Input } from '../common/Input'
 interface Props {
   data: ToqueContinuarData
   onChange: (data: Partial<ToqueContinuarData>) => void
+  fieldErrors?: Record<string, string>
 }
 
 const MAX = 120
 
-export function ToqueContinuarPage({ data, onChange }: Props) {
+export function ToqueContinuarPage({ data, onChange, fieldErrors = {} }: Props) {
   return (
     <div className="flex flex-col gap-5">
       <Input
@@ -18,9 +19,9 @@ export function ToqueContinuarPage({ data, onChange }: Props) {
         maxLength={MAX}
         charCount={data.phrase.length}
         maxChars={MAX}
+        error={fieldErrors.phrase}
         onChange={(e) => onChange({ phrase: e.target.value })}
       />
-
     </div>
   )
 }

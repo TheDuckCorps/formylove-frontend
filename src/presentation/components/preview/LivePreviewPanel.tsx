@@ -12,7 +12,7 @@ export function LivePreviewPanel({ page, pageIndex = 0, totalPages = 1 }: Props)
   const meta = PAGE_TYPES_META.find((m) => m.type === page.type)
 
   return (
-    <div className="w-full max-w-[300px] mx-auto">
+    <div className="w-full max-w-[340px] mx-auto">
       <div className="border-[6px] border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col aspect-[9/19] bg-gray-50">
         <div className="bg-gray-800 h-6 flex-shrink-0 flex items-center justify-center">
           <div className="w-16 h-1 bg-gray-600 rounded-full" />

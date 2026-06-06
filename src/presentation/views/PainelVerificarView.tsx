@@ -4,6 +4,7 @@ import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
 import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
 import { ROUTES } from '@/shared/constants/routes'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type State = 'idle' | 'loading' | 'error'
 
@@ -60,7 +61,7 @@ export function PainelVerificarView() {
       await repo.verifyOTP({ email, code })
       navigate(ROUTES.PAINEL_SITES, { replace: true, state: { email } })
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Código inválido ou expirado')
+      setErrorMsg(getFriendlyMessage(err, 'Código inválido ou expirado. Tente novamente.'))
       setViewState('error')
     }
   }

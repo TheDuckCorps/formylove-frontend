@@ -7,6 +7,7 @@ import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { Site } from '@/core/entities/Site'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error'
 
@@ -81,7 +82,7 @@ export function PainelSitesView() {
         setLoadState(active.length === 0 ? 'empty' : 'ready')
       })
       .catch((err) => {
-        setErrorMsg(err instanceof Error ? err.message : 'Erro ao buscar presentes')
+        setErrorMsg(getFriendlyMessage(err, 'Não foi possível carregar seus presentes.'))
         setLoadState('error')
       })
   }, [email, navigate])

@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useMemo, useRef } from 'react'
 import '@excalidraw/excalidraw/index.css'
 import type { DesenhoLivreData } from '@/core/entities/Page'
+import { FieldError } from '../common/FieldError'
 import type {
   AppState,
   BinaryFiles,
@@ -15,6 +16,7 @@ const ExcalidrawEditor = lazy(() =>
 interface Props {
   data: DesenhoLivreData
   onChange: (data: Partial<DesenhoLivreData>) => void
+  fieldErrors?: Record<string, string>
 }
 
 function parseInitialData(
@@ -64,7 +66,7 @@ function buildEditorInitialData(
   }
 }
 
-export function DesenhoLivrePage({ data, onChange }: Props) {
+export function DesenhoLivrePage({ data, onChange, fieldErrors = {} }: Props) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
@@ -120,7 +122,12 @@ export function DesenhoLivrePage({ data, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="desenho-livre-excalidraw h-[420px] w-full border-2 border-gray-200 rounded-xl overflow-hidden bg-white relative">
+      <div
+        className={[
+          'desenho-livre-excalidraw h-[420px] w-full border-2 rounded-xl overflow-hidden bg-white relative',
+          fieldErrors.drawingDataUrl ? 'border-red-400' : 'border-gray-200',
+        ].join(' ')}
+      >
         <Suspense
           fallback={
             <div className="h-full flex items-center justify-center text-sm text-gray-400">
@@ -145,6 +152,7 @@ export function DesenhoLivrePage({ data, onChange }: Props) {
           />
         </Suspense>
       </div>
+      <FieldError message={fieldErrors.drawingDataUrl} />
     </div>
   )
 }

@@ -1,14 +1,16 @@
 import type { RoletaEscolhasData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
+import { FieldError } from '../common/FieldError'
 
 interface Props {
   data: RoletaEscolhasData
   onChange: (data: Partial<RoletaEscolhasData>) => void
+  fieldErrors?: Record<string, string>
 }
 
 const MAX_PHRASE = 100
 
-export function RoletaEscolhasPage({ data, onChange }: Props) {
+export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) {
   function updateOption(index: number, value: string) {
     const updated = [...data.options]
     updated[index] = value
@@ -34,6 +36,7 @@ export function RoletaEscolhasPage({ data, onChange }: Props) {
         maxLength={MAX_PHRASE}
         charCount={data.phrase.length}
         maxChars={MAX_PHRASE}
+        error={fieldErrors.phrase}
         onChange={(e) => onChange({ phrase: e.target.value })}
       />
 
@@ -43,7 +46,10 @@ export function RoletaEscolhasPage({ data, onChange }: Props) {
           {data.options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
               <input
-                className="input-base flex-1 text-sm py-2"
+                className={[
+                  'input-base flex-1 text-sm py-2',
+                  fieldErrors.options ? 'border-red-400' : '',
+                ].join(' ')}
                 placeholder={`OPÇÃO ${i + 1}`}
                 value={opt}
                 onChange={(e) => updateOption(i, e.target.value)}
@@ -60,6 +66,7 @@ export function RoletaEscolhasPage({ data, onChange }: Props) {
             </div>
           ))}
         </div>
+        <FieldError message={fieldErrors.options} />
 
         {data.options.length < 8 && (
           <button

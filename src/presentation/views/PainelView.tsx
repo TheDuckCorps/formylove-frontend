@@ -5,6 +5,7 @@ import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
 import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
 import { ROUTES } from '@/shared/constants/routes'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type State = 'idle' | 'loading' | 'error'
 
@@ -33,7 +34,7 @@ export function PainelView() {
       sessionStorage.setItem('hl_email', email)
       navigate(ROUTES.PAINEL_VERIFICAR, { state: { email } })
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Erro ao enviar código')
+      setErrorMsg(getFriendlyMessage(err, 'Não foi possível enviar o código. Tente novamente.'))
       setViewState('error')
     }
   }

@@ -35,6 +35,7 @@ export default {
         'fade-in': 'fadeIn 0.25s ease-in',
         blink: 'blink 1s step-end infinite',
         'finger-tap': 'fingerTap 1.6s ease-in-out infinite',
+        'finger-scratch': 'fingerScratch 2.2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
@@ -43,6 +44,12 @@ export default {
           '0%, 15%': { transform: 'translateY(0) scale(1)' },
           '35%': { transform: 'translateY(12px) scale(0.88)' },
           '50%, 100%': { transform: 'translateY(0) scale(1)' },
+        },
+        fingerScratch: {
+          '0%, 100%': { transform: 'translateX(-24px) rotate(-8deg)' },
+          '25%': { transform: 'translateX(24px) rotate(8deg)' },
+          '50%': { transform: 'translateX(-16px) rotate(-5deg)' },
+          '75%': { transform: 'translateX(16px) rotate(5deg)' },
         },
       },
     },

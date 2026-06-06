@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ROUTES } from '@/shared/constants/routes'
+import { ToastProvider } from '@/shared/ui/ToastProvider'
 
 // Views
 import { LandingView } from '@/presentation/views/LandingView'
@@ -33,8 +34,9 @@ function SuccessView() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
         {/* ── Public ─────────────────────────────────────── */}
         <Route path={ROUTES.HOME} element={<LandingView />} />
 
@@ -66,7 +68,8 @@ export default function App() {
 
         {/* ── Fallback ─────────────────────────────────────── */}
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   )
 }

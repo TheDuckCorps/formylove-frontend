@@ -14,7 +14,7 @@ export function HeartConfetti({ active = true, count = 350 }: Props) {
   if (!active) return null
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden" aria-hidden>
+    <div className="pointer-events-none fixed inset-0 z-[60] overflow-hidden" aria-hidden>
       <style>{`
         @keyframes heart-confetti-fall {
           0% { transform: translate3d(0, -15vh, 0) rotate(0deg) scale(0.7); opacity: 0; }
@@ -40,7 +40,7 @@ export function HeartConfetti({ active = true, count = 350 }: Props) {
               left: `${left}%`,
               width: size,
               height: size,
-              animation: `heart-confetti-fall ${duration}s linear ${delay}s forwards`,
+              animation: `heart-confetti-fall ${duration}s linear ${delay}s both`,
               ['--heart-drift' as string]: drift,
             }}
           >

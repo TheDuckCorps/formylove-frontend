@@ -1,13 +1,13 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EditorHeader } from '../components/layout/EditorHeader'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
 import { StepIndicator } from '../components/layout/StepIndicator'
-import { EditarPaginasModal } from '../modals/EditarPaginasModal'
+import { PageStepper } from '../components/layout/PageStepper'
 import { LivePreviewPanel } from '../components/preview/LivePreviewPanel'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { ROUTES } from '@/shared/constants/routes'
+import { PAGE_TYPES_META } from '@/core/entities/Page'
 
 import { DesenhoLivrePage } from '../components/pages/DesenhoLivrePage'
 import { MedidorAmorPage } from '../components/pages/MedidorAmorPage'
@@ -37,30 +37,32 @@ function PageEditorSwitch({
   type,
   data,
   onChange,
+  fieldErrors,
 }: {
   type: PageType
   data: AnyPageData
   onChange: (d: Partial<AnyPageData>) => void
+  fieldErrors?: Record<string, string>
 }) {
   switch (type) {
     case 'DESENHO_LIVRE':
-      return <DesenhoLivrePage data={data as DesenhoLivreData} onChange={onChange} />
+      return <DesenhoLivrePage data={data as DesenhoLivreData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'MEDIDOR_AMOR':
-      return <MedidorAmorPage data={data as MedidorAmorData} onChange={onChange} />
+      return <MedidorAmorPage data={data as MedidorAmorData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'TOQUE_CONTINUAR':
-      return <ToqueContinuarPage data={data as ToqueContinuarData} onChange={onChange} />
+      return <ToqueContinuarPage data={data as ToqueContinuarData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'MUSICA_FUNDO':
-      return <MusicaFundoPage data={data as MusicaFundoData} onChange={onChange} />
+      return <MusicaFundoPage data={data as MusicaFundoData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'PALAVRA_SECRETA':
-      return <PalavraSecretaPage data={data as PalavraSecretaData} onChange={onChange} />
+      return <PalavraSecretaPage data={data as PalavraSecretaData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'QUIZ_AFETIVO':
-      return <QuizAfetivoPage data={data as QuizAfetivoData} onChange={onChange} />
+      return <QuizAfetivoPage data={data as QuizAfetivoData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'RASPADINHA_SURPRESA':
-      return <RaspadinhaSurpresaPage data={data as RaspadinhaSurpresaData} onChange={onChange} />
+      return <RaspadinhaSurpresaPage data={data as RaspadinhaSurpresaData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'ROLETA_ESCOLHAS':
-      return <RoletaEscolhasPage data={data as RoletaEscolhasData} onChange={onChange} />
+      return <RoletaEscolhasPage data={data as RoletaEscolhasData} onChange={onChange} fieldErrors={fieldErrors} />
     case 'MENSAGEM_MULTIMIDIA':
-      return <MensagemMultimidiaPage data={data as MensagemMultimidiaData} onChange={onChange} />
+      return <MensagemMultimidiaPage data={data as MensagemMultimidiaData} onChange={onChange} fieldErrors={fieldErrors} />
     default:
       return <div className="text-gray-400 text-sm text-center py-10">Editor não disponível.</div>
   }
@@ -68,10 +70,13 @@ function PageEditorSwitch({
 
 export function EditorView() {
   const navigate = useNavigate()
-  const { selectedPages, currentPageIndex, setCurrentPageIndex, updatePageData } =
-    useSiteBuilderStore()
-
-  const [showEditModal, setShowEditModal] = useState(false)
+  const {
+    selectedPages,
+    currentPageIndex,
+    setCurrentPageIndex,
+    updatePageData,
+    validationResults,
+  } = useSiteBuilderStore()
 
   const currentPage = selectedPages[currentPageIndex]
 
@@ -80,10 +85,10 @@ export function EditorView() {
     return null
   }
 
-  const pageLabel = `${currentPageIndex + 1}. ${currentPage.type
-    .replace(/_/g, ' ')
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase())}`
+  const meta = PAGE_TYPES_META.find((m) => m.type === currentPage.type)
+  const pageLabel = `${currentPageIndex + 1}. ${meta?.label ?? currentPage.type}`
+  const currentValidation = validationResults.find((r) => r.pageId === currentPage.id)
+  const fieldErrors = currentValidation?.fieldErrors ?? {}
 
   function handleNext() {
     if (currentPageIndex < selectedPages.length - 1) {
@@ -113,18 +118,30 @@ export function EditorView() {
         totalPages={selectedPages.length}
         onPrev={handlePrev}
         onNext={handleNext}
-        onChangePages={() => setShowEditModal(true)}
       />
 
       <StepIndicator currentStep={2} />
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 lg:grid lg:grid-cols-[1fr_400px] lg:gap-10 lg:items-start">
-        <div>
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 lg:flex lg:gap-8 lg:items-start">
+        <PageStepper validationResults={validationResults} />
+
+        <div className="flex-1 min-w-0 lg:max-w-2xl">
+          {Object.keys(fieldErrors).length > 0 && (
+            <div
+              role="alert"
+              className="mb-4 bg-amber-50 border border-amber-200 text-amber-800 text-sm px-4 py-3 rounded-xl flex items-start gap-2"
+            >
+              <span aria-hidden>✏️</span>
+              <span>Complete os campos destacados para gerar seu link depois.</span>
+            </div>
+          )}
+
           <PageEditorSwitch
             key={currentPage.id}
             type={currentPage.type}
             data={currentPage.data}
             onChange={(d) => updatePageData(currentPage.id, d)}
+            fieldErrors={fieldErrors}
           />
 
           <div className="mt-10 hidden lg:flex items-center gap-3">
@@ -137,7 +154,7 @@ export function EditorView() {
           </div>
         </div>
 
-        <div className="hidden lg:block sticky top-20">
+        <div className="hidden lg:block sticky top-20 w-[340px] flex-shrink-0">
           <p className="text-xs text-brand font-semibold text-center mb-3 uppercase tracking-wide">
             Visualização ao vivo
           </p>
@@ -152,7 +169,7 @@ export function EditorView() {
       <button
         type="button"
         onClick={() => navigate(ROUTES.CRIAR_PREVIEW)}
-        className="lg:hidden fixed bottom-24 right-4 z-30 flex items-center gap-2 px-4 py-3 rounded-full bg-brand text-white shadow-lg text-sm font-semibold hover:opacity-90 transition"
+        className="lg:hidden fixed bottom-24 right-4 z-30 flex items-center gap-2 px-4 py-3 rounded-full bg-brand text-white shadow-lg text-sm font-semibold hover:opacity-90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         aria-label="Pré-visualizar presente"
       >
         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,10 +190,6 @@ export function EditorView() {
       </button>
 
       <Footer />
-
-      {showEditModal && (
-        <EditarPaginasModal onClose={() => setShowEditModal(false)} />
-      )}
     </div>
   )
 }

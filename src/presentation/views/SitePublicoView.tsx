@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
@@ -12,6 +12,8 @@ import { RaspadinhaSurpresaDisplay } from '../components/display/RaspadinhaSurpr
 import { MensagemMultimidiaDisplay } from '../components/display/MensagemMultimidiaDisplay'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
 import { ROUTES } from '@/shared/constants/routes'
+import { AUTO_ADVANCE_MS } from '@/shared/constants/autoAdvance'
+import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
@@ -34,11 +36,21 @@ interface BackendSite {
 interface RenderResult {
   node: React.ReactNode
   showNextButton?: boolean
+  requiresCompletion?: boolean
 }
+
+const COMPLETION_PAGE_TYPES = new Set([
+  'LOVE_METER',
+  'MYSTERY_WORD',
+  'SECRET_WORD',
+  'QUIZ',
+  'GALLERY',
+  'SPIN_WHEEL',
+])
 
 function PageCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 w-full max-w-sm mx-auto">
+    <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 w-full max-w-md lg:max-w-lg mx-auto">
       {children}
     </div>
   )
@@ -67,16 +79,25 @@ function parseSecretContent(content: Record<string, unknown>) {
   }
 }
 
-function renderPage(page: BackendPage, onNext: () => void): RenderResult {
+function renderPage(
+  page: BackendPage,
+  onNext: () => void,
+  onPageComplete: () => void,
+): RenderResult {
   switch (page.type) {
     case 'SPIN_WHEEL': {
       const options = (page.content.options as string[]) ?? []
       return {
         node: (
           <PageCard>
-            <SpinWheelDisplay options={options} />
+            <SpinWheelDisplay
+              options={options}
+              phrase={(page.content.phrase as string) ?? undefined}
+              onComplete={onPageComplete}
+            />
           </PageCard>
         ),
+        requiresCompletion: true,
       }
     }
 
@@ -97,9 +118,11 @@ function renderPage(page: BackendPage, onNext: () => void): RenderResult {
             <MedidorAmorDisplay
               question={(page.content.question as string) ?? 'O quanto você me ama?'}
               imageUrl={(page.content.imageDataUrl as string) ?? null}
+              onComplete={onPageComplete}
             />
           </PageCard>
         ),
+        requiresCompletion: true,
       }
 
     case 'MYSTERY_WORD':
@@ -108,9 +131,10 @@ function renderPage(page: BackendPage, onNext: () => void): RenderResult {
       return {
         node: (
           <PageCard>
-            <PalavraSecretaDisplay hint={hint} secret={secret} />
+            <PalavraSecretaDisplay hint={hint} secret={secret} onComplete={onPageComplete} />
           </PageCard>
         ),
+        requiresCompletion: true,
       }
     }
 
@@ -132,11 +156,12 @@ function renderPage(page: BackendPage, onNext: () => void): RenderResult {
             <QuizAfetivoDisplay
               question={first?.text ?? 'Pergunta'}
               answers={answers}
-              onComplete={onNext}
+              onComplete={onPageComplete}
             />
           </PageCard>
         ),
         showNextButton: false,
+        requiresCompletion: true,
       }
     }
 
@@ -152,9 +177,11 @@ function renderPage(page: BackendPage, onNext: () => void): RenderResult {
                     : null))
               }
               title={(page.content.title as string) ?? ''}
+              onComplete={onPageComplete}
             />
           </PageCard>
         ),
+        requiresCompletion: true,
       }
 
     case 'MULTIMEDIA_MESSAGE':
@@ -177,7 +204,7 @@ function renderPage(page: BackendPage, onNext: () => void): RenderResult {
               <img
                 src={page.content.prompt as string}
                 alt="Desenho livre"
-                className="w-full rounded-xl object-contain max-h-80"
+                className="w-full rounded-xl object-contain max-h-96"
               />
             ) : (
               <p className="text-sm text-gray-400 text-center">Nenhum desenho definido.</p>
@@ -204,8 +231,11 @@ export function SitePublicoView() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [loadState, setLoadState] = useState<LoadState>('loading')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [site, setSite] = useState<BackendSite | null>(null)
   const [currentIdx, setCurrentIdx] = useState(0)
+  const [completedPageIds, setCompletedPageIds] = useState<Set<string>>(new Set())
+  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!slug) { setLoadState('not-found'); return }
@@ -216,8 +246,17 @@ export function SitePublicoView() {
         setSite(data as unknown as BackendSite)
         setLoadState('ready')
         setCurrentIdx(0)
+        setCompletedPageIds(new Set())
       })
-      .catch(() => setLoadState('not-found'))
+      .catch((err) => {
+        const msg = getFriendlyMessage(err)
+        if (/não encontramos|não encontrad|404/i.test(msg)) {
+          setLoadState('not-found')
+        } else {
+          setErrorMessage(msg)
+          setLoadState('error')
+        }
+      })
   }, [slug])
 
   const pages = [...(site?.pages ?? [])].sort((a, b) => a.order - b.order)
@@ -233,6 +272,35 @@ export function SitePublicoView() {
     setCurrentIdx((i) => Math.max(i - 1, 0))
   }, [])
 
+  const markPageComplete = useCallback((pageId: string) => {
+    setCompletedPageIds((prev) => {
+      if (prev.has(pageId)) return prev
+      const next = new Set(prev)
+      next.add(pageId)
+      return next
+    })
+  }, [])
+
+  const currentPage = storyPages[currentIdx]
+  const isFirst = currentIdx === 0
+  const isLast = currentIdx === storyCount - 1
+
+  useEffect(() => {
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current)
+      autoAdvanceRef.current = null
+    }
+
+    if (!currentPage || isLast) return
+    if (!completedPageIds.has(currentPage.id)) return
+    if (!COMPLETION_PAGE_TYPES.has(currentPage.type)) return
+
+    autoAdvanceRef.current = setTimeout(handleNext, AUTO_ADVANCE_MS)
+    return () => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current)
+    }
+  }, [completedPageIds, currentPage, handleNext, isLast])
+
   if (loadState === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-page-gradient">
@@ -240,6 +308,19 @@ export function SitePublicoView() {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
         </svg>
+      </div>
+    )
+  }
+
+  if (loadState === 'error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-page-gradient px-6">
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">😔</div>
+          <h2 className="text-xl font-bold text-gray-700 mb-2">Ops, algo deu errado</h2>
+          <p className="text-sm text-gray-500 mb-6">{errorMessage}</p>
+          <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+        </div>
       </div>
     )
   }
@@ -271,12 +352,13 @@ export function SitePublicoView() {
     )
   }
 
-  const currentPage = storyPages[currentIdx]
-  const isFirst = currentIdx === 0
-  const isLast = currentIdx === storyCount - 1
   const sitePlan = (site.planType ?? site.plan) as string | undefined
   const showLeadCta =
     isLast && (sitePlan === 'BASIC' || sitePlan === 'INTERMEDIATE')
+
+  const isCurrentComplete = currentPage
+    ? completedPageIds.has(currentPage.id)
+    : false
 
   return (
     <div className="min-h-screen bg-page-gradient flex flex-col">
@@ -286,14 +368,12 @@ export function SitePublicoView() {
         />
       ) : null}
 
-      {/* Header */}
-      <div className="flex justify-center pt-5 pb-2">
+      <div className="flex justify-center pt-5 pb-2 relative z-10 bg-page-gradient/80">
         <Logo size="sm" />
       </div>
 
-      {/* Progress dots */}
       {storyCount > 1 && (
-        <div className="flex justify-center gap-1.5 pb-2">
+        <div className="flex justify-center gap-1.5 pb-2 relative z-10">
           {storyPages.map((_, i) => (
             <button
               key={i}
@@ -301,7 +381,7 @@ export function SitePublicoView() {
               onClick={() => setCurrentIdx(i)}
               aria-label={`Ir para página ${i + 1}`}
               className={[
-                'h-1.5 rounded-full transition-all duration-300',
+                'h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
                 i === currentIdx ? 'w-6 bg-brand' : 'w-1.5 bg-gray-300 hover:bg-gray-400',
               ].join(' ')}
             />
@@ -309,7 +389,6 @@ export function SitePublicoView() {
         </div>
       )}
 
-      {/* Page content */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto">
         {storyCount === 0 ? (
           <p className="text-center text-gray-400 text-sm">Este presente ainda não tem páginas.</p>
@@ -323,11 +402,18 @@ export function SitePublicoView() {
         ) : (
           <div key={currentPage.id} className="w-full flex flex-col items-center gap-6 animate-fade-in">
             {(() => {
-              const render = renderPage(currentPage, handleNext)
+              const onPageComplete = () => markPageComplete(currentPage.id)
+              const render = renderPage(currentPage, handleNext, onPageComplete)
+              const needsCompletion = render.requiresCompletion ?? COMPLETION_PAGE_TYPES.has(currentPage.type)
+              const canShowNext =
+                render.showNextButton !== false &&
+                !isLast &&
+                (!needsCompletion || isCurrentComplete)
+
               return (
                 <>
                   {render.node}
-                  {render.showNextButton !== false && !isLast && (
+                  {canShowNext && (
                     <div className="flex justify-center">
                       <Button onClick={handleNext}>
                         Próxima página →
@@ -338,7 +424,7 @@ export function SitePublicoView() {
                     <button
                       type="button"
                       onClick={() => navigate(ROUTES.HOME)}
-                      className="text-xs text-brand underline hover:text-brand/80 transition mt-2"
+                      className="text-xs text-brand underline hover:text-brand/80 transition mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                     >
                       Crie um presente inesquecível como este no For My Love →
                     </button>
@@ -350,46 +436,43 @@ export function SitePublicoView() {
         )}
       </main>
 
-      {/* Navigation */}
       {storyCount > 1 && (
-        <div className="flex items-center justify-between px-8 py-4 border-t border-gray-100 bg-white/80 backdrop-blur-sm">
+        <div className="fixed left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
           <button
             type="button"
             onClick={handlePrev}
             disabled={isFirst}
             aria-label="Página anterior"
-            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand hover:text-brand transition"
+            className="w-9 h-9 flex items-center justify-center text-gray-400 disabled:opacity-20 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
             </svg>
           </button>
-
-          <span className="text-xs text-gray-400 font-medium tabular-nums">
-            {currentIdx + 1} / {storyCount}
-          </span>
 
           <button
             type="button"
             onClick={handleNext}
             disabled={isLast}
             aria-label="Próxima página"
-            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 disabled:opacity-30 hover:border-brand hover:text-brand transition"
+            className="w-9 h-9 flex items-center justify-center text-gray-400 disabled:opacity-20 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
         </div>
       )}
 
-      {/* Watermark */}
       <div className="text-center py-3">
         <p className="text-xs text-gray-400">
           Criado com{' '}
           <span
             className="text-brand font-semibold cursor-pointer hover:underline"
             onClick={() => navigate(ROUTES.HOME)}
+            role="link"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && navigate(ROUTES.HOME)}
           >
             For My Love
           </span>

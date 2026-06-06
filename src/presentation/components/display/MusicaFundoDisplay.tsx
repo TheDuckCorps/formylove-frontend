@@ -28,7 +28,10 @@ function getYoutubeVideoId(url: string): string | null {
 
 export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   const [playing, setPlaying] = useState(true)
+  const [volume, setVolume] = useState(70)
+  const [showVolume, setShowVolume] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const videoId = useMemo(() => getYoutubeVideoId(youtubeUrl), [youtubeUrl])
 
@@ -48,9 +51,34 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     postToPlayer(playing ? 'playVideo' : 'pauseVideo')
   }, [playing])
 
+  useEffect(() => {
+    postToPlayer('setVolume', [volume])
+  }, [volume])
+
+  function scheduleHideVolume() {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = setTimeout(() => setShowVolume(false), 3000)
+  }
+
   function handleToggle() {
     setPlaying((p) => !p)
+    if (!compact) {
+      setShowVolume(true)
+      scheduleHideVolume()
+    }
   }
+
+  function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setVolume(Number(e.target.value))
+    setShowVolume(true)
+    scheduleHideVolume()
+  }
+
+  useEffect(() => {
+    return () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    }
+  }, [])
 
   if (!youtubeUrl) {
     return (
@@ -60,30 +88,56 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     )
   }
 
-  const control = (
-    <div
-      className={[
-        compact ? 'relative inline-flex' : 'fixed left-4 bottom-4 z-50',
-        'select-none',
-      ].join(' ')}
+  const positionClass = compact
+    ? 'relative inline-flex flex-col items-center'
+    : 'fixed left-4 top-4 z-50 flex flex-col items-center'
+
+  const playPauseButton = (
+    <button
+      type="button"
+      onClick={handleToggle}
+      className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+      aria-label={playing ? 'Pausar música' : 'Retomar música'}
     >
-      <button
-        type="button"
-        onClick={handleToggle}
-        className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center shadow-lg border border-white/10"
-        aria-label={playing ? 'Pausar música' : 'Retomar música'}
-      >
-        {playing ? (
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <rect x="6" y="5" width="4" height="14" rx="1" />
-            <rect x="14" y="5" width="4" height="14" rx="1" />
+      {playing ? (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <rect x="6" y="5" width="4" height="14" rx="1" />
+          <rect x="14" y="5" width="4" height="14" rx="1" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7L8 5z" />
+        </svg>
+      )}
+    </button>
+  )
+
+  return (
+    <div className={[positionClass, 'select-none gap-2'].join(' ')}>
+      {!compact && showVolume && (
+        <div className="flex flex-col items-center gap-2 animate-fade-in py-1">
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={handleVolumeChange}
+            aria-label="Volume da música"
+            className="accent-brand cursor-pointer"
+            style={{
+              writingMode: 'vertical-lr',
+              direction: 'rtl',
+              height: '100px',
+              width: '6px',
+            }}
+          />
+          <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
           </svg>
-        ) : (
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7L8 5z" />
-          </svg>
-        )}
-      </button>
+        </div>
+      )}
+
+      {playPauseButton}
 
       {playerUrl ? (
         <iframe
@@ -96,6 +150,4 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
       ) : null}
     </div>
   )
-
-  return compact ? control : control
 }

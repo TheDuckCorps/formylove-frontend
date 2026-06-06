@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react'
-import { HeartConfetti } from '../display/HeartConfetti'
+import { RewardReveal } from '../display/RewardReveal'
 
 interface Props {
   phrase?: string
   options: string[]
+  onComplete?: () => void
+  previewMode?: boolean
 }
 
 const COLORS = [
@@ -11,7 +13,7 @@ const COLORS = [
   '#8b5cf6', '#ec4899', '#7c3aed', '#f472b6',
 ]
 
-const SIZE = 280
+const SIZE = 320
 const cx = SIZE / 2
 const cy = SIZE / 2
 const RADIUS = SIZE / 2 - 6
@@ -41,11 +43,12 @@ function truncate(text: string, max = 11) {
   return text.length > max ? text.slice(0, max - 1) + '…' : text
 }
 
-export function SpinWheelDisplay({ phrase, options }: Props) {
+export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = false }: Props) {
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
   const [winner, setWinner] = useState<string | null>(null)
   const winnerRef = useRef<string | null>(null)
+  const completedRef = useRef(false)
 
   const n = options.length
   const segmentAngle = 360 / n
@@ -69,11 +72,20 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
   function handleTransitionEnd() {
     setSpinning(false)
     setWinner(winnerRef.current)
+    if (!completedRef.current) {
+      completedRef.current = true
+      onComplete?.()
+    }
   }
 
   return (
     <div className="flex flex-col items-center gap-5 py-4 select-none">
-      <HeartConfetti active={!!winner && !spinning} />
+      <RewardReveal
+        active={!!winner && !spinning}
+        message="Sorteio feito!"
+        subtitle={winner ?? undefined}
+        previewMode={previewMode}
+      />
 
       {phrase && (
         <p className="text-lg font-bold text-gray-800 text-center px-4">{phrase}</p>
@@ -144,7 +156,7 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
       <button
         onClick={handleSpin}
         disabled={spinning}
-        className="px-10 py-3 rounded-full font-bold text-white text-base shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+        className="px-10 py-3 rounded-full font-bold text-white text-base shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         style={{ background: 'linear-gradient(135deg, #C62A87, #E91E8C)' }}
       >
         {spinning ? (

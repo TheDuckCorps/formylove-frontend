@@ -20,11 +20,13 @@ import { RaspadinhaSurpresaDisplay } from '../display/RaspadinhaSurpresaDisplay'
 import { MensagemMultimidiaDisplay } from '../display/MensagemMultimidiaDisplay'
 
 export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPageData }) {
+  const previewMode = true
+
   switch (type) {
     case 'DESENHO_LIVRE': {
       const d = data as DesenhoLivreData
       return d.drawingDataUrl ? (
-        <img src={d.drawingDataUrl} alt="Desenho" className="w-full rounded-xl object-contain max-h-52" />
+        <img src={d.drawingDataUrl} alt="Desenho" className="w-full rounded-xl object-contain max-h-64" />
       ) : (
         <div className="h-32 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm">
           Nenhum desenho ainda
@@ -33,7 +35,13 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
     }
     case 'MEDIDOR_AMOR': {
       const d = data as MedidorAmorData
-      return <MedidorAmorDisplay question={d.question} imageUrl={d.imageUrl} />
+      return (
+        <MedidorAmorDisplay
+          question={d.question}
+          imageUrl={d.imageUrl}
+          previewMode={previewMode}
+        />
+      )
     }
     case 'TOQUE_CONTINUAR': {
       const d = data as ToqueContinuarData
@@ -41,19 +49,33 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
     }
     case 'MUSICA_FUNDO': {
       const d = data as MusicaFundoData
-      return <MusicaFundoDisplay youtubeUrl={d.youtubeUrl} compact />
+      return (
+        <div className="flex flex-col min-h-[220px] justify-end items-center pt-6">
+          <MusicaFundoDisplay youtubeUrl={d.youtubeUrl} compact />
+        </div>
+      )
     }
     case 'PALAVRA_SECRETA': {
       const d = data as PalavraSecretaData
-      return <PalavraSecretaDisplay hint={d.hint} secret={d.secret} />
+      return (
+        <PalavraSecretaDisplay hint={d.hint} secret={d.secret} previewMode={previewMode} />
+      )
     }
     case 'QUIZ_AFETIVO': {
       const d = data as QuizAfetivoData
-      return <QuizAfetivoDisplay question={d.question} answers={d.answers} />
+      return (
+        <QuizAfetivoDisplay question={d.question} answers={d.answers} previewMode={previewMode} />
+      )
     }
     case 'RASPADINHA_SURPRESA': {
       const d = data as RaspadinhaSurpresaData
-      return <RaspadinhaSurpresaDisplay imageUrl={d.imageUrl} title={d.title} />
+      return (
+        <RaspadinhaSurpresaDisplay
+          imageUrl={d.imageUrl}
+          title={d.title}
+          previewMode={previewMode}
+        />
+      )
     }
     case 'ROLETA_ESCOLHAS': {
       const d = data as RoletaEscolhasData
@@ -65,7 +87,13 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
           </p>
         )
       }
-      return <SpinWheelDisplay phrase={d.phrase || undefined} options={validOptions} />
+      return (
+        <SpinWheelDisplay
+          phrase={d.phrase || undefined}
+          options={validOptions}
+          previewMode={previewMode}
+        />
+      )
     }
     case 'MENSAGEM_MULTIMIDIA': {
       const d = data as MensagemMultimidiaData
