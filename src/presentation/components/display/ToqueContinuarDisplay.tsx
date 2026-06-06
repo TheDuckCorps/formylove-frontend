@@ -13,8 +13,7 @@ export function ToqueContinuarDisplay({ phrase, onContinue }: Props) {
       <button
         type="button"
         onClick={onContinue}
-        className="btn-brand rounded-full w-14 h-14 p-0 animate-bounce"
-        aria-label="Continuar"
+        className="btn-brand px-8 py-2 rounded-lg text-sm font-semibold"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

@@ -13,14 +13,14 @@ export function PrivacidadeView() {
           Última atualização: [INSERIR DATA]
         </p>
         <p className="text-sm text-gray-500 text-center mb-10">
-          Ao utilizar o Heart Link, você concorda com esta política de privacidade. Leia-os atentamente.
+          Ao utilizar o For My Love, você concorda com esta política de privacidade. Leia-os atentamente.
         </p>
 
         <div className="prose prose-sm max-w-none text-gray-700 space-y-6">
           {[
             {
               title: '1. Informações Coletadas',
-              body: `Ao usar o Heart Link, coletamos:\n• E-mail: Necessário para criar e acessar sua conta.\n• Conteúdo multimídia: Imagens, áudios, vídeos e desenhos enviados para personalizar suas páginas interativas.\n• Dados de interação: Como respostas a quizzes, resultados de jogos e preferências de personalização.\n• Cookies e tecnologias similares: Usamos serviços externos para análises de tráfego e melhora da experiência.`,
+              body: `Ao usar o For My Love, coletamos:\n• E-mail: Necessário para criar e acessar sua conta.\n• Conteúdo multimídia: Imagens, áudios, vídeos e desenhos enviados para personalizar suas páginas interativas.\n• Dados de interação: Como respostas a quizzes, resultados de jogos e preferências de personalização.\n• Cookies e tecnologias similares: Usamos serviços externos para análises de tráfego e melhora da experiência.`,
             },
             {
               title: '2. Uso das Informações',
@@ -48,7 +48,7 @@ export function PrivacidadeView() {
             },
             {
               title: '8. Interrupção do Serviço',
-              body: `• O Heart Link pode sofrer interrupções devido a falhas técnicas ou manutenções programadas.\n• Não nos responsabilizamos por perdas causadas por tais interrupções. Para casos de interrupção prolongada, entre em contato via e-mail para avaliar compensação proporcional.`,
+              body: `• O For My Love pode sofrer interrupções devido a falhas técnicas ou manutenções programadas.\n• Não nos responsabilizamos por perdas causadas por tais interrupções. Para casos de interrupção prolongada, entre em contato via e-mail para avaliar compensação proporcional.`,
             },
             {
               title: '9. Alterações na Política',

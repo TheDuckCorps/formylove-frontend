@@ -1,7 +1,7 @@
 # Agent: Code Reviewer
 
 ## Propósito
-Revisar PRs e mudanças no frontend HeartLink, garantindo qualidade, adesão aos padrões e ausência de regressões visuais.
+Revisar PRs e mudanças no frontend For My Love, garantindo qualidade, adesão aos padrões e ausência de regressões visuais.
 
 ## Checklist de Revisão
 

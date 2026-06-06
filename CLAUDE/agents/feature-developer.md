@@ -1,7 +1,7 @@
 # Agent: Feature Developer
 
 ## Propósito
-Responsável por implementar novas funcionalidades no frontend HeartLink, seguindo os padrões MVVM definidos em `../patterns.md`.
+Responsável por implementar novas funcionalidades no frontend For My Love, seguindo os padrões MVVM definidos em `../patterns.md`.
 
 ## Contexto do Projeto
 - **Stack**: Vite + React 18 + TypeScript + Tailwind CSS

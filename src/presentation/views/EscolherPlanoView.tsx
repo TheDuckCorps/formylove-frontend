@@ -15,19 +15,19 @@ import type { PlanType } from '@/core/entities/Site'
 const PLAN_FEATURES: Record<PlanType, string[]> = {
   BASIC: [
     'Até 5 páginas interativas',
-    'Válido por 3 dias',
+    'Válido por 7 dias',
     'Link + QR Code para compartilhar',
     'QR Code com design premium (+R$2)',
   ],
   INTERMEDIATE: [
     'Até 7 páginas interativas',
-    'Válido por 7 dias',
+    'Válido por 30 dias',
     'Link + QR Code para compartilhar',
     'QR Code com design premium (+R$2)',
   ],
   PREMIUM: [
     'Até 15 páginas interativas',
-    'Válido por 30 dias',
+    'Válido por 1 ano',
     'Link + QR Code para compartilhar',
     'Design premium do QR Code incluso',
   ],
@@ -35,8 +35,8 @@ const PLAN_FEATURES: Record<PlanType, string[]> = {
 
 const PLAN_BADGE: Record<PlanType, string | null> = {
   BASIC: null,
-  INTERMEDIATE: 'Mais popular',
-  PREMIUM: 'Mais completo',
+  INTERMEDIATE: 'Melhor custo-benefício',
+  PREMIUM: 'Mais Popular',
 }
 
 function formatPrice(cents: number) {
@@ -192,13 +192,20 @@ export function EscolherPlanoView() {
             const tooMany = selectedPages.length > MAX_PAGES_PER_PLAN[plan.type]
             const features = PLAN_FEATURES[plan.type]
 
+            const isPremium = plan.type === 'PREMIUM'
+
             return (
               <button
                 key={plan.type}
                 onClick={() => handleSelectPlan(plan.type)}
                 className={[
                   'relative flex flex-col items-start p-5 rounded-2xl border-2 text-left transition-all',
-                  isSelected
+                  isPremium && 'sm:scale-105 z-10',
+                  isPremium
+                    ? isSelected
+                      ? 'border-brand bg-brand/10 shadow-card'
+                      : 'border-brand bg-brand/5 shadow-md hover:bg-brand/10'
+                    : isSelected
                     ? 'border-brand bg-brand/5 shadow-card'
                     : tooMany
                     ? 'border-gray-200 bg-gray-50 opacity-60'
@@ -252,6 +259,22 @@ export function EscolherPlanoView() {
             )
           })}
         </div>
+
+        {chosen && chosen !== 'PREMIUM' && (
+          <div className="bg-brand/5 border border-brand/20 rounded-xl p-4 mb-6 text-center">
+            <p className="text-sm text-gray-700">
+              Por apenas <strong className="text-brand">R$ 5,00 a mais</strong> que o Intermediário, tenha acesso por{' '}
+              <strong className="text-brand">1 ano inteiro</strong>.
+            </p>
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('PREMIUM')}
+              className="mt-2 text-xs font-semibold text-brand hover:underline"
+            >
+              Ver plano Premium →
+            </button>
+          </div>
+        )}
 
         {qrCodeDetailed && chosen && chosen !== 'PREMIUM' && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 flex items-center gap-3">

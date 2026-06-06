@@ -204,21 +204,21 @@ const HOW_IT_WORKS: Array<{
 const PLAN_FEATURES: Record<PlanType, string[]> = {
   BASIC: [
     'Até 5 páginas interativas',
-    'Site ativo por 3 dias',
+    'Site ativo por 7 dias',
     'Link + QR Code por e-mail',
     'Design básico do QR Code',
     'QR Code premium +R$2,00',
   ],
   INTERMEDIATE: [
     'Até 7 páginas interativas',
-    'Site ativo por 7 dias',
+    'Site ativo por 30 dias',
     'Link + QR Code por e-mail',
     'Design básico do QR Code',
     'QR Code premium +R$2,00',
   ],
   PREMIUM: [
     'Até 15 páginas interativas',
-    'Site ativo por 30 dias',
+    'Site ativo por 1 ano',
     'Link + QR Code por e-mail',
     'Design premium do QR Code incluso',
     'Acesso a todos os templates',
@@ -227,13 +227,13 @@ const PLAN_FEATURES: Record<PlanType, string[]> = {
 
 const PLAN_HIGHLIGHT: Record<PlanType, string | null> = {
   BASIC: null,
-  INTERMEDIATE: 'Mais popular',
-  PREMIUM: 'Mais completo',
+  INTERMEDIATE: 'Melhor custo-benefício',
+  PREMIUM: 'Mais Popular',
 }
 
 const FAQ = [
   { q: 'O que posso enviar?', a: 'Você pode criar páginas com desenhos à mão, quizzes, raspadinhas, medidor de amor, música de fundo, vídeos e muito mais. Tudo personalizado para quem você ama!' },
-  { q: 'Por quanto tempo minha página fica disponível?', a: 'Depende do plano escolhido: Básico (3 dias), Intermediário (7 dias) ou Premium (30 dias).' },
+  { q: 'Por quanto tempo minha página fica disponível?', a: 'Depende do plano escolhido: Básico (7 dias), Intermediário (30 dias) ou Premium (1 ano).' },
   { q: 'Posso editar meu presente depois de finalizar?', a: 'Após o pagamento confirmado, o conteúdo não pode ser alterado. Por isso, revise bem antes de finalizar.' },
   { q: 'Como faço para compartilhar meu presente?', a: 'Após a ativação, você receberá por e-mail o link direto e o QR Code. Basta enviar para quem você ama!' },
   { q: 'É necessário ter conta para criar?', a: 'Não! Apenas informe seu e-mail. Você receberá um código de confirmação e pronto — sem senhas.' },
@@ -372,7 +372,7 @@ export function LandingView() {
                 className={[
                   'relative flex flex-col rounded-2xl border-2 p-6 transition-all',
                   isPremium
-                    ? 'border-brand bg-brand/5 shadow-card'
+                    ? 'border-brand bg-brand/5 shadow-card sm:scale-105 z-10'
                     : 'border-gray-200 bg-white',
                 ].join(' ')}
               >

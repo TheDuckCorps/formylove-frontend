@@ -14,6 +14,28 @@ interface Props {
 
 const MAX_CLICKS = 40
 
+const REVEAL_POINTS = [
+  { percent: 0, visible: 0 },
+  { percent: 25, visible: 15 },
+  { percent: 50, visible: 40 },
+  { percent: 75, visible: 60 },
+  { percent: 100, visible: 100 },
+]
+
+function getVisiblePercent(percent: number) {
+  for (let i = 1; i < REVEAL_POINTS.length; i += 1) {
+    const previous = REVEAL_POINTS[i - 1]
+    const next = REVEAL_POINTS[i]
+
+    if (percent <= next.percent) {
+      const progress = (percent - previous.percent) / (next.percent - previous.percent)
+      return previous.visible + progress * (next.visible - previous.visible)
+    }
+  }
+
+  return 100
+}
+
 export function MedidorAmorDisplay({ question, imageUrl }: Props) {
   const [clicks, setClicks] = useState(0)
   const [hearts, setHearts] = useState<HeartMark[]>([])
@@ -24,7 +46,7 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
     () => Math.max(0, Math.min(100, Math.round((clicks / MAX_CLICKS) * 100))),
     [clicks],
   )
-  const overlayOpacity = percent < 50 ? 1 : 1 - (percent - 50) / 50
+  const overlayOpacity = 1 - getVisiblePercent(percent) / 100
 
   useEffect(() => {
     return () => {
@@ -40,6 +62,10 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
     inactivityTimeoutRef.current = setTimeout(() => {
       decayIntervalRef.current = setInterval(() => {
         setClicks((prev) => {
+          if (prev >= MAX_CLICKS) {
+            if (decayIntervalRef.current) clearInterval(decayIntervalRef.current)
+            return MAX_CLICKS
+          }
           if (prev <= 0) {
             if (decayIntervalRef.current) clearInterval(decayIntervalRef.current)
             return 0

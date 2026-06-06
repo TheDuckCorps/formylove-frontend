@@ -13,7 +13,7 @@ export function TermosUsoView() {
           Última atualização: [INSERIR DATA]
         </p>
         <p className="text-sm text-gray-500 text-center mb-10">
-          Ao utilizar o Heart Link, você concorda com estes Termos de Uso. Leia-os atentamente.
+          Ao utilizar o For My Love, você concorda com estes Termos de Uso. Leia-os atentamente.
         </p>
 
         <div className="text-sm text-gray-700 space-y-6">
@@ -24,7 +24,7 @@ export function TermosUsoView() {
             },
             {
               title: '2. Descrição do Serviço',
-              body: `O Heart Link é uma plataforma que permite:\n• Criar páginas interativas com jogos, quizzes, presentes virtuais e mensagens multimídia.\n• Personalizar conteúdo com imagens, vídeos, áudios e desenhos.\n• Compartilhar experiências com amigos, familiares ou parceiros.`,
+              body: `O For My Love é uma plataforma que permite:\n• Criar páginas interativas com jogos, quizzes, presentes virtuais e mensagens multimídia.\n• Personalizar conteúdo com imagens, vídeos, áudios e desenhos.\n• Compartilhar experiências com amigos, familiares ou parceiros.`,
             },
             {
               title: '3. Registro de Conta',
@@ -32,11 +32,11 @@ export function TermosUsoView() {
             },
             {
               title: '4. Conteúdo do Usuário',
-              body: `• Propriedade: Você mantém a posse do conteúdo que enviar (imagens, vídeos, textos).\n• Licença: Ao enviar conteúdo, concede ao Heart Link o direito não exclusivo de hospedá-lo e exibi-lo na plataforma.\n• Proibições: Não envie material legal, ofensivo, discriminatório ou que viole direitos de terceiros.`,
+              body: `• Propriedade: Você mantém a posse do conteúdo que enviar (imagens, vídeos, textos).\n• Licença: Ao enviar conteúdo, concede ao For My Love o direito não exclusivo de hospedá-lo e exibi-lo na plataforma.\n• Proibições: Não envie material legal, ofensivo, discriminatório ou que viole direitos de terceiros.`,
             },
             {
               title: '5. Conduta Proibida',
-              body: `Você não poderá:\n• Usar a plataforma para atividades ilegais ou prejudiciais.\n• Copiar, modificar ou distribuir funcionalidades do Heart Link sem autorização.\n• Interferir na segurança ou desempenho do serviço.`,
+              body: `Você não poderá:\n• Usar a plataforma para atividades ilegais ou prejudiciais.\n• Copiar, modificar ou distribuir funcionalidades do For My Love sem autorização.\n• Interferir na segurança ou desempenho do serviço.`,
             },
             {
               title: '6. Pagamentos e Assinaturas',
@@ -44,7 +44,7 @@ export function TermosUsoView() {
             },
             {
               title: '7. Interrupção do Serviço',
-              body: `O Heart Link pode sofrer indisponibilidade devido a:\n• Manutenções programadas.\n• Falhas em serviços de terceiros (hospedagem, pagamento).\nNão nos responsabilizamos por perdas causadas por interrupções.`,
+              body: `O For My Love pode sofrer indisponibilidade devido a:\n• Manutenções programadas.\n• Falhas em serviços de terceiros (hospedagem, pagamento).\nNão nos responsabilizamos por perdas causadas por interrupções.`,
             },
             {
               title: '8. Rescisão',
@@ -52,7 +52,7 @@ export function TermosUsoView() {
             },
             {
               title: '9. Limitação de Responsabilidade',
-              body: `O Heart Link é fornecido "no estado em que se encontra", sem garantias de disponibilidade ou adequação a fins específicos.\nNão nos responsabilizamos por:\n• Conteúdo gerado por usuários.\n• Danos indiretos (lucros cessantes, perda de dados).`,
+              body: `O For My Love é fornecido "no estado em que se encontra", sem garantias de disponibilidade ou adequação a fins específicos.\nNão nos responsabilizamos por:\n• Conteúdo gerado por usuários.\n• Danos indiretos (lucros cessantes, perda de dados).`,
             },
             {
               title: '10. Alterações nos Termos',
