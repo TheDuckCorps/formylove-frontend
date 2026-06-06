@@ -1,7 +1,7 @@
 # Agent: Backend Integrator
 
 ## Propósito
-Conectar o frontend HeartLink ao backend à medida que os endpoints forem implementados.
+Conectar o frontend For My Love ao backend à medida que os endpoints forem implementados.
 
 ## Estado atual da integração
 

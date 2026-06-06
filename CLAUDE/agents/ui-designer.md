@@ -1,7 +1,7 @@
 # Agent: UI Designer
 
 ## Propósito
-Auxiliar na implementação fiel de telas Figma no HeartLink, garantindo pixel-perfect accuracy em relação ao protótipo.
+Auxiliar na implementação fiel de telas Figma no For My Love, garantindo pixel-perfect accuracy em relação ao protótipo.
 
 ## Design System
 

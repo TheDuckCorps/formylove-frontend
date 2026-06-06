@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { HeartConfetti } from '../display/HeartConfetti'
 
 interface Props {
   phrase?: string
@@ -57,9 +58,6 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
     const winnerIndex = Math.floor(Math.random() * n)
     winnerRef.current = options[winnerIndex]
 
-    // Target: after rotation, pointer (top) points to center of winnerIndex segment.
-    // After rotation R (clockwise), top sees wheel angle: (360 - R%360 + 360)%360
-    // We want that angle = winnerIndex * segmentAngle + segmentAngle/2
     const targetAngle = (360 - (winnerIndex * segmentAngle + segmentAngle / 2 - 360)) % 360
     const currentNorm = ((rotation % 360) + 360) % 360
     let delta = targetAngle - currentNorm
@@ -75,13 +73,13 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-5 py-4 select-none">
+      <HeartConfetti active={!!winner && !spinning} />
+
       {phrase && (
         <p className="text-lg font-bold text-gray-800 text-center px-4">{phrase}</p>
       )}
 
-      {/* Wheel + pointer */}
       <div className="relative flex items-center justify-center">
-        {/* Pointer */}
         <div
           className="absolute top-0 left-1/2 z-10 -translate-x-1/2"
           style={{ marginTop: '-2px' }}
@@ -92,7 +90,6 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
           </svg>
         </div>
 
-        {/* Wheel */}
         <div
           className="rounded-full shadow-lg overflow-hidden"
           style={{
@@ -126,7 +123,6 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
                 </g>
               )
             })}
-            {/* Separator lines */}
             {options.map((_, i) => {
               const angleDeg = (i / n) * 360 - 90
               const x2 = cx + RADIUS * Math.cos(toRad(angleDeg))
@@ -139,14 +135,12 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
                 />
               )
             })}
-            {/* Center hub */}
             <circle cx={cx} cy={cy} r={18} fill="white" />
             <circle cx={cx} cy={cy} r={14} fill="#C62A87" />
           </svg>
         </div>
       </div>
 
-      {/* Spin button */}
       <button
         onClick={handleSpin}
         disabled={spinning}
@@ -164,7 +158,6 @@ export function SpinWheelDisplay({ phrase, options }: Props) {
         ) : winner ? 'Girar novamente' : 'Girar!'}
       </button>
 
-      {/* Winner banner */}
       {winner && !spinning && (
         <div className="animate-fade-in bg-brand/10 border border-brand/30 rounded-2xl px-8 py-4 text-center w-full max-w-xs">
           <p className="text-xs text-brand font-semibold uppercase tracking-widest mb-1">Resultado</p>

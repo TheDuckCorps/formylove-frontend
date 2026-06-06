@@ -31,7 +31,7 @@ export function Logo({ size = 'md' }: LogoProps) {
       </svg>
 
       <span className="font-bold text-gray-800 tracking-tight" style={{ fontSize: size === 'sm' ? 14 : size === 'lg' ? 22 : 17 }}>
-        Heart Link
+        For My Love
       </span>
     </div>
   )

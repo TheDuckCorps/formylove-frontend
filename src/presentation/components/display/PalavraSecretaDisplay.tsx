@@ -18,10 +18,12 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
   const wrongGuessedSet = useMemo(() => new Set(wrongGuessed), [wrongGuessed])
   const wrongFlashSet = useMemo(() => new Set(wrongFlash), [wrongFlash])
   const lettersOnly = normalizedSecret.replace(/[^A-Z]/g, '')
+  const hasWord = lettersOnly.length > 0
   const isComplete =
-    lettersOnly.length > 0 && [...lettersOnly].every((letter) => guessedSet.has(letter))
+    hasWord && [...lettersOnly].every((letter) => guessedSet.has(letter))
 
   function handleGuess(letter: string) {
+    if (!hasWord || isComplete) return
     if (guessedSet.has(letter) || wrongGuessedSet.has(letter) || wrongFlashSet.has(letter)) return
 
     if (normalizedSecret.includes(letter)) {
@@ -66,30 +68,38 @@ export function PalavraSecretaDisplay({ hint, secret }: Props) {
         )}
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
-        {ALPHABET.map((letter) => {
-          const selected = guessedSet.has(letter)
-          const flashingWrong = wrongFlashSet.has(letter)
-          const unavailable = wrongGuessedSet.has(letter)
-          return (
-            <button
-              key={letter}
-              type="button"
-              onClick={() => handleGuess(letter)}
-              className={[
-                'text-xs font-semibold rounded-md py-2 border transition',
-                selected && 'bg-brand text-white border-brand',
-                flashingWrong && 'bg-red-50 text-red-600 border-red-400 animate-bounce',
-                unavailable && 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-70',
-                !selected && !flashingWrong && !unavailable &&
-                  'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand',
-              ].filter(Boolean).join(' ')}
-            >
-              {letter}
-            </button>
-          )
-        })}
-      </div>
+      {!hasWord ? (
+        <p className="text-sm text-gray-400 text-center">Palavra secreta não configurada</p>
+      ) : (
+        <div className="grid grid-cols-7 gap-2">
+          {ALPHABET.map((letter) => {
+            const selected = guessedSet.has(letter)
+            const flashingWrong = wrongFlashSet.has(letter)
+            const unavailable = wrongGuessedSet.has(letter)
+            const disabled = !hasWord || selected || unavailable || isComplete
+            return (
+              <button
+                key={letter}
+                type="button"
+                disabled={disabled}
+                onClick={() => handleGuess(letter)}
+                className={[
+                  'text-xs font-semibold rounded-md py-2 border transition',
+                  selected && 'bg-brand text-white border-brand',
+                  flashingWrong && 'bg-red-50 text-red-600 border-red-400 animate-bounce',
+                  unavailable && 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-70',
+                  disabled && !selected && !flashingWrong && !unavailable &&
+                    'bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed',
+                  !disabled && !flashingWrong &&
+                    'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand',
+                ].filter(Boolean).join(' ')}
+              >
+                {letter}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {isComplete && (
         <div className="text-center rounded-lg bg-green-50 border border-green-200 py-2 animate-bounce">

@@ -1,8 +1,8 @@
-# HeartLink Frontend — Padrões e Estrutura
+# For My Love Frontend — Padrões e Estrutura
 
 ## Visão Geral
 
-**HeartLink Frontend** é uma SPA (Single Page Application) construída com **Vite + React + TypeScript + Tailwind CSS**, seguindo o padrão **MVVM** (Model-View-ViewModel) com camadas hexagonais adaptadas para o frontend.
+**For My Love Frontend** é uma SPA (Single Page Application) construída com **Vite + React + TypeScript + Tailwind CSS**, seguindo o padrão **MVVM** (Model-View-ViewModel) com camadas hexagonais adaptadas para o frontend.
 
 ---
 
@@ -110,7 +110,7 @@ src/
 ## State Management (Zustand)
 
 Store: `src/shared/store/siteBuilderStore.ts`  
-Persiste no `localStorage` com key `heartlink-builder`.
+Persiste no `localStorage` com key `for-my-love-builder`.
 
 ```typescript
 // Campos principais:

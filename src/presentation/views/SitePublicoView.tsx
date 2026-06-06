@@ -274,6 +274,9 @@ export function SitePublicoView() {
   const currentPage = storyPages[currentIdx]
   const isFirst = currentIdx === 0
   const isLast = currentIdx === storyCount - 1
+  const sitePlan = (site.planType ?? site.plan) as string | undefined
+  const showLeadCta =
+    isLast && (sitePlan === 'BASIC' || sitePlan === 'INTERMEDIATE')
 
   return (
     <div className="min-h-screen bg-page-gradient flex flex-col">
@@ -331,6 +334,15 @@ export function SitePublicoView() {
                       </Button>
                     </div>
                   )}
+                  {showLeadCta && (
+                    <button
+                      type="button"
+                      onClick={() => navigate(ROUTES.HOME)}
+                      className="text-xs text-brand underline hover:text-brand/80 transition mt-2"
+                    >
+                      Crie um presente inesquecível como este no For My Love →
+                    </button>
+                  )}
                 </>
               )
             })()}
@@ -379,7 +391,7 @@ export function SitePublicoView() {
             className="text-brand font-semibold cursor-pointer hover:underline"
             onClick={() => navigate(ROUTES.HOME)}
           >
-            HeartLink
+            For My Love
           </span>
         </p>
       </div>

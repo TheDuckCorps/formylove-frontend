@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { HeartConfetti } from './HeartConfetti'
 
 interface Answer {
   id: string
@@ -32,12 +33,15 @@ export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
   }, [isCorrect, onComplete])
 
   function handleSelect(answer: Answer) {
+    if (isCorrect === true) return
     setSelectedId(answer.id)
     setIsCorrect(answer.isCorrect)
   }
 
   return (
     <div className="space-y-4">
+      <HeartConfetti active={isCorrect === true} />
+
       <p className="text-base font-semibold text-gray-800 text-center">
         {question || 'Pergunta não definida'}
       </p>
@@ -49,6 +53,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
             <button
               key={answer.id}
               type="button"
+              disabled={isCorrect === true}
               onClick={() => handleSelect(answer)}
               className={[
                 'text-sm px-3 py-3 rounded-lg border text-center transition',
@@ -57,6 +62,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete }: Props) {
                     ? 'border-green-500 bg-green-50 text-green-700 animate-bounce'
                     : 'border-red-500 bg-red-50 text-red-700 animate-bounce'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-brand',
+                isCorrect === true && 'opacity-60 cursor-not-allowed',
               ].join(' ')}
             >
               {answer.text || 'Opção'}
