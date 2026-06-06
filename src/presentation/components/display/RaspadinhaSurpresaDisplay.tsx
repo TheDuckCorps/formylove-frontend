@@ -9,6 +9,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isScratching, setIsScratching] = useState(false)
   const [revealed, setRevealed] = useState(false)
+  const [hasStarted, setHasStarted] = useState(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -19,6 +20,8 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title }: Props) {
     ctx.globalCompositeOperation = 'source-over'
     ctx.fillStyle = '#9CA3AF'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+    setRevealed(false)
+    setHasStarted(false)
   }, [imageUrl])
 
   function getPos(e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) {
@@ -42,6 +45,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title }: Props) {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
+    if (!hasStarted) setHasStarted(true)
     const { x, y } = getPos(e)
     ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
@@ -71,7 +75,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title }: Props) {
         <p className="text-center text-sm font-semibold text-gray-800">{title}</p>
       ) : null}
 
-      <div className="relative w-full h-56 rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+      <div className="relative w-full h-72 rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
         {imageUrl ? (
           <img src={imageUrl} alt="Surpresa" className="w-full h-full object-cover" />
         ) : (
@@ -94,6 +98,15 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title }: Props) {
             onTouchEnd={() => setIsScratching(false)}
             onTouchMove={scratch}
           />
+        )}
+
+        {!revealed && !hasStarted && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
+            <span className="animate-finger-tap text-5xl select-none drop-shadow-md">👆</span>
+            <p className="text-white text-xs font-semibold bg-black/45 px-3 py-1.5 rounded-full tracking-wide">
+              Raspe várias vezes para revelar!
+            </p>
+          </div>
         )}
       </div>
     </div>

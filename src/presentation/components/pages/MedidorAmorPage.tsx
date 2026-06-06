@@ -39,7 +39,7 @@ export function MedidorAmorPage({ data, onChange }: Props) {
         </label>
         <div
           onClick={() => fileRef.current?.click()}
-          className="upload-zone h-56"
+          className="upload-zone h-56 md:h-80 cursor-pointer"
         >
           {data.imageUrl ? (
             <img

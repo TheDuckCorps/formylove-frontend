@@ -29,7 +29,7 @@ export function RaspadinhaSurpresaPage({ data, onChange }: Props) {
 
       <div
         onClick={() => fileRef.current?.click()}
-        className="upload-zone h-72 cursor-pointer"
+        className="upload-zone h-72 md:h-96 cursor-pointer"
       >
         {data.imageUrl ? (
           <img

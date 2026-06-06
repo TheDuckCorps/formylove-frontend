@@ -34,10 +34,16 @@ export default {
       animation: {
         'fade-in': 'fadeIn 0.25s ease-in',
         blink: 'blink 1s step-end infinite',
+        'finger-tap': 'fingerTap 1.6s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
         blink: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0' } },
+        fingerTap: {
+          '0%, 15%': { transform: 'translateY(0) scale(1)' },
+          '35%': { transform: 'translateY(12px) scale(0.88)' },
+          '50%, 100%': { transform: 'translateY(0) scale(1)' },
+        },
       },
     },
   },

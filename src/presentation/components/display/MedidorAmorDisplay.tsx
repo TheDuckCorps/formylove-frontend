@@ -39,6 +39,7 @@ function getVisiblePercent(percent: number) {
 export function MedidorAmorDisplay({ question, imageUrl }: Props) {
   const [clicks, setClicks] = useState(0)
   const [hearts, setHearts] = useState<HeartMark[]>([])
+  const [hasStarted, setHasStarted] = useState(false)
   const inactivityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const decayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -82,6 +83,7 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
     const y = e.clientY - rect.top
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
+    if (!hasStarted) setHasStarted(true)
     setClicks((prev) => Math.min(MAX_CLICKS, prev + 1))
     setHearts((prev) => [...prev, { id, x, y }])
 
@@ -111,7 +113,7 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
       </div>
 
       <div
-        className="relative w-full h-56 rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none"
+        className="relative w-full h-72 rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none"
         onClick={registerClick}
       >
         {imageUrl ? (
@@ -138,6 +140,15 @@ export function MedidorAmorDisplay({ question, imageUrl }: Props) {
             </svg>
           </span>
         ))}
+
+        {!hasStarted && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none gap-3">
+            <span className="animate-finger-tap text-5xl select-none drop-shadow-md">👆</span>
+            <p className="text-white text-xs font-semibold bg-black/45 px-3 py-1.5 rounded-full tracking-wide">
+              Clique várias vezes para revelar!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
