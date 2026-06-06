@@ -5,7 +5,7 @@ import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
 import { StepIndicator } from '../components/layout/StepIndicator'
 import { useSiteBuilderStore, MAX_PAGES_PER_PLAN } from '@/shared/store/siteBuilderStore'
-import { PAGE_TYPES_META } from '@/core/entities/Page'
+import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
 import type { PageType } from '@/core/entities/Page'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
@@ -60,6 +60,10 @@ export function EscolherPaginasView() {
   function handleAdd(type: PageType) {
     if (selectedPages.length >= maxPages) {
       showWarning()
+      return
+    }
+    const typeMax = getPageTypeMaxInstances(type)
+    if (typeMax !== undefined && countFor(type) >= typeMax) {
       return
     }
     const before = selectedPages.length
@@ -119,8 +123,10 @@ export function EscolherPaginasView() {
             const hasAny = count > 0
             const instances = selectedPages.filter((p) => p.type === meta.type)
             const atGlobalMax = selectedPages.length >= maxPages
+            const typeMax = getPageTypeMaxInstances(meta.type)
+            const atTypeMax = typeMax !== undefined && count >= typeMax
             const isDisabled = meta.disabled === true
-            const canAdd = !atGlobalMax && !isDisabled
+            const canAdd = !atGlobalMax && !atTypeMax && !isDisabled
 
             return (
               <div
@@ -176,6 +182,11 @@ export function EscolherPaginasView() {
 
                 <h3 className="font-bold text-base text-gray-800 leading-snug pointer-events-none">{meta.label}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed pointer-events-none">{meta.description}</p>
+                {typeMax !== undefined && (
+                  <p className="text-[10px] text-gray-400 pointer-events-none">
+                    {typeMax === 1 ? 'Máx. 1 por presente' : `Máx. ${typeMax} por presente`}
+                  </p>
+                )}
 
                 {instances.length > 0 && (
                   <div

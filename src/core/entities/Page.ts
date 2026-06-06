@@ -10,6 +10,15 @@ export type PageType =
   | 'ROLETA_ESCOLHAS'
   | 'MENSAGEM_MULTIMIDIA'
 
+/** Max instances per page type (omit = unlimited, subject to plan cap) */
+export const PAGE_TYPE_MAX_INSTANCES: Partial<Record<PageType, number>> = {
+  MUSICA_FUNDO: 1,
+}
+
+export function getPageTypeMaxInstances(type: PageType): number | undefined {
+  return PAGE_TYPE_MAX_INSTANCES[type]
+}
+
 // ─── Per-type data shapes (saved in `pages` JSONB) ───────────────────────────
 export interface DesenhoLivreData {
   drawingDataUrl: string | null
@@ -114,7 +123,7 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
   {
     type: 'MUSICA_FUNDO',
     label: 'Música de Fundo',
-    description: 'Adicione uma trilha sonora via YouTube ou arquivo.',
+    description: 'Adicione uma trilha sonora via YouTube.',
     svgIcon: '/music.svg',
     defaultData: { youtubeUrl: '' } satisfies MusicaFundoData,
   },

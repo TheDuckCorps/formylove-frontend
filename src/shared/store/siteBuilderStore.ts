@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { nanoid } from '../utils/nanoid'
 import type { PageItem, PageType, AnyPageData } from '@/core/entities/Page'
-import { PAGE_TYPES_META } from '@/core/entities/Page'
+import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
 import type { PlanType } from '@/core/entities/Site'
 
 const MAX_FREE_PAGES = 15  // users pick freely; plan is chosen at the end
@@ -66,6 +66,11 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
     addPage: (type) => {
       const { selectedPages, maxPages } = get()
       if (selectedPages.length >= maxPages) return
+      const typeMax = getPageTypeMaxInstances(type)
+      if (typeMax !== undefined) {
+        const typeCount = selectedPages.filter((p) => p.type === type).length
+        if (typeCount >= typeMax) return
+      }
       const meta = PAGE_TYPES_META.find((m) => m.type === type)!
       const newPage: PageItem = {
         id: nanoid(),
