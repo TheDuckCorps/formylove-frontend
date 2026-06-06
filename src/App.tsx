@@ -12,16 +12,19 @@ import { PaymentView } from '@/presentation/views/PaymentView'
 import { PrivacidadeView } from '@/presentation/views/PrivacidadeView'
 import { TermosUsoView } from '@/presentation/views/TermosUsoView'
 import { SitePublicoView } from '@/presentation/views/SitePublicoView'
+import { PainelView } from '@/presentation/views/PainelView'
+import { PainelVerificarView } from '@/presentation/views/PainelVerificarView'
+import { PainelSitesView } from '@/presentation/views/PainelSitesView'
 
 // Layout
 import { CreationFlowLayout } from '@/presentation/layouts/CreationFlowLayout'
 
-function PlaceholderView({ title }: { title: string }) {
+function SuccessView() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-page-gradient">
       <div className="text-center">
-        <div className="text-4xl mb-4">🚧</div>
-        <h2 className="text-xl font-bold text-gray-700">{title}</h2>
+        <div className="text-4xl mb-4">🎉</div>
+        <h2 className="text-xl font-bold text-gray-700">Presente enviado!</h2>
         <p className="text-sm text-gray-400 mt-2">Em breve</p>
       </div>
     </div>
@@ -45,23 +48,14 @@ export default function App() {
           <Route path={ROUTES.CRIAR_PAGAMENTO} element={<PaymentView />} />
           <Route
             path={ROUTES.CRIAR_SUCESSO}
-            element={<PlaceholderView title="Presente enviado! 🎉" />}
+            element={<SuccessView />}
           />
         </Route>
 
         {/* ── User panel ──────────────────────────────────── */}
-        <Route
-          path={ROUTES.PAINEL}
-          element={<PlaceholderView title="Acessar meus presentes" />}
-        />
-        <Route
-          path={ROUTES.PAINEL_VERIFICAR}
-          element={<PlaceholderView title="Verificar código OTP" />}
-        />
-        <Route
-          path={ROUTES.PAINEL_SITES}
-          element={<PlaceholderView title="Meus presentes" />}
-        />
+        <Route path={ROUTES.PAINEL} element={<PainelView />} />
+        <Route path={ROUTES.PAINEL_VERIFICAR} element={<PainelVerificarView />} />
+        <Route path={ROUTES.PAINEL_SITES} element={<PainelSitesView />} />
 
         {/* ── Public site view ─────────────────────────────── */}
         <Route path={ROUTES.SITE_PUBLICO} element={<SitePublicoView />} />

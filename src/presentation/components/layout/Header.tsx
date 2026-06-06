@@ -14,51 +14,42 @@ export function Header({ showCta = true }: HeaderProps) {
   const [showProfileModal, setShowProfileModal] = useState(false)
 
   return (
-    <header className="w-full border-b border-gray-100 bg-white sticky top-0 z-40">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
-        {/* Logo – left on mobile, center on desktop */}
-        <Link to={ROUTES.HOME} className="flex-shrink-0 sm:absolute sm:left-1/2 sm:-translate-x-1/2">
-          <Logo size="sm" />
-        </Link>
-
-        {/* Spacer so right items push to the right on desktop */}
-        <div className="hidden sm:block flex-1" />
-
-        {/* Right side: CTA + flag + account */}
-        <div className="flex items-center gap-2 sm:gap-3 ml-auto">
-          {showCta && (
+    <>
+      <header className="w-full border-b border-gray-100 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 relative">
+          {/* Left: CTA button */}
+          {showCta ? (
             <Button
               size="sm"
               onClick={() => navigate(ROUTES.CRIAR)}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap flex-shrink-0"
             >
-              <span className="hidden sm:inline">Criar meu presente</span>
+              <span className="hidden sm:inline">Criar meu presente agora</span>
               <span className="sm:hidden">Criar</span>
             </Button>
+          ) : (
+            <div className="flex-shrink-0 w-8" />
           )}
 
-          <button className="hidden sm:flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 transition">
-            <span>🇧🇷</span>
-            <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            </svg>
-          </button>
+          {/* Center: Logo (absolute so it's always truly centered) */}
+          <Link to={ROUTES.HOME} className="absolute left-1/2 -translate-x-1/2 flex-shrink-0">
+            <Logo size="sm" />
+          </Link>
 
+          {/* Right: Entrar */}
           <button
             onClick={() => setShowProfileModal(true)}
-            className="w-8 h-8 rounded-full border-2 border-brand text-brand flex items-center justify-center hover:bg-brand/10 transition flex-shrink-0"
-            aria-label="Meus presentes"
+            className="flex-shrink-0 text-sm font-semibold text-brand border-2 border-brand rounded-xl px-4 py-1 hover:bg-brand hover:text-white transition-all duration-200"
+            aria-label="Entrar"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
-            </svg>
+            Entrar
           </button>
         </div>
-      </div>
+      </header>
 
       {showProfileModal && (
         <ProfileModal onClose={() => setShowProfileModal(false)} />
       )}
-    </header>
+    </>
   )
 }
