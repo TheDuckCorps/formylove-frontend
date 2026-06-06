@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
 import { ROUTES } from '@/shared/constants/routes'
 import { ToastProvider } from '@/shared/ui/ToastProvider'
 
@@ -21,12 +21,26 @@ import { PainelSitesView } from '@/presentation/views/PainelSitesView'
 import { CreationFlowLayout } from '@/presentation/layouts/CreationFlowLayout'
 
 function SuccessView() {
+  const location = useLocation()
+  const { slug, email } = (location.state as { slug?: string, email?: string }) ?? {}
+  const siteUrl = slug ? ROUTES.SITE_PUBLICO.replace(':slug', slug) : null
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-page-gradient">
-      <div className="text-center">
+      <div className="text-center px-6">
         <div className="text-4xl mb-4">🎉</div>
-        <h2 className="text-xl font-bold text-gray-700">Presente enviado!</h2>
-        <p className="text-sm text-gray-400 mt-2">Em breve</p>
+        <h2 className="text-xl font-bold text-gray-700">Pagamento confirmado!</h2>
+        <p className="text-sm text-gray-400 mt-2">
+          Seu presente está pronto{email ? ` — enviamos o link para ${email}` : ''}.
+        </p>
+        {siteUrl && (
+          <Link
+            to={siteUrl}
+            className="inline-block mt-6 bg-brand text-white text-sm font-semibold px-6 py-3 rounded-full hover:bg-brand-light transition-colors"
+          >
+            Ver meu site 💝
+          </Link>
+        )}
       </div>
     </div>
   )

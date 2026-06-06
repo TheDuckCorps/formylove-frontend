@@ -11,4 +11,11 @@ export class PaymentRepository implements IPaymentRepository {
     )
     return data
   }
+
+  async getStatus(siteId: string): Promise<IPaymentRepository.GetStatusOutput> {
+    const { data } = await httpClient.get<IPaymentRepository.GetStatusOutput>(
+      `/api/v1/payments/status/${siteId}`,
+    )
+    return data
+  }
 }

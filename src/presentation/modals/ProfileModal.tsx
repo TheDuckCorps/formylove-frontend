@@ -1,49 +1,21 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
-import { QRCodeViewer } from '../components/common/QRCodeViewer'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
-import { PLANS } from '@/core/entities/Site'
 import type { Site } from '@/core/entities/Site'
-import { ROUTES } from '@/shared/constants/routes'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 interface Props {
   onClose: () => void
 }
 
-type ViewState = 'form' | 'loading' | 'results' | 'empty' | 'error' | 'qrcode'
+type ViewState = 'form' | 'loading' | 'sent' | 'error' | 'qrcode'
 
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  ACTIVE:          { label: 'Ativo',                color: 'text-green-600 bg-green-50 border-green-200' },
-  PENDING_PAYMENT: { label: 'Aguardando pagamento', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-  DRAFT:           { label: 'Rascunho',             color: 'text-gray-500 bg-gray-50 border-gray-200' },
-  EXPIRED:         { label: 'Expirado',             color: 'text-red-500 bg-red-50 border-red-200' },
-  BLOCKED:         { label: 'Bloqueado',            color: 'text-red-600 bg-red-50 border-red-200' },
-}
-
-function getPlan(site: Site) {
-  const type = (site as any).plan ?? site.planType
-  return PLANS.find((p) => p.type === type)?.label ?? type ?? '—'
-}
-
-function getStatus(site: Site) {
-  const s = (site as any).status ?? 'DRAFT'
-  return STATUS_LABEL[s] ?? { label: s, color: 'text-gray-500 bg-gray-50 border-gray-200' }
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return null
-  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
 
 export function ProfileModal({ onClose }: Props) {
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [view, setView] = useState<ViewState>('form')
-  const [sites, setSites] = useState<Site[]>([])
   const [errorMsg, setErrorMsg] = useState('')
   const [qrSite, setQrSite] = useState<Site | null>(null)
 
@@ -61,19 +33,12 @@ export function ProfileModal({ onClose }: Props) {
     setView('loading')
     try {
       const repo = new SiteRepository()
-      const result = await repo.listByEmail({ email })
-      const active = result.filter((s) => ((s as any).status ?? s.status) === 'ACTIVE')
-      setSites(active)
-      setView(active.length === 0 ? 'empty' : 'results')
+      await repo.listByEmail({ email })
+      setView('sent')
     } catch (err) {
       setErrorMsg(getFriendlyMessage(err, 'Não foi possível buscar seus presentes. Tente novamente.'))
       setView('error')
     }
-  }
-
-  function handleCreateNew() {
-    onClose()
-    navigate(ROUTES.CRIAR)
   }
 
   return (
@@ -108,7 +73,7 @@ export function ProfileModal({ onClose }: Props) {
 
         <h2 className="text-xl font-bold text-gray-800 text-center mb-1">Meus presentes</h2>
         <p className="text-sm text-gray-500 text-center mb-6">
-          Informe seu e-mail para ver os presentes que você criou.
+          Informe seu e-mail para receber seus presentes.
         </p>
 
         {/* Form */}
@@ -141,88 +106,26 @@ export function ProfileModal({ onClose }: Props) {
           </div>
         )}
 
-        {/* Empty state */}
-        {view === 'empty' && (
+        {/* Email sent */}
+        {view === 'sent' && (
           <div className="flex flex-col items-center gap-4 text-center py-4">
-            <div className="text-5xl">🎁</div>
-            <p className="text-base font-semibold text-gray-800">
-              Você ainda não deu um presente incrível para alguém que ama?
-            </p>
-            <p className="text-sm text-gray-500">
-              Crie agora e surpreenda com uma página única e inesquecível!
-            </p>
-            <Button fullWidth onClick={handleCreateNew}>
-              Criar meu presente agora
-            </Button>
-            <button
-              onClick={() => setView('form')}
-              className="text-xs text-gray-400 hover:text-gray-600"
-            >
-              Tentar outro e-mail
-            </button>
-          </div>
-        )}
-
-        {/* Results */}
-        {view === 'results' && (
-          <div className="flex flex-col gap-3 overflow-y-auto flex-1">
-            <p className="text-xs text-gray-400 mb-1">
-              {sites.length} presente{sites.length !== 1 ? 's' : ''} ativo{sites.length !== 1 ? 's' : ''} para <strong className="text-gray-600">{email}</strong>
-            </p>
-            {sites.map((site) => {
-              const expiry = formatDate((site as any).expiresAt ?? site.expirationDate)
-              const status = getStatus(site)
-              return (
-                <div key={site.id} className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3 hover:border-brand/30 transition">
-                  <div
-                    className="flex items-start justify-between gap-3 cursor-pointer"
-                    onClick={() => { onClose(); navigate(`/site/${site.slug}`) }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-400 font-mono truncate">{site.slug}</p>
-                      <p className="text-sm font-semibold text-gray-700 mt-0.5">Plano {getPlan(site)}</p>
-                      {expiry && (
-                        <p className="text-xs text-gray-400 mt-0.5">Expira em {expiry}</p>
-                      )}
-                    </div>
-                    <span className={['text-[11px] font-semibold border px-2 py-0.5 rounded-full whitespace-nowrap', status.color].join(' ')}>
-                      {status.label}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => { setQrSite(site); setView('qrcode') }}
-                    className="text-xs font-semibold text-brand border border-brand/30 rounded-lg py-1.5 hover:bg-brand/5 transition"
-                  >
-                    Visualizar QRCode do site
-                  </button>
-                </div>
-              )
-            })}
-            <button
-              onClick={() => { setView('form'); setSites([]) }}
-              className="text-xs text-gray-400 hover:text-gray-600 text-center mt-1"
-            >
-              Buscar outro e-mail
-            </button>
-          </div>
-        )}
-
-        {/* QR Code view */}
-        {view === 'qrcode' && qrSite && (
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={() => setView('results')}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-brand transition self-start"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              Voltar
-            </button>
-            <QRCodeViewer slug={qrSite.slug} qrTemplate={qrSite.globalSettings?.qrTemplate ?? qrSite.qrTemplate} />
-            <p className="text-xs text-gray-400 text-center">
-              Aponte a câmera do celular para abrir o presente.
+            </div>
+            <p className="text-base font-semibold text-gray-800">E-mail enviado!</p>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Enviamos a lista de presentes para<br />
+              <strong className="text-gray-700">{email}</strong>.<br />
+              Verifique sua caixa de entrada.
             </p>
+            <button
+              onClick={() => { setView('form') }}
+              className="text-xs text-gray-400 hover:text-gray-600 mt-2"
+            >
+              Usar outro e-mail
+            </button>
           </div>
         )}
       </div>
