@@ -86,6 +86,7 @@ export interface PageTypeMeta {
   description: string
   svgIcon: string
   defaultData: AnyPageData
+  disabled?: boolean
 }
 
 export const PAGE_TYPES_META: PageTypeMeta[] = [
@@ -159,5 +160,6 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     description: 'Envie um vídeo especial via YouTube ou arquivo.',
     svgIcon: '/videos.svg',
     defaultData: { youtubeUrl: '' } satisfies MensagemMultimidiaData,
+    disabled: true,
   },
 ]

@@ -119,7 +119,8 @@ export function EscolherPaginasView() {
             const hasAny = count > 0
             const instances = selectedPages.filter((p) => p.type === meta.type)
             const atGlobalMax = selectedPages.length >= maxPages
-            const canAdd = !atGlobalMax
+            const isDisabled = meta.disabled === true
+            const canAdd = !atGlobalMax && !isDisabled
 
             return (
               <div
@@ -138,10 +139,19 @@ export function EscolherPaginasView() {
                 className={[
                   'relative w-full max-w-[360px] flex flex-col items-center text-center rounded-2xl border-2 p-6 pt-10 gap-4 transition-all outline-none',
                   hasAny ? 'border-brand border-brand-100 shadow-sm' : 'border-gray-200',
-                  canAdd ? 'cursor-pointer hover:shadow-card hover:border-brand/60' : 'cursor-not-allowed opacity-60',
+                  isDisabled
+                    ? 'cursor-not-allowed opacity-50'
+                    : canAdd
+                      ? 'cursor-pointer hover:shadow-card hover:border-brand/60'
+                      : 'cursor-not-allowed opacity-60',
                 ].join(' ')}
                 style={{ background: CARD_RADIAL_BG }}
               >
+                {isDisabled && (
+                  <span className="absolute top-3 right-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 border border-gray-200 pointer-events-none">
+                    Em breve
+                  </span>
+                )}
                 <div
                   className="absolute -top-5 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full border-[3px] border-brand flex items-center justify-center bg-white pointer-events-none"
                   aria-hidden
