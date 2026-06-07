@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
-import { playKeyPress, playLetterFound, playLetterWrong } from '@/shared/utils/audioEffects'
+import { playLetterFound, playLetterWrong } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
 interface Props {
@@ -54,12 +54,7 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
     if (!hasWord || isComplete) return
     if (guessedSet.has(letter) || wrongGuessedSet.has(letter) || wrongFlashSet.has(letter)) return
 
-<<<<<<< HEAD
-    if (!previewMode) playKeyPress()
-
-=======
     // Compare against normalized secret (accent-stripped)
->>>>>>> f863b32 (fix: adjust to accept portuguese alphabet letters, play music when opening site and add title to spin wheel)
     if (normalizedSecret.includes(letter)) {
       if (!previewMode) playLetterFound()
       setGuessed((prev) => [...prev, letter])
@@ -81,18 +76,7 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
         <p className="text-sm text-gray-800">{hint || 'Sem dica definida'}</p>
       </div>
 
-<<<<<<< HEAD
-      {/* Word display */}
       <div ref={wordRef} className="flex flex-wrap justify-center gap-2">
-        {normalizedSecret ? (
-          [...normalizedSecret].map((char, idx) => {
-            if (!/[A-Z]/.test(char)) {
-              return <span key={`${char}-${idx}`} className="w-3" />
-            }
-            const revealed = guessedSet.has(char) || isComplete
-
-=======
-      <div className="flex flex-wrap justify-center gap-2">
         {displaySecret ? (
           [...displaySecret].map((char, idx) => {
             // Use normalized char to decide if it's a letter or separator
@@ -102,7 +86,6 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
             }
             // Revealed when the base letter (no accent) has been guessed
             const revealed = guessedSet.has(normalizedChar)
->>>>>>> f863b32 (fix: adjust to accept portuguese alphabet letters, play music when opening site and add title to spin wheel)
             return (
               <motion.div
                 key={`${char}-${idx}`}

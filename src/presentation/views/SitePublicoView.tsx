@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
@@ -232,7 +232,6 @@ export function SitePublicoView() {
   const navigate = useNavigate()
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedPageIds, setCompletedPageIds] = useState<Set<string>>(new Set())
-  const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const directionRef = useRef(1)
 
   const { data: siteData, isLoading, error } = useGetSiteBySlug(slug)
