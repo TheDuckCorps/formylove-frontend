@@ -20,19 +20,19 @@ const PLAN_FEATURES: Record<PlanType, string[]> = {
     'Até 5 páginas interativas',
     'Válido por 7 dias',
     'Link + QR Code para compartilhar',
-    'QR Code com design premium (+R$2)',
+    'QR Code com design premium gratuito',
   ],
   INTERMEDIATE: [
     'Até 7 páginas interativas',
     'Válido por 30 dias',
     'Link + QR Code para compartilhar',
-    'QR Code com design premium (+R$2)',
+    'QR Code com design premium gratuito',
   ],
   PREMIUM: [
     'Até 15 páginas interativas',
     'Válido por 1 ano',
     'Link + QR Code para compartilhar',
-    'Design premium do QR Code incluso',
+    'QR Code com design premium gratuito',
   ],
 }
 
@@ -312,15 +312,6 @@ export function EscolherPlanoView() {
           </div>
         )}
 
-        {qrCodeDetailed && chosen && chosen !== 'PREMIUM' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 flex items-center gap-3">
-            <span className="text-amber-500 text-lg">⭐</span>
-            <p className="text-xs text-amber-700">
-              Você escolheu um design premium de QR Code. Será cobrado <strong>+R$2,00</strong>.
-            </p>
-          </div>
-        )}
-
         {errorMessage && (
           <div className="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm text-center px-4 py-3 rounded-xl">
             {errorMessage}
@@ -357,7 +348,7 @@ export function EscolherPlanoView() {
           onClose={() => setShowEmailModal(false)}
           onSubmit={handleEmailSubmit}
           isLoading={isLoading}
-          planPrice={chosenPlan.price + (qrCodeDetailed && chosen !== 'PREMIUM' ? 200 : 0)}
+          planPrice={chosenPlan.price}
         />
       )}
 
