@@ -198,6 +198,8 @@ export function EscolherPlanoView() {
         amount: payment.amount,
         expiresIn: payment.expiresIn,
         siteId: site.id,
+        siteSlug: site.slug,
+        qrTemplate,
         planType: chosen,
         email: submittedEmail,
       },
