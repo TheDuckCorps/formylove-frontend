@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
 import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
-import type { Site } from '@/core/entities/Site'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 interface Props {
@@ -17,7 +16,6 @@ export function ProfileModal({ onClose }: Props) {
   const [emailError, setEmailError] = useState('')
   const [view, setView] = useState<ViewState>('form')
   const [errorMsg, setErrorMsg] = useState('')
-  const [qrSite, setQrSite] = useState<Site | null>(null)
 
   function validate(val: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
