@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { RewardReveal } from './RewardReveal'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { initScratchSound, setScratchActive } from '@/shared/utils/audioEffects'
+import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
 interface Props {
   imageUrl: string | null
@@ -8,11 +11,14 @@ interface Props {
   previewMode?: boolean
 }
 
+
 export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, previewMode = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const lastPosRef = useRef<{ x: number; y: number } | null>(null)
   const scratchMovesRef = useRef(0)
   const completedRef = useRef(false)
+  const stopScratchAudioRef = useRef<(() => void) | null>(null)
   const [isScratching, setIsScratching] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
@@ -96,6 +102,11 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
     const sampled = imageData.length / (4 * 20)
     if (sampled > 0 && transparentCount / sampled > 0.7) {
       setRevealed(true)
+      setScratchActive(false)
+      if (!previewMode) {
+        if (containerRef.current) fireConfettiFrom(containerRef.current)
+        playWinSound()
+      }
     }
   }
 
@@ -110,23 +121,38 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
   function startScratch() {
     setIsScratching(true)
     lastPosRef.current = null
+    if (!previewMode) setScratchActive(true)
   }
 
   function stopScratch() {
     setIsScratching(false)
     lastPosRef.current = null
+    if (!previewMode) setScratchActive(false)
   }
+
+  // Init scratch audio on mount, clean up on unmount
+  useEffect(() => {
+    if (previewMode) return
+    stopScratchAudioRef.current = initScratchSound()
+    return () => { stopScratchAudioRef.current?.() }
+  }, [previewMode])
+
+  // Catch mouseup anywhere on the page so leaving the canvas while dragging
+  // doesn't leave the scratch state stuck as "active".
+  useEffect(() => {
+    window.addEventListener('mouseup', stopScratch)
+    return () => window.removeEventListener('mouseup', stopScratch)
+  }, [])
 
   return (
     <div className="space-y-3">
-      <RewardReveal active={revealed} message="Surpresa revelada!" previewMode={previewMode} />
-
       {title ? (
         <p className="text-center text-base font-semibold text-gray-800">{title}</p>
       ) : null}
 
       <div
-        className="relative w-full h-80 md:h-96 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 touch-none select-none"
+        ref={containerRef}
+        className="relative w-full h-80 md:h-96 lg:h-[520px] rounded-xl overflow-hidden border border-gray-200 bg-gray-100 touch-none select-none"
         onContextMenu={(e) => e.preventDefault()}
         style={{ WebkitTouchCallout: 'none' }}
       >
@@ -150,8 +176,6 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
             height={360}
             className="absolute inset-0 w-full h-full touch-none cursor-crosshair"
             onMouseDown={startScratch}
-            onMouseUp={stopScratch}
-            onMouseLeave={stopScratch}
             onMouseMove={scratch}
             onTouchStart={startScratch}
             onTouchEnd={stopScratch}
@@ -168,6 +192,27 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {revealed && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, y: 10 }}
+            animate={{ opacity: 1, scale: [0.5, 1.12, 0.96, 1.04, 1], y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.5, scale: { type: 'spring', stiffness: 420, damping: 18 } }}
+            className="relative overflow-hidden bg-green-50 border-2 border-green-400 rounded-2xl px-6 py-4 text-center shadow-lg"
+          >
+            <motion.div
+              className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+              initial={{ x: '-120%' }}
+              animate={{ x: '220%' }}
+              transition={{ delay: 0.3, duration: 0.55, ease: 'easeInOut' }}
+            />
+            <p className="text-xs text-green-600 font-semibold uppercase tracking-widest mb-1">Surpresa revelada!</p>
+            <p className="text-lg font-extrabold text-green-700">Você raspou tudo! 🎉</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
