@@ -3,18 +3,16 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
-import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+import { useSendOTP } from '@/infrastructure/queries/authQueries'
 import { ROUTES } from '@/shared/constants/routes'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
-
-type State = 'idle' | 'loading' | 'error'
 
 export function PainelView() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [viewState, setViewState] = useState<State>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
+
+  const sendOTP = useSendOTP()
 
   function validate(val: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
@@ -27,16 +25,12 @@ export function PainelView() {
       return
     }
     setEmailError('')
-    setViewState('loading')
-    try {
-      const repo = new AuthRepository()
-      await repo.sendOTP({ email })
-      sessionStorage.setItem('hl_email', email)
-      navigate(ROUTES.PAINEL_VERIFICAR, { state: { email } })
-    } catch (err) {
-      setErrorMsg(getFriendlyMessage(err, 'Não foi possível enviar o código. Tente novamente.'))
-      setViewState('error')
-    }
+    sendOTP.mutate({ email }, {
+      onSuccess: () => {
+        sessionStorage.setItem('hl_email', email)
+        navigate(ROUTES.PAINEL_VERIFICAR, { state: { email } })
+      },
+    })
   }
 
   return (
@@ -66,16 +60,18 @@ export function PainelView() {
             placeholder="seu@email.com"
             value={email}
             error={emailError}
-            onChange={(e) => { setEmail(e.target.value); setEmailError(''); setViewState('idle') }}
+            onChange={(e) => { setEmail(e.target.value); setEmailError(''); sendOTP.reset() }}
             autoFocus
           />
 
-          {viewState === 'error' && (
-            <p className="text-sm text-red-500 text-center">{errorMsg}</p>
+          {sendOTP.isError && (
+            <p className="text-sm text-red-500 text-center">
+              {getFriendlyMessage(sendOTP.error, 'Não foi possível enviar o código. Tente novamente.')}
+            </p>
           )}
 
-          <Button type="submit" fullWidth size="lg" disabled={viewState === 'loading'}>
-            {viewState === 'loading' ? 'Enviando...' : 'Enviar código de acesso'}
+          <Button type="submit" fullWidth size="lg" disabled={sendOTP.isPending}>
+            {sendOTP.isPending ? 'Enviando...' : 'Enviar código de acesso'}
           </Button>
         </form>
 

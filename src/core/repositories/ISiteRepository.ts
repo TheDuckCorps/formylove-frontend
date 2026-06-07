@@ -12,6 +12,7 @@ export namespace ISiteRepository {
 
   export interface GetBySlugInput { slug: string }
   export interface ListByEmailInput { email: string }
+  export interface ListByEmailOutput { hasSites: boolean }
 
   export interface BackendTemplate {
     id: string
@@ -24,6 +25,6 @@ export namespace ISiteRepository {
 export interface ISiteRepository {
   create(input: ISiteRepository.CreateInput): Promise<ISiteRepository.CreateOutput>
   getBySlug(input: ISiteRepository.GetBySlugInput): Promise<Site>
-  listByEmail(input: ISiteRepository.ListByEmailInput): Promise<Site[]>
+  listByEmail(input: ISiteRepository.ListByEmailInput): Promise<ISiteRepository.ListByEmailOutput>
   listTemplates(): Promise<ISiteRepository.BackendTemplate[]>
 }

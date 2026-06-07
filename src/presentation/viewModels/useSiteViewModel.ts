@@ -1,62 +1,25 @@
-import { useState } from 'react'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
-import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
-import type { Site } from '@/core/entities/Site'
+import { useCreateSite, useGetSiteBySlug } from '@/infrastructure/queries/siteQueries'
 
-export function useSiteViewModel() {
+export function useSiteViewModel(slug?: string) {
   const store = useSiteBuilderStore()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [createdSite, setCreatedSite] = useState<Site | null>(null)
-
-  const siteRepo = new SiteRepository()
+  const createSite = useCreateSite()
+  const siteQuery = useGetSiteBySlug(slug)
 
   async function submitSite(email: string) {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const result = await siteRepo.create({
-        ownerEmail: email,
-        planType: store.planType ?? 'BASIC',
-        pages: store.selectedPages,
-        qrTemplate: store.qrTemplate,
-      })
-      setCreatedSite(result)
-      return result
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro ao criar presente'
-      setError(msg)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  async function fetchSite(slug: string) {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const site = await siteRepo.getBySlug({ slug })
-      setCreatedSite(site)
-      return site
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Presente não encontrado'
-      setError(msg)
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
+    return createSite.mutateAsync({
+      ownerEmail: email,
+      planType: store.planType ?? 'BASIC',
+      pages: store.selectedPages,
+      qrTemplate: store.qrTemplate,
+    })
   }
 
   return {
-    // State
-    isLoading,
-    error,
-    createdSite,
-    // Builder store
+    isLoading: createSite.isPending || siteQuery.isLoading,
+    error: createSite.error?.message ?? siteQuery.error?.message ?? null,
+    createdSite: createSite.data ?? siteQuery.data ?? null,
     ...store,
-    // Actions
     submitSite,
-    fetchSite,
   }
 }

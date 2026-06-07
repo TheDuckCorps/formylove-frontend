@@ -2,11 +2,9 @@ import { useState, useRef } from 'react'
 import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
-import { AuthRepository } from '@/infrastructure/repositories/AuthRepository'
+import { useSendOTP, useVerifyOTP } from '@/infrastructure/queries/authQueries'
 import { ROUTES } from '@/shared/constants/routes'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
-
-type State = 'idle' | 'loading' | 'error'
 
 const CODE_LENGTH = 6
 
@@ -16,9 +14,10 @@ export function PainelVerificarView() {
   const email: string = (location.state as any)?.email ?? sessionStorage.getItem('hl_email') ?? ''
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
-  const [viewState, setViewState] = useState<State>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  const verifyOTP = useVerifyOTP()
+  const sendOTP = useSendOTP()
 
   if (!email) {
     return <Navigate to={ROUTES.PAINEL} replace />
@@ -54,25 +53,13 @@ export function PainelVerificarView() {
     e.preventDefault()
     const code = digits.join('')
     if (code.length < CODE_LENGTH) return
-    setViewState('loading')
-    setErrorMsg('')
-    try {
-      const repo = new AuthRepository()
-      await repo.verifyOTP({ email, code })
-      navigate(ROUTES.PAINEL_SITES, { replace: true, state: { email } })
-    } catch (err) {
-      setErrorMsg(getFriendlyMessage(err, 'Código inválido ou expirado. Tente novamente.'))
-      setViewState('error')
-    }
+    verifyOTP.mutate({ email, code }, {
+      onSuccess: () => navigate(ROUTES.PAINEL_SITES, { replace: true, state: { email } }),
+    })
   }
 
-  async function handleResend() {
-    try {
-      const repo = new AuthRepository()
-      await repo.sendOTP({ email })
-    } catch {
-      // silent
-    }
+  function handleResend() {
+    sendOTP.mutate({ email })
   }
 
   const code = digits.join('')
@@ -118,12 +105,14 @@ export function PainelVerificarView() {
             ))}
           </div>
 
-          {viewState === 'error' && (
-            <p className="text-sm text-red-500 text-center">{errorMsg}</p>
+          {verifyOTP.isError && (
+            <p className="text-sm text-red-500 text-center">
+              {getFriendlyMessage(verifyOTP.error, 'Código inválido ou expirado. Tente novamente.')}
+            </p>
           )}
 
-          <Button type="submit" fullWidth size="lg" disabled={!isComplete || viewState === 'loading'}>
-            {viewState === 'loading' ? 'Verificando...' : 'Acessar meus presentes'}
+          <Button type="submit" fullWidth size="lg" disabled={!isComplete || verifyOTP.isPending}>
+            {verifyOTP.isPending ? 'Verificando...' : 'Acessar meus presentes'}
           </Button>
         </form>
 

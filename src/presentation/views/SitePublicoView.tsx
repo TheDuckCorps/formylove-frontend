@@ -10,7 +10,7 @@ import { PalavraSecretaDisplay } from '../components/display/PalavraSecretaDispl
 import { QuizAfetivoDisplay } from '../components/display/QuizAfetivoDisplay'
 import { RaspadinhaSurpresaDisplay } from '../components/display/RaspadinhaSurpresaDisplay'
 import { MensagemMultimidiaDisplay } from '../components/display/MensagemMultimidiaDisplay'
-import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
+import { useGetSiteBySlug } from '@/infrastructure/queries/siteQueries'
 import { ROUTES } from '@/shared/constants/routes'
 import { AUTO_ADVANCE_MS } from '@/shared/constants/autoAdvance'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
@@ -230,34 +230,22 @@ function renderPage(
 export function SitePublicoView() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [site, setSite] = useState<BackendSite | null>(null)
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedPageIds, setCompletedPageIds] = useState<Set<string>>(new Set())
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    if (!slug) { setLoadState('not-found'); return }
+  const { data: siteData, isLoading, error } = useGetSiteBySlug(slug)
+  const site = siteData as unknown as BackendSite | undefined
 
-    const repo = new SiteRepository()
-    repo.getBySlug({ slug })
-      .then((data) => {
-        setSite(data as unknown as BackendSite)
-        setLoadState('ready')
-        setCurrentIdx(0)
-        setCompletedPageIds(new Set())
-      })
-      .catch((err) => {
-        const msg = getFriendlyMessage(err)
-        if (/não encontramos|não encontrad|404/i.test(msg)) {
-          setLoadState('not-found')
-        } else {
-          setErrorMessage(msg)
-          setLoadState('error')
-        }
-      })
-  }, [slug])
+  const loadState: LoadState = !slug
+    ? 'not-found'
+    : isLoading
+    ? 'loading'
+    : error
+    ? (/não encontramos|não encontrad|404/i.test(getFriendlyMessage(error)) ? 'not-found' : 'error')
+    : 'ready'
+
+  const errorMessage = error ? getFriendlyMessage(error) : null
 
   const pages = [...(site?.pages ?? [])].sort((a, b) => a.order - b.order)
   const musicPages = pages.filter((p) => p.type === 'BACKGROUND_MUSIC')
