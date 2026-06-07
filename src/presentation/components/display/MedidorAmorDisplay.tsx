@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { RewardReveal } from './RewardReveal'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { playHeartClick, playMilestone } from '@/shared/utils/audioEffects'
+import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
 interface HeartMark {
   id: string
   x: number
   y: number
+  offset: number
 }
 
 interface Props {
@@ -14,7 +18,7 @@ interface Props {
   previewMode?: boolean
 }
 
-const MAX_CLICKS = 40
+const MAX_CLICKS = 10
 
 const REVEAL_POINTS = [
   { percent: 0, visible: 0 },
@@ -38,6 +42,7 @@ function getVisiblePercent(percent: number) {
   return 100
 }
 
+
 export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode = false }: Props) {
   const [clicks, setClicks] = useState(0)
   const [hearts, setHearts] = useState<HeartMark[]>([])
@@ -45,6 +50,7 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
   const inactivityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const decayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const completedRef = useRef(false)
+  const imageContainerRef = useRef<HTMLDivElement>(null)
 
   const percent = useMemo(
     () => Math.max(0, Math.min(100, Math.round((clicks / MAX_CLICKS) * 100))),
@@ -64,8 +70,11 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
     if (isComplete && !completedRef.current) {
       completedRef.current = true
       onComplete?.()
+      if (!previewMode && imageContainerRef.current) {
+        fireConfettiFrom(imageContainerRef.current)
+      }
     }
-  }, [isComplete, onComplete])
+  }, [isComplete, onComplete, previewMode])
 
   function resetDecayTimer() {
     if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current)
@@ -93,10 +102,23 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const offset = (Math.random() - 0.5) * 40
 
     if (!hasStarted) setHasStarted(true)
-    setClicks((prev) => Math.min(MAX_CLICKS, prev + 1))
-    setHearts((prev) => [...prev, { id, x, y }])
+    if (!previewMode) playHeartClick()
+    setClicks((prev) => {
+      const next = Math.min(MAX_CLICKS, prev + 1)
+      const prevPct = Math.round((prev / MAX_CLICKS) * 100)
+      const nextPct = Math.round((next / MAX_CLICKS) * 100)
+      if (!previewMode) {
+        if (prevPct < 25 && nextPct >= 25) playMilestone(1)
+        else if (prevPct < 50 && nextPct >= 50) playMilestone(2)
+        else if (prevPct < 75 && nextPct >= 75) playMilestone(3)
+        else if (nextPct >= 100) playWinSound()
+      }
+      return next
+    })
+    setHearts((prev) => [...prev, { id, x, y, offset }])
 
     window.setTimeout(() => {
       setHearts((prev) => prev.filter((h) => h.id !== id))
@@ -107,29 +129,26 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
 
   return (
     <div className="space-y-3">
-      <RewardReveal
-        active={isComplete}
-        message="Amor no máximo!"
-        subtitle="Você revelou a surpresa"
-        previewMode={previewMode}
-      />
-
       <p className="text-center text-base font-semibold text-gray-800">
         {question || 'O quanto você me ama?'}
       </p>
 
       <div className="space-y-2">
         <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
-          <div
-            className="h-full bg-brand transition-all duration-200"
-            style={{ width: `${percent}%` }}
+          <motion.div
+            className={isComplete ? 'h-full bg-green-500' : 'h-full bg-brand'}
+            animate={{ width: `${percent}%` }}
+            transition={{ duration: 0.2 }}
           />
         </div>
-        <p className="text-xs text-gray-500 text-center">{percent}%</p>
+        <p className={`text-xs text-center font-semibold ${isComplete ? 'text-green-600' : 'text-gray-500'}`}>
+          {percent}%
+        </p>
       </div>
 
       <div
-        className="relative w-full h-80 md:h-96 rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
+        ref={imageContainerRef}
+        className="relative w-full h-80 md:h-96 lg:h-[520px] rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
         onClick={registerClick}
         onContextMenu={(e) => e.preventDefault()}
         style={{ WebkitTouchCallout: 'none' }}
@@ -159,9 +178,9 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
           <span
             key={heart.id}
             className="absolute pointer-events-none text-brand animate-ping"
-            style={{ left: heart.x - 10, top: heart.y - 10 }}
+            style={{ left: heart.x - 24 + heart.offset, top: heart.y - 72 }}
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <svg className="w-12 h-12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M12 21s-7.2-4.56-9.6-9A5.6 5.6 0 0112 5.4 5.6 5.6 0 0121.6 12C19.2 16.44 12 21 12 21z" />
             </svg>
           </span>
@@ -176,6 +195,27 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
           </div>
         )}
       </div>
+
+      <AnimatePresence>
+        {isComplete && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5, y: 10 }}
+            animate={{ opacity: 1, scale: [0.5, 1.12, 0.96, 1.04, 1], y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.5, scale: { type: 'spring', stiffness: 420, damping: 18 } }}
+            className="relative overflow-hidden bg-green-50 border-2 border-green-400 rounded-2xl px-6 py-4 text-center shadow-lg"
+          >
+            <motion.div
+              className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+              initial={{ x: '-120%' }}
+              animate={{ x: '220%' }}
+              transition={{ delay: 0.3, duration: 0.55, ease: 'easeInOut' }}
+            />
+            <p className="text-xs text-green-600 font-semibold uppercase tracking-widest mb-1">Amor no máximo!</p>
+            <p className="text-lg font-extrabold text-green-700">Você revelou a surpresa 💚</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

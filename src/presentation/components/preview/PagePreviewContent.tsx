@@ -10,7 +10,7 @@ import type {
   RoletaEscolhasData,
   MensagemMultimidiaData,
 } from '@/core/entities/Page'
-import { SpinWheelDisplay } from '../pages/SpinWheelDisplay'
+import { SpinWheelDisplay } from '../display/SpinWheelDisplay'
 import { MedidorAmorDisplay } from '../display/MedidorAmorDisplay'
 import { ToqueContinuarDisplay } from '../display/ToqueContinuarDisplay'
 import { MusicaFundoDisplay } from '../display/MusicaFundoDisplay'

@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
-import { SpinWheelDisplay } from '../components/pages/SpinWheelDisplay'
+import { SpinWheelDisplay } from '../components/display/SpinWheelDisplay'
 import { MedidorAmorDisplay } from '../components/display/MedidorAmorDisplay'
 import { ToqueContinuarDisplay } from '../components/display/ToqueContinuarDisplay'
 import { MusicaFundoDisplay } from '../components/display/MusicaFundoDisplay'
@@ -50,7 +51,7 @@ const COMPLETION_PAGE_TYPES = new Set([
 
 function PageCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 w-full max-w-md lg:max-w-lg mx-auto">
+    <div className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 w-full max-w-md lg:max-w-2xl mx-auto">
       {children}
     </div>
   )
@@ -233,6 +234,7 @@ export function SitePublicoView() {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedPageIds, setCompletedPageIds] = useState<Set<string>>(new Set())
   const autoAdvanceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const directionRef = useRef(1)
 
   const { data: siteData, isLoading, error } = useGetSiteBySlug(slug)
   const site = siteData as unknown as BackendSite | undefined
@@ -253,10 +255,12 @@ export function SitePublicoView() {
   const storyCount = storyPages.length
 
   const handleNext = useCallback(() => {
+    directionRef.current = 1
     setCurrentIdx((i) => Math.min(i + 1, storyCount - 1))
   }, [storyCount])
 
   const handlePrev = useCallback(() => {
+    directionRef.current = -1
     setCurrentIdx((i) => Math.max(i - 1, 0))
   }, [])
 
@@ -292,10 +296,42 @@ export function SitePublicoView() {
   if (loadState === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-page-gradient">
-        <svg className="w-10 h-10 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-        </svg>
+        <div className="relative flex items-center justify-center">
+          {/* Ripple rings */}
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="absolute rounded-full border-2 border-brand"
+              initial={{ opacity: 0.6, scale: 0.6 }}
+              animate={{ opacity: 0, scale: 2.4 }}
+              transition={{
+                duration: 1.6,
+                repeat: Infinity,
+                delay: i * 0.5,
+                ease: 'easeOut',
+              }}
+              style={{ width: 48, height: 48 }}
+            />
+          ))}
+          {/* Heartbeat */}
+          <motion.svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-12 h-12 text-brand relative z-10 drop-shadow-md"
+            animate={{
+              scale: [1, 1.25, 1, 1.15, 1],
+            }}
+            transition={{
+              duration: 0.9,
+              repeat: Infinity,
+              repeatDelay: 0.4,
+              ease: 'easeInOut',
+              times: [0, 0.2, 0.4, 0.6, 1],
+            }}
+          >
+            <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" />
+          </motion.svg>
+        </div>
       </div>
     )
   }
@@ -366,7 +402,7 @@ export function SitePublicoView() {
             <button
               key={i}
               type="button"
-              onClick={() => setCurrentIdx(i)}
+              onClick={() => { directionRef.current = i > currentIdx ? 1 : -1; setCurrentIdx(i) }}
               aria-label={`Ir para página ${i + 1}`}
               className={[
                 'h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
@@ -377,7 +413,7 @@ export function SitePublicoView() {
         </div>
       )}
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto overflow-x-hidden">
         {storyCount === 0 ? (
           <p className="text-center text-gray-400 text-sm">Este presente ainda não tem páginas.</p>
         ) : currentIdx >= storyCount ? (
@@ -388,7 +424,21 @@ export function SitePublicoView() {
             </p>
           </PageCard>
         ) : (
-          <div key={currentPage.id} className="w-full flex flex-col items-center gap-6 animate-fade-in">
+          <AnimatePresence mode="wait" custom={directionRef.current}>
+          <motion.div
+            key={currentPage.id}
+            custom={directionRef.current}
+            variants={{
+              enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
+              center: { x: 0, opacity: 1 },
+              exit: (dir: number) => ({ x: dir > 0 ? '-60%' : '60%', opacity: 0 }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            className="w-full flex flex-col items-center gap-6"
+          >
             {(() => {
               const onPageComplete = () => markPageComplete(currentPage.id)
               const render = renderPage(currentPage, handleNext, onPageComplete)
@@ -420,7 +470,8 @@ export function SitePublicoView() {
                 </>
               )
             })()}
-          </div>
+          </motion.div>
+          </AnimatePresence>
         )}
       </main>
 
