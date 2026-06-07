@@ -203,19 +203,19 @@ const HOW_IT_WORKS: Array<{
 
 const PLAN_FEATURES: Record<PlanType, string[]> = {
   BASIC: [
-    'Até 5 páginas interativas',
+    'Até 10 páginas interativas',
     'Site ativo por 7 dias',
     'Link + QR Code por e-mail',
     'Todos os designs de QR Code inclusos',
   ],
   INTERMEDIATE: [
-    'Até 7 páginas interativas',
+    'Até 25 páginas interativas',
     'Site ativo por 30 dias',
     'Link + QR Code por e-mail',
     'Todos os designs de QR Code inclusos',
   ],
   PREMIUM: [
-    'Até 15 páginas interativas',
+    'Até 50 páginas interativas',
     'Site ativo por 1 ano',
     'Link + QR Code por e-mail',
     'Todos os designs de QR Code inclusos',

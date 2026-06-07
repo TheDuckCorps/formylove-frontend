@@ -17,19 +17,19 @@ import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 const PLAN_FEATURES: Record<PlanType, string[]> = {
   BASIC: [
-    'Até 5 páginas interativas',
+    'Até 10 páginas interativas',
     'Válido por 7 dias',
     'Link + QR Code para compartilhar',
     'Todos os designs de QR Code inclusos',
   ],
   INTERMEDIATE: [
-    'Até 7 páginas interativas',
+    'Até 25 páginas interativas',
     'Válido por 30 dias',
     'Link + QR Code para compartilhar',
     'Todos os designs de QR Code inclusos',
   ],
   PREMIUM: [
-    'Até 15 páginas interativas',
+    'Até 50 páginas interativas',
     'Válido por 1 ano',
     'Link + QR Code para compartilhar',
     'Todos os designs de QR Code inclusos',
