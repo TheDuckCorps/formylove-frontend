@@ -13,9 +13,17 @@ interface Props {
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
+// Strips diacritics so Ã→A, Ç→C, É→E, etc.
+function stripAccents(str: string): string {
+  return str.normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
 
 export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = false }: Props) {
-  const normalizedSecret = useMemo(() => secret.toUpperCase(), [secret])
+  // displaySecret keeps original accents for rendering
+  const displaySecret = useMemo(() => secret.toUpperCase(), [secret])
+  // normalizedSecret has accents stripped — used for game logic (A-Z only)
+  const normalizedSecret = useMemo(() => stripAccents(displaySecret), [displaySecret])
+
   const [guessed, setGuessed] = useState<string[]>([])
   const [wrongGuessed, setWrongGuessed] = useState<string[]>([])
   const [wrongFlash, setWrongFlash] = useState<string[]>([])
@@ -25,6 +33,8 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
   const guessedSet = useMemo(() => new Set(guessed), [guessed])
   const wrongGuessedSet = useMemo(() => new Set(wrongGuessed), [wrongGuessed])
   const wrongFlashSet = useMemo(() => new Set(wrongFlash), [wrongFlash])
+
+  // Only count A-Z letters in the normalized version
   const lettersOnly = normalizedSecret.replace(/[^A-Z]/g, '')
   const hasWord = lettersOnly.length > 0
   const isComplete = hasWord && [...lettersOnly].every((letter) => guessedSet.has(letter))
@@ -44,8 +54,12 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
     if (!hasWord || isComplete) return
     if (guessedSet.has(letter) || wrongGuessedSet.has(letter) || wrongFlashSet.has(letter)) return
 
+<<<<<<< HEAD
     if (!previewMode) playKeyPress()
 
+=======
+    // Compare against normalized secret (accent-stripped)
+>>>>>>> f863b32 (fix: adjust to accept portuguese alphabet letters, play music when opening site and add title to spin wheel)
     if (normalizedSecret.includes(letter)) {
       if (!previewMode) playLetterFound()
       setGuessed((prev) => [...prev, letter])
@@ -67,6 +81,7 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
         <p className="text-sm text-gray-800">{hint || 'Sem dica definida'}</p>
       </div>
 
+<<<<<<< HEAD
       {/* Word display */}
       <div ref={wordRef} className="flex flex-wrap justify-center gap-2">
         {normalizedSecret ? (
@@ -76,6 +91,18 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
             }
             const revealed = guessedSet.has(char) || isComplete
 
+=======
+      <div className="flex flex-wrap justify-center gap-2">
+        {displaySecret ? (
+          [...displaySecret].map((char, idx) => {
+            // Use normalized char to decide if it's a letter or separator
+            const normalizedChar = stripAccents(char)
+            if (!/[A-Z]/.test(normalizedChar)) {
+              return <span key={`sep-${idx}`} className="w-3" />
+            }
+            // Revealed when the base letter (no accent) has been guessed
+            const revealed = guessedSet.has(normalizedChar)
+>>>>>>> f863b32 (fix: adjust to accept portuguese alphabet letters, play music when opening site and add title to spin wheel)
             return (
               <motion.div
                 key={`${char}-${idx}`}

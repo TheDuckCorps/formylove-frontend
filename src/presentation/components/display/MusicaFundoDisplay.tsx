@@ -30,6 +30,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   const [playing, setPlaying] = useState(true)
   const [volume, setVolume] = useState(70)
   const [showVolume, setShowVolume] = useState(false)
+  const [playerReady, setPlayerReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -47,13 +48,34 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     )
   }
 
+  // Listen for YouTube player ready event
   useEffect(() => {
-    postToPlayer(playing ? 'playVideo' : 'pauseVideo')
-  }, [playing])
+    function handleMessage(e: MessageEvent) {
+      if (!e.data) return
+      try {
+        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
+        if (data.event === 'onReady') {
+          setPlayerReady(true)
+        }
+      } catch {
+        // ignore non-JSON messages
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
 
+  // Send play/pause only after player is ready
   useEffect(() => {
+    if (!playerReady) return
+    postToPlayer(playing ? 'playVideo' : 'pauseVideo')
+  }, [playing, playerReady])
+
+  // Send volume only after player is ready
+  useEffect(() => {
+    if (!playerReady) return
     postToPlayer('setVolume', [volume])
-  }, [volume])
+  }, [volume, playerReady])
 
   function scheduleHideVolume() {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current)

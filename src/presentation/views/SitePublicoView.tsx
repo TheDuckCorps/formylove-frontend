@@ -13,7 +13,6 @@ import { RaspadinhaSurpresaDisplay } from '../components/display/RaspadinhaSurpr
 import { MensagemMultimidiaDisplay } from '../components/display/MensagemMultimidiaDisplay'
 import { useGetSiteBySlug } from '@/infrastructure/queries/siteQueries'
 import { ROUTES } from '@/shared/constants/routes'
-import { AUTO_ADVANCE_MS } from '@/shared/constants/autoAdvance'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
@@ -277,21 +276,6 @@ export function SitePublicoView() {
   const isFirst = currentIdx === 0
   const isLast = currentIdx === storyCount - 1
 
-  useEffect(() => {
-    if (autoAdvanceRef.current) {
-      clearTimeout(autoAdvanceRef.current)
-      autoAdvanceRef.current = null
-    }
-
-    if (!currentPage || isLast) return
-    if (!completedPageIds.has(currentPage.id)) return
-    if (!COMPLETION_PAGE_TYPES.has(currentPage.type)) return
-
-    autoAdvanceRef.current = setTimeout(handleNext, AUTO_ADVANCE_MS)
-    return () => {
-      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current)
-    }
-  }, [completedPageIds, currentPage, handleNext, isLast])
 
   if (loadState === 'loading') {
     return (
