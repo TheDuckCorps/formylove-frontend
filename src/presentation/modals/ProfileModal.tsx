@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { Button } from '../components/common/Button'
 import { Input } from '../components/common/Input'
-import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
+import { useListSitesByEmailMutation } from '@/infrastructure/queries/siteQueries'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 interface Props {
   onClose: () => void
 }
 
-type ViewState = 'form' | 'loading' | 'sent' | 'error' | 'qrcode'
-
+type ViewState = 'form' | 'sent' | 'empty'
 
 export function ProfileModal({ onClose }: Props) {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [view, setView] = useState<ViewState>('form')
-  const [errorMsg, setErrorMsg] = useState('')
+
+  const listSites = useListSitesByEmailMutation()
 
   function validate(val: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
@@ -28,15 +28,9 @@ export function ProfileModal({ onClose }: Props) {
       return
     }
     setEmailError('')
-    setView('loading')
-    try {
-      const repo = new SiteRepository()
-      await repo.listByEmail({ email })
-      setView('sent')
-    } catch (err) {
-      setErrorMsg(getFriendlyMessage(err, 'Não foi possível buscar seus presentes. Tente novamente.'))
-      setView('error')
-    }
+    listSites.mutate({ email }, {
+      onSuccess: ({ hasSites }) => setView(hasSites ? 'sent' : 'empty'),
+    })
   }
 
   return (
@@ -75,26 +69,28 @@ export function ProfileModal({ onClose }: Props) {
         </p>
 
         {/* Form */}
-        {(view === 'form' || view === 'error') && (
+        {view === 'form' && (
           <form onSubmit={handleSearch} className="flex flex-col gap-4">
             <Input
               placeholder="seu@email.com"
               type="email"
               value={email}
               error={emailError}
-              onChange={(e) => { setEmail(e.target.value); setEmailError('') }}
+              onChange={(e) => { setEmail(e.target.value); setEmailError(''); listSites.reset() }}
             />
-            {view === 'error' && (
-              <p className="text-sm text-red-500 text-center">{errorMsg}</p>
+            {listSites.isError && (
+              <p className="text-sm text-red-500 text-center">
+                {getFriendlyMessage(listSites.error, 'Não foi possível buscar seus presentes. Tente novamente.')}
+              </p>
             )}
-            <Button type="submit" fullWidth>
-              Buscar meus presentes
+            <Button type="submit" fullWidth disabled={listSites.isPending}>
+              {listSites.isPending ? 'Buscando...' : 'Buscar meus presentes'}
             </Button>
           </form>
         )}
 
         {/* Loading */}
-        {view === 'loading' && (
+        {listSites.isPending && (
           <div className="flex flex-col items-center gap-4 py-8">
             <svg className="w-8 h-8 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -119,10 +115,32 @@ export function ProfileModal({ onClose }: Props) {
               Verifique sua caixa de entrada.
             </p>
             <button
-              onClick={() => { setView('form') }}
+              onClick={() => { setView('form'); listSites.reset() }}
               className="text-xs text-gray-400 hover:text-gray-600 mt-2"
             >
               Usar outro e-mail
+            </button>
+          </div>
+        )}
+
+        {/* No sites found */}
+        {view === 'empty' && (
+          <div className="flex flex-col items-center gap-4 text-center py-4">
+            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <p className="text-base font-semibold text-gray-700">Nenhum presente encontrado</p>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Não encontramos presentes associados a<br />
+              <strong className="text-gray-600">{email}</strong>.
+            </p>
+            <button
+              onClick={() => { setView('form'); listSites.reset() }}
+              className="text-xs text-gray-400 hover:text-gray-600 mt-2"
+            >
+              Tentar outro e-mail
             </button>
           </div>
         )}

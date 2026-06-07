@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { PaymentRepository } from '@/infrastructure/repositories/PaymentRepository'
+import { usePaymentStatus, useCreatePayment } from '@/infrastructure/queries/paymentQueries'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
-
-const POLLING_INTERVAL_MS = 5000
 
 interface UsePaymentViewModelInput {
   initialQrCode: string
@@ -25,16 +23,16 @@ export function usePaymentViewModel({
   const [qrCodeImage, setQrCodeImage] = useState(initialQrCodeImage)
   const [secondsLeft, setSecondsLeft] = useState(expiresIn)
   const [isExpired, setIsExpired] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isPaid, setIsPaid] = useState(false)
-  const [siteSlug, setSiteSlug] = useState<string | null>(null)
   const [isCheckingPayment, setIsCheckingPayment] = useState(false)
   const [checkMessage, setCheckMessage] = useState<string | null>(null)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const isPaidRef = useRef(false)
+
+  const { data: statusData, refetch: refetchStatus } = usePaymentStatus(siteId)
+  const refreshQrCodeMutation = useCreatePayment()
+
+  const isPaid = statusData?.paid ?? false
+  const siteSlug = statusData?.slug ?? null
 
   const startCountdown = useCallback((seconds: number) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -53,41 +51,19 @@ export function usePaymentViewModel({
     }, 1000)
   }, [])
 
-  const fetchPaymentStatus = useCallback(async (): Promise<boolean> => {
-    if (!siteId || isPaidRef.current) return isPaidRef.current
-    try {
-      const repo = new PaymentRepository()
-      const status = await repo.getStatus(siteId)
-      if (status.paid) {
-        isPaidRef.current = true
-        setSiteSlug(status.slug)
-        setIsPaid(true)
-        if (intervalRef.current) clearInterval(intervalRef.current)
-        if (pollingRef.current) clearInterval(pollingRef.current)
-        return true
-      }
-    } catch {
-      // silent — polling will retry
-    }
-    return false
-  }, [siteId])
-
-  // Poll payment status in background while waiting
   useEffect(() => {
-    if (!siteId) return
-    pollingRef.current = setInterval(fetchPaymentStatus, POLLING_INTERVAL_MS)
+    startCountdown(expiresIn)
     return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current)
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [siteId, fetchPaymentStatus])
+  }, [expiresIn, startCountdown])
 
-  // Manual check triggered by the "Já paguei" button
   async function checkPaymentNow() {
     setIsCheckingPayment(true)
     setCheckMessage(null)
     try {
-      const paid = await fetchPaymentStatus()
-      if (!paid) {
+      const result = await refetchStatus()
+      if (!result.data?.paid) {
         setCheckMessage(
           'Ainda não identificamos seu pagamento. Pode levar alguns instantes — vamos avisar assim que for confirmado.',
         )
@@ -97,31 +73,17 @@ export function usePaymentViewModel({
     }
   }
 
-  useEffect(() => {
-    startCountdown(expiresIn)
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
-  }, [expiresIn, startCountdown])
-
   async function refreshQrCode() {
-    setIsRefreshing(true)
-    setError(null)
-    try {
-      const repo = new PaymentRepository()
-      const result = await repo.create({
-        siteId,
-        qrCodeDetailed,
-        customerEmail: email,
-      })
-      setQrCode(result.qrCode)
-      setQrCodeImage(result.qrCodeImage)
-      startCountdown(result.expiresIn)
-    } catch (err) {
-      setError(getFriendlyMessage(err, 'Não foi possível gerar um novo QR Code.'))
-    } finally {
-      setIsRefreshing(false)
-    }
+    const result = await refreshQrCodeMutation.mutateAsync({
+      siteId,
+      qrCodeDetailed,
+      customerEmail: email,
+    }).catch(() => null)
+
+    if (!result) return
+    setQrCode(result.qrCode)
+    setQrCodeImage(result.qrCodeImage)
+    startCountdown(result.expiresIn)
   }
 
   const minutes = Math.floor(secondsLeft / 60)
@@ -134,10 +96,12 @@ export function usePaymentViewModel({
     qrCodeImage,
     secondsLeft,
     isExpired,
-    isRefreshing,
+    isRefreshing: refreshQrCodeMutation.isPending,
     isWarning,
     formattedTime,
-    error,
+    error: refreshQrCodeMutation.isError
+      ? getFriendlyMessage(refreshQrCodeMutation.error, 'Não foi possível gerar um novo QR Code.')
+      : null,
     refreshQrCode,
     isPaid,
     siteSlug,

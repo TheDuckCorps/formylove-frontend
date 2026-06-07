@@ -142,8 +142,8 @@ export class SiteRepository implements ISiteRepository {
     return data
   }
 
-  async listByEmail({ email }: ISiteRepository.ListByEmailInput): Promise<Site[]> {
-    const { data } = await httpClient.get<Site[]>('/api/v1/sites', {
+  async listByEmail({ email }: ISiteRepository.ListByEmailInput): Promise<ISiteRepository.ListByEmailOutput> {
+    const { data } = await httpClient.get<ISiteRepository.ListByEmailOutput>('/api/v1/sites', {
       params: { email },
     })
     return data

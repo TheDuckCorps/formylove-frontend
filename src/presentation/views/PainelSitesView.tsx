@@ -1,35 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Logo } from '../components/common/Logo'
 import { Button } from '../components/common/Button'
-import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
+import { useListSitesByEmail } from '@/infrastructure/queries/siteQueries'
 import { ROUTES } from '@/shared/constants/routes'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
-
-type LoadState = 'loading' | 'sent' | 'error'
 
 export function PainelSitesView() {
   const navigate = useNavigate()
   const location = useLocation()
   const email: string = (location.state as any)?.email ?? sessionStorage.getItem('hl_email') ?? ''
 
-  const [loadState, setLoadState] = useState<LoadState>('loading')
-  const [errorMsg, setErrorMsg] = useState('')
+  const { data, isLoading, error } = useListSitesByEmail(email)
 
   useEffect(() => {
-    if (!email) {
-      navigate(ROUTES.PAINEL, { replace: true })
-      return
-    }
-
-    const repo = new SiteRepository()
-    repo.listByEmail({ email })
-      .then(() => setLoadState('sent'))
-      .catch((err) => {
-        setErrorMsg(getFriendlyMessage(err, 'Não foi possível carregar seus presentes.'))
-        setLoadState('error')
-      })
+    if (!email) navigate(ROUTES.PAINEL, { replace: true })
   }, [email, navigate])
+
+  const hasSites = data?.hasSites
 
   return (
     <>
@@ -49,7 +37,7 @@ export function PainelSitesView() {
           <p className="text-sm text-gray-400 mb-8">Os seus presentes serão enviados para o seu e-mail.</p>
 
           {/* Loading */}
-          {loadState === 'loading' && (
+          {isLoading && (
             <div className="flex flex-col items-center gap-4 py-20">
               <svg className="w-10 h-10 animate-spin text-brand" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -60,16 +48,37 @@ export function PainelSitesView() {
           )}
 
           {/* Error */}
-          {loadState === 'error' && (
+          {error && (
             <div className="text-center py-16">
               <div className="text-4xl mb-4">⚠️</div>
-              <p className="text-gray-600 mb-6">{errorMsg}</p>
+              <p className="text-gray-600 mb-6">{getFriendlyMessage(error, 'Não foi possível carregar seus presentes.')}</p>
               <Button onClick={() => navigate(ROUTES.PAINEL)}>Tentar novamente</Button>
             </div>
           )}
 
+          {/* Empty */}
+          {!isLoading && !error && hasSites === false && (
+            <div className="flex flex-col items-center gap-5 py-16 text-center">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-gray-700">Nenhum site encontrado</p>
+                <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+                  Não encontramos sites associados a<br />
+                  <strong className="text-gray-600">{email}</strong>.
+                </p>
+              </div>
+              <Button onClick={() => navigate(ROUTES.PAINEL)}>
+                Voltar ao início
+              </Button>
+            </div>
+          )}
+
           {/* Sent */}
-          {loadState === 'sent' && (
+          {!isLoading && !error && hasSites === true && (
             <div className="flex flex-col items-center gap-5 py-16 text-center">
               <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center">
                 <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +100,6 @@ export function PainelSitesView() {
           )}
         </main>
       </div>
-
     </>
   )
 }

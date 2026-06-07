@@ -7,8 +7,8 @@ import { StepIndicator } from '../components/layout/StepIndicator'
 import { EmailModal } from '../modals/EmailModal'
 import { ValidationSummaryModal } from '../modals/ValidationSummaryModal'
 import { useSiteBuilderStore, MAX_PAGES_PER_PLAN } from '@/shared/store/siteBuilderStore'
-import { SiteRepository } from '@/infrastructure/repositories/SiteRepository'
-import { PaymentRepository } from '@/infrastructure/repositories/PaymentRepository'
+import { useCreateSite } from '@/infrastructure/queries/siteQueries'
+import { useCreatePayment } from '@/infrastructure/queries/paymentQueries'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
@@ -112,8 +112,15 @@ export function EscolherPlanoView() {
   const [showPageLimitModal, setShowPageLimitModal] = useState(false)
   const [showValidationModal, setShowValidationModal] = useState(false)
   const [validationResults, setLocalValidationResults] = useState<ReturnType<typeof validateAllPages>>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const createSite = useCreateSite()
+  const createPayment = useCreatePayment()
+  const isLoading = createSite.isPending || createPayment.isPending
+  const errorMessage = createSite.isError
+    ? getFriendlyMessage(createSite.error)
+    : createPayment.isError
+    ? getFriendlyMessage(createPayment.error)
+    : null
 
   const pagesTooManyForPlan = chosen
     ? selectedPages.length > MAX_PAGES_PER_PLAN[chosen]
@@ -121,7 +128,8 @@ export function EscolherPlanoView() {
 
   function handleSelectPlan(plan: PlanType) {
     setChosen(plan)
-    setErrorMessage(null)
+    createSite.reset()
+    createPayment.reset()
   }
 
   function handleContinue() {
@@ -162,41 +170,38 @@ export function EscolherPlanoView() {
 
   async function handleEmailSubmit(submittedEmail: string) {
     if (!chosen) return
-    setIsLoading(true)
-    setErrorMessage(null)
-    try {
-      const siteRepo = new SiteRepository()
-      const site = await siteRepo.create({
-        ownerEmail: submittedEmail,
-        planType: chosen,
-        pages: selectedPages,
-        qrTemplate,
-      })
+    createSite.reset()
+    createPayment.reset()
 
-      const paymentRepo = new PaymentRepository()
-      const payment = await paymentRepo.create({
+    const site = await createSite.mutateAsync({
+      ownerEmail: submittedEmail,
+      planType: chosen,
+      pages: selectedPages,
+      qrTemplate,
+    }).catch(() => null)
+
+    if (!site) return
+
+    const payment = await createPayment.mutateAsync({
+      siteId: site.id,
+      qrCodeDetailed,
+      customerEmail: submittedEmail,
+    }).catch(() => null)
+
+    if (!payment) return
+
+    setShowEmailModal(false)
+    navigate(ROUTES.CRIAR_PAGAMENTO, {
+      state: {
+        qrCode: payment.qrCode,
+        qrCodeImage: payment.qrCodeImage,
+        amount: payment.amount,
+        expiresIn: payment.expiresIn,
         siteId: site.id,
-        qrCodeDetailed,
-        customerEmail: submittedEmail,
-      })
-
-      setShowEmailModal(false)
-      navigate(ROUTES.CRIAR_PAGAMENTO, {
-        state: {
-          qrCode: payment.qrCode,
-          qrCodeImage: payment.qrCodeImage,
-          amount: payment.amount,
-          expiresIn: payment.expiresIn,
-          siteId: site.id,
-          planType: chosen,
-          email: submittedEmail,
-        },
-      })
-    } catch (err) {
-      setErrorMessage(getFriendlyMessage(err))
-    } finally {
-      setIsLoading(false)
-    }
+        planType: chosen,
+        email: submittedEmail,
+      },
+    })
   }
 
   const chosenPlan = chosen ? PLANS.find((p) => p.type === chosen) : null
