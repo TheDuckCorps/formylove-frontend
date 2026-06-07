@@ -6,7 +6,7 @@ import { validateAllPages } from '@/core/validation/pageSchemas'
 import type { PlanType } from '@/core/entities/Site'
 import type { PageValidationResult } from '@/core/validation/pageSchemas'
 
-const MAX_FREE_PAGES = 15  // users pick freely; plan is chosen at the end
+const MAX_FREE_PAGES = 50  // users pick freely; plan is chosen at the end
 
 interface SiteBuilderState {
   email: string
@@ -43,9 +43,9 @@ interface SiteBuilderActions {
 }
 
 export const MAX_PAGES_PER_PLAN: Record<PlanType, number> = {
-  BASIC: 5,
-  INTERMEDIATE: 7,
-  PREMIUM: 15,
+  BASIC: 10,
+  INTERMEDIATE: 25,
+  PREMIUM: 50,
 }
 
 const initialState: SiteBuilderState = {
