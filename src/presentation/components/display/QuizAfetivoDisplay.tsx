@@ -84,9 +84,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode 
 
           return (
             <motion.button
-              key={answer.id}
-              // Re-key the shake so it replays on each wrong attempt
-              {...(wrong ? { key: `${answer.id}-shake-${shakeKey}` } : {})}
+              key={wrong ? `${answer.id}-shake-${shakeKey}` : answer.id}
               type="button"
               disabled={isCorrect === true}
               onClick={() => handleSelect(answer)}
