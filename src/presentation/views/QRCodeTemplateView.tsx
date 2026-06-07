@@ -12,27 +12,26 @@ interface TemplateOption {
   label: string
   style: string
   emoji?: string
-  detailed: boolean
 }
 
 const TEMPLATES: TemplateOption[] = [
-  { id: 'template-1', label: 'Fundo branco', style: 'bg-white border border-gray-200', detailed: false },
-  { id: 'template-2', label: 'Flores coloridas', style: 'bg-[url("/templates/t2.png")] bg-cover', emoji: '🌸🎨', detailed: false },
-  { id: 'template-3', label: 'Fundo claro', style: 'bg-gray-50 border border-gray-200', detailed: false },
-  { id: 'template-4', label: 'Corações rosa', style: 'bg-pink-100', emoji: '💗', detailed: true },
-  { id: 'template-5', label: 'Nuvens', style: 'bg-sky-100', emoji: '☁️', detailed: true },
-  { id: 'template-6', label: 'Flores silvestres', style: 'bg-green-50', emoji: '🌼', detailed: true },
-  { id: 'template-7', label: 'Rosa claro', style: 'bg-rose-50', emoji: '🌹', detailed: true },
-  { id: 'template-8', label: 'Lilás', style: 'bg-violet-100', emoji: '💜', detailed: true },
-  { id: 'template-9', label: 'Roxo', style: 'bg-purple-200', emoji: '🔮', detailed: true },
+  { id: 'template-1', label: 'Fundo branco', style: 'bg-white border border-gray-200' },
+  { id: 'template-2', label: 'Flores coloridas', style: 'bg-[url("/templates/t2.png")] bg-cover', emoji: '🌸🎨' },
+  { id: 'template-3', label: 'Fundo claro', style: 'bg-gray-50 border border-gray-200' },
+  { id: 'template-4', label: 'Corações rosa', style: 'bg-pink-100', emoji: '💗' },
+  { id: 'template-5', label: 'Nuvens', style: 'bg-sky-100', emoji: '☁️' },
+  { id: 'template-6', label: 'Flores silvestres', style: 'bg-green-50', emoji: '🌼' },
+  { id: 'template-7', label: 'Rosa claro', style: 'bg-rose-50', emoji: '🌹' },
+  { id: 'template-8', label: 'Lilás', style: 'bg-violet-100', emoji: '💜' },
+  { id: 'template-9', label: 'Roxo', style: 'bg-purple-200', emoji: '🔮' },
 ]
 
 export function QRCodeTemplateView() {
   const navigate = useNavigate()
-  const { qrTemplate, qrCodeDetailed, setQrTemplate } = useSiteBuilderStore()
+  const { qrTemplate, setQrTemplate } = useSiteBuilderStore()
 
   function handleSelect(t: TemplateOption) {
-    setQrTemplate(t.id, t.detailed)
+    setQrTemplate(t.id, false)
   }
 
   return (
@@ -48,7 +47,7 @@ export function QRCodeTemplateView() {
           Este design aparece impresso ao redor do QR Code do seu presente
         </p>
         <p className="text-xs text-gray-400 text-center mb-8">
-          Designs com <span className="text-brand font-semibold">★ Premium</span> são gratuitos no plano Premium. Nos demais planos, acrescentam <strong>R$2,00</strong>.
+          Todos os designs são gratuitos e inclusos em qualquer plano.
         </p>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -67,13 +66,6 @@ export function QRCodeTemplateView() {
                 >
                   {t.emoji && <span className="text-3xl select-none">{t.emoji}</span>}
 
-                  {/* Premium badge */}
-                  {t.detailed && (
-                    <span className="absolute top-1.5 left-1.5 bg-brand/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                      ★ Premium
-                    </span>
-                  )}
-
                   {/* Selected checkmark */}
                   {qrTemplate === t.id && (
                     <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-brand rounded-full flex items-center justify-center">
@@ -89,16 +81,6 @@ export function QRCodeTemplateView() {
                 </button>
               ))}
             </div>
-
-            {/* Detailed QR warning */}
-            {qrCodeDetailed && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6 flex items-start gap-3">
-                <span className="text-amber-500 text-base">⭐</span>
-                <p className="text-xs text-amber-700">
-                  Design Premium selecionado. No plano Premium este design é <strong>gratuito</strong>. Nos outros planos, adiciona <strong>+R$2,00</strong>.
-                </p>
-              </div>
-            )}
 
             <div className="flex flex-col items-center gap-3">
               <Button
