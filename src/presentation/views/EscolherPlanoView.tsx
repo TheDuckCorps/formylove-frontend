@@ -20,19 +20,19 @@ const PLAN_FEATURES: Record<PlanType, string[]> = {
     'Até 5 páginas interativas',
     'Válido por 7 dias',
     'Link + QR Code para compartilhar',
-    'QR Code com design premium gratuito',
+    'Todos os designs de QR Code inclusos',
   ],
   INTERMEDIATE: [
     'Até 7 páginas interativas',
     'Válido por 30 dias',
     'Link + QR Code para compartilhar',
-    'QR Code com design premium gratuito',
+    'Todos os designs de QR Code inclusos',
   ],
   PREMIUM: [
     'Até 15 páginas interativas',
     'Válido por 1 ano',
     'Link + QR Code para compartilhar',
-    'QR Code com design premium gratuito',
+    'Todos os designs de QR Code inclusos',
   ],
 }
 
