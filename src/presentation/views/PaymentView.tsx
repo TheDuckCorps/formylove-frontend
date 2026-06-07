@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
+import { QRCodeViewer } from '../components/common/QRCodeViewer'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
@@ -12,6 +13,8 @@ interface LocationState {
   qrCode?: string
   qrCodeImage?: string
   siteId?: string
+  siteSlug?: string
+  qrTemplate?: string
   planType?: PlanType
   email?: string
   amount?: number
@@ -27,7 +30,7 @@ export function PaymentView() {
   const location = useLocation()
   const state = (location.state as LocationState) ?? {}
 
-  const { qrCode: initialQrCode, qrCodeImage: initialQrCodeImage, siteId, planType = 'BASIC', email, amount, expiresIn = 3000 } = state
+  const { qrCode: initialQrCode, qrCodeImage: initialQrCodeImage, siteId, siteSlug, qrTemplate, planType = 'BASIC', email, amount, expiresIn = 3000 } = state
   const plan = PLANS.find((p) => p.type === planType) ?? PLANS[0]
   const displayAmount = amount ?? plan.price
 
@@ -41,7 +44,6 @@ export function PaymentView() {
     error,
     refreshQrCode,
     isPaid,
-    siteSlug,
     isCheckingPayment,
     checkMessage,
     checkPaymentNow,
@@ -211,6 +213,23 @@ export function PaymentView() {
           Após a confirmação do pagamento, você receberá o link do site
           {email ? ` no email ${email}` : ''} automaticamente.
         </p>
+
+        {/* QR Code preview — styled with the chosen template */}
+        {siteSlug && (
+          <div className="mb-8">
+            <p className="text-xs text-gray-500 font-medium mb-3 text-center">
+              Prévia do QR Code do seu presente:
+            </p>
+            <div className="flex justify-center">
+              <div className="w-48 h-48">
+                <QRCodeViewer slug={siteSlug} qrTemplate={qrTemplate} size={200} />
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-400 text-center mt-2">
+              Este QR Code estará disponível após a confirmação do pagamento
+            </p>
+          </div>
+        )}
 
         {/* "Já paguei" — manual payment check */}
         <Button
