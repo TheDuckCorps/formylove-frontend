@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 
 interface Props {
   youtubeUrl: string
@@ -27,12 +28,13 @@ function getYoutubeVideoId(url: string): string | null {
 }
 
 export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
-  const [playing, setPlaying] = useState(true)
+  const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(70)
   const [showVolume, setShowVolume] = useState(false)
   const [playerReady, setPlayerReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hasUserInteracted = useRef(false)
 
   const videoId = useMemo(() => getYoutubeVideoId(youtubeUrl), [youtubeUrl])
 
@@ -48,7 +50,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     )
   }
 
-  // Listen for YouTube player ready event
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
       if (!e.data) return
@@ -56,6 +57,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
         if (data.event === 'onReady') {
           setPlayerReady(true)
+        }
+        // Sync playing state from YouTube's own events (desktop autoplay)
+        if (data.event === 'onStateChange') {
+          if (data.info === 1) setPlaying(true)
+          if (data.info === 2) setPlaying(false)
         }
       } catch {
         // ignore non-JSON messages
@@ -65,13 +71,12 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  // Send play/pause only after player is ready
+  // Only send play/pause after the user has interacted at least once
   useEffect(() => {
-    if (!playerReady) return
+    if (!playerReady || !hasUserInteracted.current) return
     postToPlayer(playing ? 'playVideo' : 'pauseVideo')
   }, [playing, playerReady])
 
-  // Send volume only after player is ready
   useEffect(() => {
     if (!playerReady) return
     postToPlayer('setVolume', [volume])
@@ -83,7 +88,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   }
 
   function handleToggle() {
-    setPlaying((p) => !p)
+    hasUserInteracted.current = true
+    const next = !playing
+    setPlaying(next)
+    // Direct call in click handler so mobile browsers treat it as a user gesture
+    postToPlayer(next ? 'playVideo' : 'pauseVideo')
     if (!compact) {
       setShowVolume(true)
       scheduleHideVolume()
@@ -110,66 +119,101 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     )
   }
 
-  const positionClass = compact
-    ? 'relative inline-flex flex-col items-center'
-    : 'fixed left-4 top-4 z-50 flex flex-col items-center'
-
   const playPauseButton = (
     <button
       type="button"
       onClick={handleToggle}
-      className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+      className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
       aria-label={playing ? 'Pausar música' : 'Retomar música'}
     >
       {playing ? (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <rect x="6" y="5" width="4" height="14" rx="1" />
           <rect x="14" y="5" width="4" height="14" rx="1" />
         </svg>
       ) : (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7L8 5z" />
         </svg>
       )}
     </button>
   )
 
-  return (
-    <div className={[positionClass, 'select-none gap-2'].join(' ')}>
-      {!compact && showVolume && (
-        <div className="flex flex-col items-center gap-2 animate-fade-in py-1">
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={handleVolumeChange}
-            aria-label="Volume da música"
-            className="accent-brand cursor-pointer"
-            style={{
-              writingMode: 'vertical-lr',
-              direction: 'rtl',
-              height: '100px',
-              width: '6px',
-            }}
+  if (compact) {
+    return (
+      <div className="relative inline-flex flex-col items-center select-none gap-2">
+        {playPauseButton}
+        {playerUrl ? (
+          <iframe
+            ref={iframeRef}
+            title="Música de fundo"
+            src={playerUrl}
+            className="w-0 h-0 opacity-0 pointer-events-none absolute"
+            allow="autoplay; encrypted-media"
           />
-          <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
-          </svg>
-        </div>
-      )}
+        ) : null}
+      </div>
+    )
+  }
 
-      {playPauseButton}
+  return (
+    <>
+      <motion.div
+        initial={{ y: -72, opacity: 0, scale: 0.92 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 24, delay: 0.4 }}
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 select-none"
+      >
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/60">
+          <svg
+            className="w-4 h-4 text-brand flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
+          </svg>
+
+          <span className="text-sm font-medium text-gray-700 leading-none">
+            {playing ? 'Tocando' : 'Música'}
+          </span>
+
+          {playPauseButton}
+
+          <motion.div
+            initial={false}
+            animate={{ width: showVolume ? 28 : 0, opacity: showVolume ? 1 : 0 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="overflow-hidden flex items-center justify-center"
+          >
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={volume}
+              onChange={handleVolumeChange}
+              aria-label="Volume da música"
+              className="accent-brand cursor-pointer"
+              style={{
+                writingMode: 'vertical-lr',
+                direction: 'rtl',
+                height: '64px',
+                width: '6px',
+              }}
+            />
+          </motion.div>
+        </div>
+      </motion.div>
 
       {playerUrl ? (
         <iframe
           ref={iframeRef}
           title="Música de fundo"
           src={playerUrl}
-          className="w-0 h-0 opacity-0 pointer-events-none absolute"
+          className="w-0 h-0 opacity-0 pointer-events-none fixed"
           allow="autoplay; encrypted-media"
         />
       ) : null}
-    </div>
+    </>
   )
 }

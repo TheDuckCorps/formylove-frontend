@@ -91,7 +91,7 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
       const d = data as RoletaEscolhasData
       const validOptions = d.options.filter((o) => o.trim().length > 0)
       while (validOptions.length < 2) validOptions.push(`Opção ${validOptions.length + 1}`)
-      return { options: validOptions }
+      return { phrase: d.phrase || '', options: validOptions }
     }
 
     case 'MENSAGEM_MULTIMIDIA': {
