@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { MedidorAmorData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
@@ -13,13 +13,33 @@ const MAX_Q = 150
 
 export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
-  function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  function loadFile(file: File) {
     const reader = new FileReader()
     reader.onload = (ev) => onChange({ imageUrl: ev.target?.result as string })
     reader.readAsDataURL(file)
+  }
+
+  function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) loadFile(file)
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file?.type.startsWith('image/')) loadFile(file)
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false)
   }
 
   return (
@@ -41,8 +61,13 @@ export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
         </label>
         <div
           onClick={() => fileRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragOver}
+          onDragLeave={handleDragLeave}
           className={[
             'upload-zone h-56 md:h-80 cursor-pointer',
+            isDragging ? 'border-brand bg-brand/5 scale-[1.01]' : '',
             fieldErrors.imageUrl ? 'border-red-400 ring-1 ring-red-200' : '',
           ].join(' ')}
           role="button"
@@ -60,7 +85,9 @@ export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
               <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
-              <span>Clique para carregar a imagem principal</span>
+              <span>
+                {isDragging ? 'Solte a imagem aqui' : 'Clique ou arraste a imagem principal'}
+              </span>
             </>
           )}
         </div>
