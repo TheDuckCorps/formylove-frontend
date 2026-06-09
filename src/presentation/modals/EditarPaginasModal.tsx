@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { PAGE_TYPES_META } from '@/core/entities/Page'
 
@@ -9,6 +9,11 @@ interface Props {
 export function EditarPaginasModal({ onClose }: Props) {
   const { selectedPages, removePage, reorderPages } = useSiteBuilderStore()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+
+  // Touch drag state — tracked in refs to avoid stale closures during touchmove
+  const touchDragIndexRef = useRef<number | null>(null)
+  const touchStartYRef = useRef<number>(0)
+  const itemHeightRef = useRef<number>(0)
 
   function getMeta(type: string) {
     return PAGE_TYPES_META.find((m) => m.type === type)
@@ -23,6 +28,38 @@ export function EditarPaginasModal({ onClose }: Props) {
     if (dragIndex === null || dragIndex === index) return
     reorderPages(dragIndex, index)
     setDragIndex(index)
+  }
+
+  // --- Touch drag handlers (mobile reorder) ---
+  // touch-action: none on the drag handle prevents the browser from claiming the
+  // touchmove event for scrolling, so these handlers reliably fire on mobile.
+  function handleTouchStart(e: React.TouchEvent, index: number) {
+    touchDragIndexRef.current = index
+    touchStartYRef.current = e.touches[0].clientY
+    const row = (e.currentTarget as HTMLElement).closest('[draggable]') as HTMLElement | null
+    itemHeightRef.current = row ? row.getBoundingClientRect().height : 48
+    setDragIndex(index)
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchDragIndexRef.current === null) return
+    const currentY = e.touches[0].clientY
+    const delta = currentY - touchStartYRef.current
+    const height = itemHeightRef.current || 48
+    const steps = Math.round(delta / height)
+    if (steps === 0) return
+    const newIndex = Math.max(0, Math.min(selectedPages.length - 1, touchDragIndexRef.current + steps))
+    if (newIndex !== touchDragIndexRef.current) {
+      reorderPages(touchDragIndexRef.current, newIndex)
+      touchDragIndexRef.current = newIndex
+      touchStartYRef.current = currentY
+      setDragIndex(newIndex)
+    }
+  }
+
+  function handleTouchEnd() {
+    touchDragIndexRef.current = null
+    setDragIndex(null)
   }
 
   return (
@@ -74,7 +111,18 @@ export function EditarPaginasModal({ onClose }: Props) {
                   onDragEnd={() => setDragIndex(null)}
                   className={`flex items-center gap-3 bg-brand-gradient text-white rounded-full px-4 py-2.5 cursor-grab active:cursor-grabbing transition ${dragIndex === i ? 'opacity-50' : ''}`}
                 >
-                  <svg className="w-4 h-4 opacity-70 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {/* drag handle — touch-action: none prevents the browser from intercepting
+                      the touch gesture for scroll, allowing touch reorder to work on mobile */}
+                  <svg
+                    className="w-4 h-4 opacity-70 flex-shrink-0"
+                    style={{ touchAction: 'none' }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    onTouchStart={(e) => handleTouchStart(e, i)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
                   </svg>
 
