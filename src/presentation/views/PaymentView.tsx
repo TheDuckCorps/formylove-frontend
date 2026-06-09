@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { z } from 'zod'
+import { useToast } from '@/shared/ui/ToastProvider'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
@@ -8,17 +10,21 @@ import { PLANS } from '@/core/entities/Site'
 import type { PlanType } from '@/core/entities/Site'
 import { usePaymentViewModel } from '../viewModels/usePaymentViewModel'
 
-interface LocationState {
-  qrCode?: string
-  qrCodeImage?: string
-  siteId?: string
-  siteSlug?: string
-  qrTemplate?: string
-  planType?: PlanType
-  email?: string
-  amount?: number
-  expiresIn?: number
-}
+const planTypeValues = ['BASIC', 'INTERMEDIATE', 'PREMIUM'] as const
+
+const locationStateSchema = z.object({
+  qrCode: z.string().optional(),
+  qrCodeImage: z.string().optional(),
+  siteId: z.string().optional(),
+  siteSlug: z.string().optional(),
+  qrTemplate: z.string().optional(),
+  planType: z.enum(planTypeValues).optional(),
+  email: z.string().optional(),
+  amount: z.number().optional(),
+  expiresIn: z.number().optional(),
+})
+
+type LocationState = z.infer<typeof locationStateSchema>
 
 function formatCurrency(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -27,7 +33,13 @@ function formatCurrency(cents: number) {
 export function PaymentView() {
   const navigate = useNavigate()
   const location = useLocation()
-  const state = (location.state as LocationState) ?? {}
+  const { showToast } = useToast()
+  const parsed = locationStateSchema.safeParse(location.state)
+  if (!parsed.success) {
+    navigate(ROUTES.HOME, { replace: true })
+    return null
+  }
+  const state: LocationState = parsed.data
 
   const { qrCode: initialQrCode, qrCodeImage: initialQrCodeImage, siteId, siteSlug, planType = 'BASIC', email, amount, expiresIn = 3000 } = state
   const plan = PLANS.find((p) => p.type === planType) ?? PLANS[0]
@@ -80,7 +92,7 @@ export function PaymentView() {
 
   function handleCopyPix() {
     navigator.clipboard.writeText(qrCode)
-      .then(() => alert('Código PIX copiado!'))
+      .then(() => showToast('Código PIX copiado!', 'success'))
       .catch(() => {})
   }
 
@@ -118,7 +130,9 @@ export function PaymentView() {
           <div className="relative">
             {qrCodeImage ? (
               <img
-                src={qrCodeImage.startsWith('data:') ? qrCodeImage : `data:image/png;base64,${qrCodeImage}`}
+                src={typeof qrCodeImage === 'string' && qrCodeImage.startsWith('data:image/')
+                  ? qrCodeImage
+                  : `data:image/png;base64,${qrCodeImage}`}
                 alt="QR Code PIX"
                 className={[
                   'w-52 h-52 rounded-xl transition-opacity',

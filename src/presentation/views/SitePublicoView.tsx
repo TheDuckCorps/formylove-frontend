@@ -17,6 +17,9 @@ import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
 
+const isValidImgSrc = (src: unknown): src is string =>
+  typeof src === 'string' && (src.startsWith('data:image/') || src.startsWith('https://'))
+
 interface BackendPage {
   id: string
   type: string
@@ -199,9 +202,9 @@ function renderPage(
       return {
         node: (
           <PageCard>
-            {(page.content.prompt as string) ? (
+            {isValidImgSrc(page.content.prompt) ? (
               <img
-                src={page.content.prompt as string}
+                src={page.content.prompt}
                 alt="Desenho livre"
                 className="w-full rounded-xl object-contain max-h-96"
               />

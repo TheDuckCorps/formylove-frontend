@@ -8,12 +8,13 @@ interface Props {
   onClose: () => void
 }
 
-type ViewState = 'form' | 'sent' | 'empty'
+type ViewState = 'form' | 'sent' | 'empty' | 'cooldown'
 
 export function ProfileModal({ onClose }: Props) {
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [view, setView] = useState<ViewState>('form')
+  const [cooldownMessage, setCooldownMessage] = useState('')
 
   const listSites = useListSitesByEmailMutation()
 
@@ -30,6 +31,15 @@ export function ProfileModal({ onClose }: Props) {
     setEmailError('')
     listSites.mutate({ email }, {
       onSuccess: ({ hasSites }) => setView(hasSites ? 'sent' : 'empty'),
+      onError: (error: any) => {
+        if (error?.response?.status === 429) {
+          const msg: string =
+            error.response.data?.message ??
+            'Um e-mail já foi enviado recentemente. Tente novamente em 2 minuto(s).'
+          setCooldownMessage(msg)
+          setView('cooldown')
+        }
+      },
     })
   }
 
@@ -141,6 +151,25 @@ export function ProfileModal({ onClose }: Props) {
               className="text-xs text-gray-400 hover:text-gray-600 mt-2"
             >
               Tentar outro e-mail
+            </button>
+          </div>
+        )}
+
+        {/* Cooldown — too many requests */}
+        {view === 'cooldown' && (
+          <div className="flex flex-col items-center gap-4 text-center py-4">
+            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-base font-semibold text-gray-800">Aguarde um momento</p>
+            <p className="text-sm text-gray-500 leading-relaxed">{cooldownMessage}</p>
+            <button
+              onClick={() => { setView('form'); listSites.reset() }}
+              className="text-xs text-gray-400 hover:text-gray-600 mt-2"
+            >
+              Tentar novamente
             </button>
           </div>
         )}
