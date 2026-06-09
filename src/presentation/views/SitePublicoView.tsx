@@ -459,16 +459,16 @@ export function SitePublicoView() {
       </main>
 
       {storyCount > 1 && (
-        <div className="fixed left-3 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-3">
+        <>
           <button
             type="button"
             onClick={handlePrev}
             disabled={isFirst}
             aria-label="Página anterior"
-            className="w-9 h-9 flex items-center justify-center text-gray-400 disabled:opacity-20 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+            className="fixed left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center shadow-md hover:bg-brand/90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
@@ -477,13 +477,13 @@ export function SitePublicoView() {
             onClick={handleNext}
             disabled={isLast}
             aria-label="Próxima página"
-            className="w-9 h-9 flex items-center justify-center text-gray-400 disabled:opacity-20 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+            className="fixed right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center shadow-md hover:bg-brand/90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-        </div>
+        </>
       )}
 
       <div className="text-center py-3">
