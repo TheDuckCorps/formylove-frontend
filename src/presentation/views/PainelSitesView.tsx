@@ -9,7 +9,13 @@ import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 export function PainelSitesView() {
   const navigate = useNavigate()
   const location = useLocation()
-  const email: string = (location.state as any)?.email ?? sessionStorage.getItem('hl_email') ?? ''
+  const email: string = (() => {
+    const fromState = (location.state as any)?.email
+    if (fromState) return fromState
+    const stored = sessionStorage.getItem('hl_email')
+    sessionStorage.removeItem('hl_email')
+    return stored ?? ''
+  })()
 
   const { data, isLoading, error } = useListSitesByEmail(email)
 
@@ -50,9 +56,27 @@ export function PainelSitesView() {
           {/* Error */}
           {error && (
             <div className="text-center py-16">
-              <div className="text-4xl mb-4">⚠️</div>
-              <p className="text-gray-600 mb-6">{getFriendlyMessage(error, 'Não foi possível carregar seus presentes.')}</p>
-              <Button onClick={() => navigate(ROUTES.PAINEL)}>Tentar novamente</Button>
+              {(error as any)?.response?.status === 429 ? (
+                <>
+                  <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <svg className="w-10 h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-semibold text-gray-800 mb-2">Aguarde um momento</p>
+                  <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                    {(error as any).response?.data?.message ??
+                      'Um e-mail já foi enviado recentemente. Tente novamente em 2 minuto(s).'}
+                  </p>
+                  <Button onClick={() => navigate(ROUTES.PAINEL)}>Voltar ao início</Button>
+                </>
+              ) : (
+                <>
+                  <div className="text-4xl mb-4">⚠️</div>
+                  <p className="text-gray-600 mb-6">{getFriendlyMessage(error, 'Não foi possível carregar seus presentes.')}</p>
+                  <Button onClick={() => navigate(ROUTES.PAINEL)}>Tentar novamente</Button>
+                </>
+              )}
             </div>
           )}
 

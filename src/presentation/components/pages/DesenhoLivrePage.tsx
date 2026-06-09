@@ -19,20 +19,26 @@ interface Props {
   fieldErrors?: Record<string, string>
 }
 
+function isValidExcalidrawData(d: unknown): boolean {
+  return d !== null && typeof d === 'object' && !Array.isArray(d)
+}
+
 function parseInitialData(
   excalidrawData: string | null | undefined,
 ): ExcalidrawInitialDataState | null {
   if (!excalidrawData) return null
   try {
-    const parsed = JSON.parse(excalidrawData) as {
+    const parsed = JSON.parse(excalidrawData)
+    if (!isValidExcalidrawData(parsed)) return null
+    const safe = parsed as {
       elements?: ExcalidrawInitialDataState['elements']
       appState?: ExcalidrawInitialDataState['appState']
       files?: ExcalidrawInitialDataState['files']
     }
     return {
-      elements: parsed.elements ?? [],
-      appState: parsed.appState,
-      files: parsed.files,
+      elements: safe.elements ?? [],
+      appState: safe.appState,
+      files: safe.files,
     }
   } catch {
     return null

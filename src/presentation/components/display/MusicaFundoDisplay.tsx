@@ -76,6 +76,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
+      if (e.origin !== 'https://www.youtube.com') return
       if (!e.data) return
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
