@@ -76,56 +76,83 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
         <p className="text-sm text-gray-800">{hint || 'Sem dica definida'}</p>
       </div>
 
-      <div ref={wordRef} className="flex flex-wrap justify-center gap-2">
+      <div ref={wordRef} className="flex flex-wrap justify-center gap-x-3 gap-y-2">
         {displaySecret ? (
-          [...displaySecret].map((char, idx) => {
-            // Use normalized char to decide if it's a letter or separator
-            const normalizedChar = stripAccents(char)
-            if (!/[A-Z]/.test(normalizedChar)) {
-              return <span key={`sep-${idx}`} className="w-3" />
-            }
-            // Revealed when the base letter (no accent) has been guessed
-            const revealed = guessedSet.has(normalizedChar)
-            return (
-              <motion.div
-                key={`${char}-${idx}`}
-                className={[
-                  'w-9 h-11 border-b-2 flex items-center justify-center rounded-sm',
-                  isComplete
-                    ? 'border-green-500 bg-green-100'
-                    : 'border-gray-400 bg-transparent',
-                ].join(' ')}
-                animate={isComplete ? { scale: [1, 1.18, 1] } : {}}
-                transition={{ delay: idx * 0.04, type: 'spring', stiffness: 380, damping: 16 }}
-              >
-                <AnimatePresence mode="wait">
-                  {revealed ? (
-                    <motion.span
-                      key="revealed"
-                      className={[
-                        'font-bold text-lg',
-                        isComplete ? 'text-green-700' : 'text-gray-800',
-                      ].join(' ')}
-                      initial={{ opacity: 0, y: -8, scale: 0.7 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-                    >
-                      {char}
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="hidden"
-                      className="font-bold text-lg text-gray-400"
-                      initial={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      _
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )
-          })
+          (() => {
+            // Group chars into word segments and separator segments so line breaks
+            // only happen between whole words, never mid-word.
+            type Segment =
+              | { isWord: true; chars: Array<{ char: string; idx: number }> }
+              | { isWord: false; key: string }
+
+            const segments: Segment[] = []
+            let current: Extract<Segment, { isWord: true }> | null = null
+
+            ;[...displaySecret].forEach((char, idx) => {
+              if (/[A-Z]/.test(stripAccents(char))) {
+                if (!current) {
+                  current = { isWord: true, chars: [] }
+                  segments.push(current)
+                }
+                current.chars.push({ char, idx })
+              } else {
+                current = null
+                segments.push({ isWord: false, key: `sep-${idx}` })
+              }
+            })
+
+            return segments.map((seg, gIdx) => {
+              if (!seg.isWord) return <div key={seg.key} className="w-2" />
+
+              return (
+                <div key={`word-${gIdx}`} className="flex gap-2">
+                  {seg.chars.map(({ char, idx }) => {
+                    const normalizedChar = stripAccents(char)
+                    const revealed = guessedSet.has(normalizedChar)
+                    return (
+                      <motion.div
+                        key={`${char}-${idx}`}
+                        className={[
+                          'w-9 h-11 border-b-2 flex items-center justify-center rounded-sm',
+                          isComplete
+                            ? 'border-green-500 bg-green-100'
+                            : 'border-gray-400 bg-transparent',
+                        ].join(' ')}
+                        animate={isComplete ? { scale: [1, 1.18, 1] } : {}}
+                        transition={{ delay: idx * 0.04, type: 'spring', stiffness: 380, damping: 16 }}
+                      >
+                        <AnimatePresence mode="wait">
+                          {revealed ? (
+                            <motion.span
+                              key="revealed"
+                              className={[
+                                'font-bold text-lg',
+                                isComplete ? 'text-green-700' : 'text-gray-800',
+                              ].join(' ')}
+                              initial={{ opacity: 0, y: -8, scale: 0.7 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 18 }}
+                            >
+                              {char}
+                            </motion.span>
+                          ) : (
+                            <motion.span
+                              key="hidden"
+                              className="font-bold text-lg text-gray-400"
+                              initial={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                            >
+                              _
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              )
+            })
+          })()
         ) : (
           <p className="text-sm text-gray-400">Sem palavra/frase definida</p>
         )}

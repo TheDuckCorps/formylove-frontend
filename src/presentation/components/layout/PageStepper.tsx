@@ -5,6 +5,8 @@ import type { PageValidationResult } from '@/core/validation/pageSchemas'
 
 interface Props {
   validationResults?: PageValidationResult[]
+  hideMobileButton?: boolean
+  externalMobileOpen?: React.MutableRefObject<(() => void) | null>
 }
 
 interface StepperItemProps {
@@ -60,11 +62,25 @@ function StepperItem({
         dragIndex === index ? 'opacity-50' : '',
       ].join(' ')}
     >
+      <div className="flex items-center justify-center flex-shrink-0 h-11">
+        <svg
+          aria-hidden
+          className="w-3.5 h-3.5 text-gray-300 group-hover/step:text-gray-400 transition-colors"
+          viewBox="0 0 10 16" fill="currentColor"
+        >
+          <circle cx="2.5" cy="2" r="1.5" />
+          <circle cx="7.5" cy="2" r="1.5" />
+          <circle cx="2.5" cy="8" r="1.5" />
+          <circle cx="7.5" cy="8" r="1.5" />
+          <circle cx="2.5" cy="14" r="1.5" />
+          <circle cx="7.5" cy="14" r="1.5" />
+        </svg>
+      </div>
       <div className="flex flex-col items-center flex-shrink-0">
         <button
           type="button"
           onClick={() => onSelect(index)}
-          aria-label={`${meta?.label ?? 'Presente'} ${index + 1}${invalid ? ', incompleto' : ''}`}
+          aria-label={`${meta?.label ?? 'Página'} ${index + 1}${invalid ? ', incompleto' : ''}`}
           aria-current={isActive ? 'step' : undefined}
           className={[
             'relative w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all',
@@ -118,7 +134,7 @@ function StepperItem({
           >
             {meta?.label}
           </p>
-          <p className="text-xs text-gray-400">Presente {index + 1}</p>
+          <p className="text-xs text-gray-400">Página {index + 1}</p>
         </button>
 
         <button
@@ -139,7 +155,7 @@ function StepperItem({
   )
 }
 
-export function PageStepper({ validationResults = [] }: Props) {
+export function PageStepper({ validationResults = [], hideMobileButton = false, externalMobileOpen }: Props) {
   const {
     selectedPages,
     currentPageIndex,
@@ -149,6 +165,9 @@ export function PageStepper({ validationResults = [] }: Props) {
   } = useSiteBuilderStore()
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Expose open function to parent so it can trigger the drawer from a shared bottom bar
+  if (externalMobileOpen) externalMobileOpen.current = () => setMobileOpen(true)
 
   function isPageInvalid(pageId: string) {
     return validationResults.some((r) => r.pageId === pageId && !r.isValid)
@@ -196,28 +215,42 @@ export function PageStepper({ validationResults = [] }: Props) {
     <>
       <aside className="hidden lg:block w-52 flex-shrink-0 sticky top-24">
         <p className="text-xs font-semibold text-brand uppercase tracking-wide mb-4">
-          Seus presentes
+          Suas páginas
         </p>
-        <nav aria-label="Navegação entre presentes" className="flex flex-col">
-          {renderStepperItems(false)}
+        <nav aria-label="Navegação entre páginas" className="flex flex-col">
+          {renderStepperItems(true)}
           {selectedPages.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">Nenhum presente ainda.</p>
+            <p className="text-sm text-gray-400 text-center py-4">Nenhuma página ainda.</p>
           )}
         </nav>
+        {selectedPages.length > 1 && (
+          <p className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Arraste para reordenar
+          </p>
+        )}
       </aside>
 
-      <div className="lg:hidden fixed bottom-20 left-4 z-30">
+      {!hideMobileButton && <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-30">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          aria-label="Abrir lista de presentes"
-          className="w-12 h-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center hover:opacity-90 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+          aria-label="Abrir lista de páginas"
+          className="flex items-center gap-2 bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-lg hover:opacity-90 active:scale-95 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
+          Suas páginas
+          {selectedPages.length > 0 && (
+            <span className="bg-white/25 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+              {selectedPages.length}
+            </span>
+          )}
         </button>
-      </div>
+      </div>}
 
       {mobileOpen && (
         <div
@@ -229,7 +262,7 @@ export function PageStepper({ validationResults = [] }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Seus presentes</h2>
+              <h2 className="text-lg font-bold text-gray-800">Suas páginas</h2>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -241,7 +274,7 @@ export function PageStepper({ validationResults = [] }: Props) {
                 </svg>
               </button>
             </div>
-            <nav aria-label="Navegação entre presentes" className="flex flex-col">
+            <nav aria-label="Navegação entre páginas" className="flex flex-col">
               {renderStepperItems(true)}
             </nav>
           </div>
