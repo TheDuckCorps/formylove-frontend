@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { PAGE_TYPES_META } from '@/core/entities/Page'
 import type { PageValidationResult } from '@/core/validation/pageSchemas'
@@ -23,6 +23,9 @@ interface StepperItemProps {
   onDragStart: (index: number) => void
   onDragOver: (e: React.DragEvent, index: number) => void
   onDragEnd: () => void
+  onTouchStart: (e: React.TouchEvent, index: number) => void
+  onTouchMove: (e: React.TouchEvent) => void
+  onTouchEnd: () => void
 }
 
 function StepperItem({
@@ -39,6 +42,9 @@ function StepperItem({
   onDragStart,
   onDragOver,
   onDragEnd,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
 }: StepperItemProps) {
   const meta = PAGE_TYPES_META.find((m) => m.type === page.type)
 
@@ -62,7 +68,15 @@ function StepperItem({
         dragIndex === index ? 'opacity-50' : '',
       ].join(' ')}
     >
-      <div className="flex items-center justify-center flex-shrink-0 h-11">
+      {/* drag handle — touch-action: none tells the browser not to scroll on this element,
+          allowing our touch handlers to fire and drive reorder on mobile */}
+      <div
+        className="flex items-center justify-center flex-shrink-0 h-11"
+        style={{ touchAction: 'none' }}
+        onTouchStart={(e) => onTouchStart(e, index)}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <svg
           aria-hidden
           className="w-3.5 h-3.5 text-gray-300 group-hover/step:text-gray-400 transition-colors"
@@ -166,6 +180,11 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
 
+  // Touch drag state — tracked in refs to avoid stale closures during touchmove
+  const touchDragIndexRef = useRef<number | null>(null)
+  const touchStartYRef = useRef<number>(0)
+  const itemHeightRef = useRef<number>(0)
+
   // Expose open function to parent so it can trigger the drawer from a shared bottom bar
   if (externalMobileOpen) externalMobileOpen.current = () => setMobileOpen(true)
 
@@ -190,6 +209,39 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
     setDragIndex(index)
   }
 
+  // --- Touch drag handlers (mobile reorder) ---
+  // touch-action: none on the drag handle prevents the browser from claiming the
+  // touchmove event for scrolling, so these handlers reliably fire on mobile.
+  function handleTouchStart(e: React.TouchEvent, index: number) {
+    touchDragIndexRef.current = index
+    touchStartYRef.current = e.touches[0].clientY
+    // Measure approximate row height from the touch target's parent row
+    const row = (e.currentTarget as HTMLElement).closest('[draggable]') as HTMLElement | null
+    itemHeightRef.current = row ? row.getBoundingClientRect().height : 48
+    setDragIndex(index)
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (touchDragIndexRef.current === null) return
+    const currentY = e.touches[0].clientY
+    const delta = currentY - touchStartYRef.current
+    const height = itemHeightRef.current || 48
+    const steps = Math.round(delta / height)
+    if (steps === 0) return
+    const newIndex = Math.max(0, Math.min(selectedPages.length - 1, touchDragIndexRef.current + steps))
+    if (newIndex !== touchDragIndexRef.current) {
+      reorderPages(touchDragIndexRef.current, newIndex)
+      touchDragIndexRef.current = newIndex
+      touchStartYRef.current = currentY
+      setDragIndex(newIndex)
+    }
+  }
+
+  function handleTouchEnd() {
+    touchDragIndexRef.current = null
+    setDragIndex(null)
+  }
+
   function renderStepperItems(forceShowLabel: boolean) {
     return selectedPages.map((page, i) => (
       <StepperItem
@@ -207,6 +259,9 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={() => setDragIndex(null)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       />
     ))
   }
