@@ -93,7 +93,7 @@ export function EscolherPaginasView() {
         </div>
       )}
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6 pb-28 md:pb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">
           Escolha suas páginas
         </h1>
@@ -184,7 +184,7 @@ export function EscolherPaginasView() {
                 <p className="text-sm text-gray-500 leading-relaxed pointer-events-none">{meta.description}</p>
                 {typeMax !== undefined && (
                   <p className="text-[10px] text-gray-400 pointer-events-none">
-                    {typeMax === 1 ? 'Máx. 1 por presente' : `Máx. ${typeMax} por presente`}
+                    {typeMax === 1 ? 'Máx. 1 por site' : `Máx. ${typeMax} por site`}
                   </p>
                 )}
 
@@ -212,12 +212,21 @@ export function EscolherPaginasView() {
           })}
         </div>
 
-        <div className="max-w-md mx-auto">
+        <div className="hidden md:block max-w-md mx-auto">
           <Button size="lg" fullWidth disabled={selectedPages.length === 0} onClick={handleContinuar}>
             Continuar ({selectedPages.length} página{selectedPages.length !== 1 ? 's' : ''})
           </Button>
         </div>
       </main>
+
+      {/* Floating continue bar — mobile only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur border-t border-gray-100 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+        <Button size="lg" fullWidth disabled={selectedPages.length === 0} onClick={handleContinuar}>
+          {selectedPages.length === 0
+            ? 'Selecione ao menos uma página'
+            : `Continuar (${selectedPages.length} página${selectedPages.length !== 1 ? 's' : ''})`}
+        </Button>
+      </div>
 
       <Footer />
     </div>

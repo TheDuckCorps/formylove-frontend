@@ -32,7 +32,7 @@ export function Footer() {
           </a>
 
           <div className="flex items-center gap-3">
-            <span>© 2025. Todos os direitos reservados</span>
+            <span>© 2025 The Duck Corporation. Todos os direitos reservados</span>
             <Link to={ROUTES.POLITICA} className="hover:text-brand transition">Política de Privacidade</Link>
             <span>|</span>
             <Link to={ROUTES.TERMOS} className="hover:text-brand transition">Termos de Uso</Link>
