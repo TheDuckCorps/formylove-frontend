@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import { nanoid } from '../utils/nanoid'
 import type { PageItem, PageType, AnyPageData } from '@/core/entities/Page'
 import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
@@ -125,6 +125,19 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
     }),
     {
       name: BUILDER_STORAGE_KEY,
+      storage: createJSONStorage(() => ({
+        getItem: (name) => localStorage.getItem(name),
+        setItem: (name, value) => {
+          try {
+            localStorage.setItem(name, value)
+          } catch (e) {
+            if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+              console.warn('localStorage quota exceeded — state not persisted')
+            }
+          }
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      })),
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { validationResults, ...persisted } = state

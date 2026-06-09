@@ -11,7 +11,13 @@ const CODE_LENGTH = 6
 export function PainelVerificarView() {
   const navigate = useNavigate()
   const location = useLocation()
-  const email: string = (location.state as any)?.email ?? sessionStorage.getItem('hl_email') ?? ''
+  const email: string = (() => {
+    const fromState = (location.state as any)?.email
+    if (fromState) return fromState
+    const stored = sessionStorage.getItem('hl_email')
+    sessionStorage.removeItem('hl_email')
+    return stored ?? ''
+  })()
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(''))
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])

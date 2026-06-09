@@ -4,18 +4,35 @@ import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
 import { CropModal } from '../common/CropModal'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+
 interface Props {
   data: RaspadinhaSurpresaData
   onChange: (data: Partial<RaspadinhaSurpresaData>) => void
   fieldErrors?: Record<string, string>
+  onError?: (message: string) => void
 }
 
-export function RaspadinhaSurpresaPage({ data, onChange, fieldErrors = {} }: Props) {
+export function RaspadinhaSurpresaPage({ data, onChange, fieldErrors = {}, onError }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   function loadFile(file: File) {
+    setUploadError(null)
+    if (!file.type.startsWith('image/')) {
+      const msg = 'Apenas imagens são permitidas.'
+      setUploadError(msg)
+      onError?.(msg)
+      return
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      const msg = 'A imagem deve ter no máximo 5 MB.'
+      setUploadError(msg)
+      onError?.(msg)
+      return
+    }
     const reader = new FileReader()
     reader.onload = (ev) => setPendingCropSrc(ev.target?.result as string)
     reader.readAsDataURL(file)
@@ -99,6 +116,9 @@ export function RaspadinhaSurpresaPage({ data, onChange, fieldErrors = {} }: Pro
             )}
           </div>
           <FieldError message={fieldErrors.imageUrl} />
+          {uploadError && (
+            <p role="alert" className="text-sm text-red-600 mt-1">{uploadError}</p>
+          )}
         </div>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
       </div>

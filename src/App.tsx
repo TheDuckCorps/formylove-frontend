@@ -13,9 +13,7 @@ import { PaymentView } from '@/presentation/views/PaymentView'
 import { PrivacidadeView } from '@/presentation/views/PrivacidadeView'
 import { TermosUsoView } from '@/presentation/views/TermosUsoView'
 import { SitePublicoView } from '@/presentation/views/SitePublicoView'
-import { PainelView } from '@/presentation/views/PainelView'
-import { PainelVerificarView } from '@/presentation/views/PainelVerificarView'
-import { PainelSitesView } from '@/presentation/views/PainelSitesView'
+
 
 // Layout
 import { CreationFlowLayout } from '@/presentation/layouts/CreationFlowLayout'
@@ -69,9 +67,9 @@ export default function App() {
         </Route>
 
         {/* ── User panel ──────────────────────────────────── */}
-        <Route path={ROUTES.PAINEL} element={<PainelView />} />
+        {/* <Route path={ROUTES.PAINEL} element={<PainelView />} />
         <Route path={ROUTES.PAINEL_VERIFICAR} element={<PainelVerificarView />} />
-        <Route path={ROUTES.PAINEL_SITES} element={<PainelSitesView />} />
+        <Route path={ROUTES.PAINEL_SITES} element={<PainelSitesView />} /> */}
 
         {/* ── Public site view ─────────────────────────────── */}
         <Route path={ROUTES.SITE_PUBLICO} element={<SitePublicoView />} />

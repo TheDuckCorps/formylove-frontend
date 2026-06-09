@@ -4,20 +4,37 @@ import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
 import { CropModal } from '../common/CropModal'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
+
 interface Props {
   data: MedidorAmorData
   onChange: (data: Partial<MedidorAmorData>) => void
   fieldErrors?: Record<string, string>
+  onError?: (message: string) => void
 }
 
 const MAX_Q = 150
 
-export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
+export function MedidorAmorPage({ data, onChange, fieldErrors = {}, onError }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [pendingCropSrc, setPendingCropSrc] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   function loadFile(file: File) {
+    setUploadError(null)
+    if (!file.type.startsWith('image/')) {
+      const msg = 'Apenas imagens são permitidas.'
+      setUploadError(msg)
+      onError?.(msg)
+      return
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      const msg = 'A imagem deve ter no máximo 5 MB.'
+      setUploadError(msg)
+      onError?.(msg)
+      return
+    }
     const reader = new FileReader()
     reader.onload = (ev) => setPendingCropSrc(ev.target?.result as string)
     reader.readAsDataURL(file)
@@ -108,6 +125,9 @@ export function MedidorAmorPage({ data, onChange, fieldErrors = {} }: Props) {
             )}
           </div>
           <FieldError message={fieldErrors.imageUrl} />
+          {uploadError && (
+            <p role="alert" className="text-sm text-red-600 mt-1">{uploadError}</p>
+          )}
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImage} />
         </div>
       </div>
