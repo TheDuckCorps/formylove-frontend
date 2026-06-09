@@ -160,7 +160,7 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full h-auto block pointer-events-none select-none"
+            className="w-full max-h-[600px] object-contain block pointer-events-none select-none"
           />
         ) : (
           <div className="w-full min-h-48 flex items-center justify-center text-gray-400 text-sm">
