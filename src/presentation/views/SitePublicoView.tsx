@@ -375,7 +375,7 @@ export function SitePublicoView() {
         />
       ) : null}
 
-      <div className={`flex justify-center pb-2 relative z-10 bg-page-gradient/80 ${musicPages[0] ? 'pt-16' : 'pt-5'}`}>
+      <div className="flex justify-center pt-5 pb-2 relative z-10 bg-page-gradient/80">
         <Logo size="sm" />
       </div>
 
