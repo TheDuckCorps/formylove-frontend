@@ -67,6 +67,14 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&rel=0&playsinline=1`
   }, [videoId])
 
+  // All origins YouTube iframes can post messages from.
+  // youtu.be is a share shortener only — embeds always use www.youtube.com.
+  const YOUTUBE_ORIGINS = new Set([
+    'https://www.youtube.com',
+    'https://youtube.com',
+    'https://youtu.be',
+  ])
+
   function postToPlayer(command: string, args: unknown[] = []) {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: command, args }),
@@ -76,7 +84,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
-      if (e.origin !== 'https://www.youtube.com') return
+      if (!YOUTUBE_ORIGINS.has(e.origin)) return
       if (!e.data) return
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
