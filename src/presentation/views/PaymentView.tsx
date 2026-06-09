@@ -7,7 +7,6 @@ import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
-import type { PlanType } from '@/core/entities/Site'
 import { usePaymentViewModel } from '../viewModels/usePaymentViewModel'
 
 const planTypeValues = ['BASIC', 'INTERMEDIATE', 'PREMIUM'] as const

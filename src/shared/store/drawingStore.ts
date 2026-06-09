@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 interface DrawingState {
   drawingDataUrl: string | null
@@ -16,14 +16,11 @@ export const useDrawingStore = create<DrawingState>()(
     }),
     {
       name: 'hl-drawing',
-      storage: {
-        getItem: (name) => {
-          const value = localStorage.getItem(name)
-          return value ? JSON.parse(value) : null
-        },
+      storage: createJSONStorage(() => ({
+        getItem: (name) => localStorage.getItem(name),
         setItem: (name, value) => {
           try {
-            localStorage.setItem(name, JSON.stringify(value))
+            localStorage.setItem(name, value)
           } catch (e) {
             if (e instanceof DOMException && e.name === 'QuotaExceededError') {
               console.warn('localStorage quota exceeded — state not persisted')
@@ -31,7 +28,7 @@ export const useDrawingStore = create<DrawingState>()(
           }
         },
         removeItem: (name) => localStorage.removeItem(name),
-      },
+      })),
     },
   ),
 )
