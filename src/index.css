@@ -5,6 +5,7 @@
 
 @layer base {
   * { box-sizing: border-box; }
+  html, body { overflow-x: hidden; }
   body {
     @apply font-sans text-gray-800 bg-white;
     -webkit-font-smoothing: antialiased;
