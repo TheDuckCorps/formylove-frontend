@@ -152,7 +152,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
 
       <div
         ref={containerRef}
-        className="relative w-full h-80 md:h-96 lg:h-[520px] rounded-xl overflow-hidden border border-gray-200 bg-gray-100 touch-none select-none"
+        className="relative w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-100 touch-none select-none"
         onContextMenu={(e) => e.preventDefault()}
         style={{ WebkitTouchCallout: 'none' }}
       >
@@ -161,10 +161,10 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full h-full object-cover pointer-events-none select-none"
+            className="w-full max-h-[600px] object-contain block pointer-events-none select-none"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+          <div className="w-full min-h-48 flex items-center justify-center text-gray-400 text-sm">
             Sem imagem definida
           </div>
         )}
