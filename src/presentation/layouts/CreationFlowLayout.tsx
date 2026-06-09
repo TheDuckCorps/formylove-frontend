@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
+import { useSiteBuilderStore, BUILDER_STORAGE_KEY } from '@/shared/store/siteBuilderStore'
 
 export function CreationFlowLayout() {
   const reset = useSiteBuilderStore((s) => s.reset)
@@ -8,6 +8,7 @@ export function CreationFlowLayout() {
   useEffect(() => {
     return () => {
       reset()
+      localStorage.removeItem(BUILDER_STORAGE_KEY)
     }
   }, [reset])
 

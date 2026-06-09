@@ -123,16 +123,16 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     <button
       type="button"
       onClick={handleToggle}
-      className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+      className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
       aria-label={playing ? 'Pausar música' : 'Retomar música'}
     >
       {playing ? (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
           <rect x="6" y="5" width="4" height="14" rx="1" />
           <rect x="14" y="5" width="4" height="14" rx="1" />
         </svg>
       ) : (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
           <path d="M8 5v14l11-7L8 5z" />
         </svg>
       )}

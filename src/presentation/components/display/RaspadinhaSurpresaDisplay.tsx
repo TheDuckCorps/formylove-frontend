@@ -175,6 +175,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
             width={600}
             height={360}
             className="absolute inset-0 w-full h-full touch-none cursor-crosshair"
+            style={{ maxWidth: '100%' }}
             onMouseDown={startScratch}
             onMouseMove={scratch}
             onTouchStart={startScratch}
