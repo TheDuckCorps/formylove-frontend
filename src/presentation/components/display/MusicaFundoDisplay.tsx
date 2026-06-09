@@ -92,12 +92,17 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  // On player ready: attempt autoplay directly. hasUserInteracted stays false so
-  // the sync effect below won't fire and create a race condition.
+  // On player ready: attempt autoplay and optimistically mark as playing.
+  // We set playing=true here because onStateChange(info=1) is unreliable when
+  // autoplay=1 starts the video before the postMessage listener is ready.
+  // If the browser actually blocks autoplay, onStateChange(info=2) will fire
+  // and correct the state back to false.
+  // hasUserInteracted stays false so the sync effect below won't race with this.
   useEffect(() => {
     if (!playerReady) return
     postToPlayer('playVideo')
     postToPlayer('setVolume', [volume])
+    setPlaying(true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerReady])
 
