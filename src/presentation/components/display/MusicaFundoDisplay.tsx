@@ -343,6 +343,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
                         onChange={handleVolumeChange}
                         aria-label="Volume da música"
                         className="accent-brand cursor-pointer w-full"
+                        // Stop the pointer event from bubbling to the framer-motion
+                        // drag handler on the parent widget — otherwise dragging the
+                        // slider is treated as dragging the entire widget and the
+                        // slider's onChange never fires.
+                        onPointerDown={e => e.stopPropagation()}
                       />
                     </motion.div>
                   )}
