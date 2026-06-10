@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useMotionValue, animate, AnimatePresence } from 'framer-motion'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 
 interface Props {
   youtubeUrl: string
@@ -25,6 +26,8 @@ function getYoutubeVideoId(url: string): string | null {
 const PAD = 16
 
 export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
+  const theme = useSiteTheme()
+
   /* ── audio state ─────────────────────────────────────────────── */
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(70)
@@ -194,7 +197,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
             setPlaying(next)
             postToPlayer(next ? 'playVideo' : 'pauseVideo')
           }}
-          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+          className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[var(--site-primary)] transition focus-visible:outline-none focus-visible:ring-2 rounded-full"
+          style={{ outlineColor: theme.primary }}
           aria-label={playing ? 'Pausar música' : 'Retomar música'}
         >
           {playing ? (
@@ -225,8 +229,9 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
   const MusicIcon = (
     <motion.svg
-      className="w-5 h-5 text-brand flex-shrink-0"
+      className="w-5 h-5 flex-shrink-0"
       fill="currentColor"
+      style={{ color: theme.primary }}
       viewBox="0 0 24 24"
       aria-hidden
       animate={playing ? { rotate: [0, 12, -12, 0] } : { rotate: 0 }}
@@ -260,7 +265,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
         transition={{ type: 'spring', stiffness: 320, damping: 24, delay: 0.3 }}
       >
         <div
-          className="flex items-center rounded-full bg-white/85 backdrop-blur-md shadow-lg border border-white/60 px-4 gap-0 overflow-hidden h-12"
+          className="flex items-center rounded-full bg-white/85 backdrop-blur-md shadow-lg border px-4 gap-0 overflow-hidden h-12"
+          style={{ borderColor: theme.borderSoft, boxShadow: theme.buttonShadow }}
           onMouseEnter={() => introPhase === 'idle' && setExpanded(true)}
           onMouseLeave={() => { setExpanded(false); setShowVolume(false) }}
           onPointerUp={(e) => {
@@ -309,7 +315,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
                   type="button"
                   onClick={handleToggle}
                   data-testid="music-play-btn"
-                  className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand transition rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand flex-shrink-0"
+                  className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-[var(--site-primary)] transition rounded-full focus-visible:outline-none focus-visible:ring-2 flex-shrink-0"
+                  style={{ outlineColor: theme.primary }}
                   aria-label={playing ? 'Pausar música' : 'Retomar música'}
                 >
                   {playing ? (
@@ -342,7 +349,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
                         value={volume}
                         onChange={handleVolumeChange}
                         aria-label="Volume da música"
-                        className="accent-brand cursor-pointer w-full"
+                        className="cursor-pointer w-full"
+                        style={{ accentColor: theme.primary }}
                         // Stop the pointer event from bubbling to the framer-motion
                         // drag handler on the parent widget — otherwise dragging the
                         // slider is treated as dragging the entire widget and the

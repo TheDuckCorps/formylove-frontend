@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
+import { SiteThemeProvider, useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { Button } from '../components/common/Button'
 import { Logo } from '../components/common/Logo'
 import { LivePreviewPanel } from '../components/preview/LivePreviewPanel'
 
-export function PreviewView() {
+function PreviewViewContent() {
   const navigate = useNavigate()
+  const theme = useSiteTheme()
   const { selectedPages } = useSiteBuilderStore()
   const [currentIdx, setCurrentIdx] = useState(0)
 
@@ -18,13 +20,12 @@ export function PreviewView() {
   }
 
   return (
-    <div className="min-h-screen bg-page-gradient flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen flex flex-col" style={{ background: theme.pageGradient }}>
       <header className="w-full border-b border-gray-100 bg-white sticky top-0 z-40">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-brand transition"
+            className="flex items-center gap-1.5 text-sm text-gray-500 transition hover:text-[var(--site-primary)]"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -32,7 +33,7 @@ export function PreviewView() {
             Voltar e editar
           </button>
 
-          <Logo size="sm" />
+          <Logo size="sm" color={theme.primary} />
 
           <div className="w-24 text-right">
             <span className="text-xs text-gray-400">
@@ -42,7 +43,6 @@ export function PreviewView() {
         </div>
       </header>
 
-      {/* Preview notice */}
       <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center">
         <p className="text-xs text-amber-700 font-medium">
           Pré-visualização — visível somente para você nesta sessão
@@ -59,7 +59,6 @@ export function PreviewView() {
             />
           )}
 
-          {/* Page navigation */}
           <div className="flex items-center justify-between mt-6 gap-3">
             <Button
               variant="outline"
@@ -70,16 +69,16 @@ export function PreviewView() {
               ← Anterior
             </Button>
 
-            {/* Dots */}
             <div className="flex gap-1.5">
               {selectedPages.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIdx(i)}
                   className={[
-                    'w-2 h-2 rounded-full transition-all',
-                    i === currentIdx ? 'bg-brand w-4' : 'bg-gray-300',
+                    'h-2 rounded-full transition-all',
+                    i === currentIdx ? 'w-4' : 'w-2 bg-gray-300',
                   ].join(' ')}
+                  style={i === currentIdx ? { backgroundColor: theme.primary } : undefined}
                 />
               ))}
             </div>
@@ -102,5 +101,15 @@ export function PreviewView() {
         </div>
       </main>
     </div>
+  )
+}
+
+export function PreviewView() {
+  const siteColor = useSiteBuilderStore((s) => s.siteColor)
+
+  return (
+    <SiteThemeProvider color={siteColor}>
+      <PreviewViewContent />
+    </SiteThemeProvider>
   )
 }

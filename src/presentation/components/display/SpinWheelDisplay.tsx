@@ -1,19 +1,19 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { startWheelSpin, playWinSound } from '@/shared/utils/spinWheelAudio'
+import { getContrastTextColor, normalizeWheelColors } from '@/shared/constants/colorPalette'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
+import { Button } from '../common/Button'
 
 interface Props {
   phrase?: string
   options: string[]
+  colors?: string[]
   onComplete?: () => void
   previewMode?: boolean
 }
-
-const COLORS = [
-  '#C62A87', '#E91E8C', '#a855f7', '#db2777',
-  '#8b5cf6', '#ec4899', '#7c3aed', '#f472b6',
-]
 
 const WINNER_COLOR = '#16a34a'
 const SPIN_DURATION_MS = 4000
@@ -49,7 +49,9 @@ function truncate(text: string, max = 11) {
 }
 
 
-export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = false }: Props) {
+export function SpinWheelDisplay({ phrase, options, colors, onComplete, previewMode = false }: Props) {
+  const theme = useSiteTheme()
+  const activeColors = normalizeWheelColors(colors)
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null)
@@ -118,7 +120,7 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
     }
 
     if (!previewMode && wheelRef.current) {
-      fireConfettiFrom(wheelRef.current)
+      fireConfettiFrom(wheelRef.current, getThemeConfettiColors(theme))
       playWinSound()
     }
 
@@ -151,7 +153,13 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
         <p className="text-lg font-bold text-gray-800 text-center px-4">{phrase}</p>
       )}
 
-      <div className="lg:scale-125 lg:my-8 transition-transform" ref={wheelRef}>
+      <div
+        ref={wheelRef}
+        className={[
+          'transition-transform',
+          previewMode ? 'scale-[0.95] my-1' : 'lg:scale-125 lg:my-8',
+        ].join(' ')}
+      >
       <div className="relative flex items-center justify-center">
         {/* Pointer */}
         <div
@@ -159,7 +167,7 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
           style={{ marginTop: '-2px' }}
         >
           <svg width="22" height="32" viewBox="0 0 22 32">
-            <polygon points="11,32 0,0 22,0" fill="#C62A87" />
+            <polygon points="11,32 0,0 22,0" fill={theme.primary} />
             <polygon points="11,32 0,0 22,0" fill="none" stroke="white" strokeWidth="1.5" />
           </svg>
         </div>
@@ -191,10 +199,11 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
             {options.map((opt, i) => {
               const { x, y, rotation: rot } = textTransform(i, n)
               const isWinner = !spinning && winnerIndex === i
-              const fill = isWinner ? WINNER_COLOR : COLORS[i % COLORS.length]
+              const segmentColor = isWinner ? WINNER_COLOR : activeColors[i % activeColors.length]
+              const labelColor = getContrastTextColor(segmentColor)
               return (
                 <g key={i} filter={isWinner ? 'url(#winner-glow)' : undefined}>
-                  <path d={segmentPath(i, n)} fill={fill} />
+                  <path d={segmentPath(i, n)} fill={segmentColor} />
                   <text
                     x={x}
                     y={y}
@@ -203,7 +212,7 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
                     transform={`rotate(${rot},${x},${y})`}
                     fontSize={n <= 4 ? '13' : '11'}
                     fontWeight="700"
-                    fill="white"
+                    fill={labelColor}
                   >
                     {truncate(opt, n <= 4 ? 14 : 10)}
                   </text>
@@ -225,7 +234,7 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
             })}
 
             <circle cx={cx} cy={cy} r={18} fill="white" />
-            <circle cx={cx} cy={cy} r={14} fill="#C62A87" />
+            <circle cx={cx} cy={cy} r={14} fill={theme.primary} />
           </svg>
         </div>
 
@@ -250,11 +259,11 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
       </div>
       </div>
 
-      <button
+      <Button
         onClick={handleSpin}
         disabled={spinning}
-        className="px-10 py-3 rounded-full font-bold text-white text-base shadow-md transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-        style={{ background: 'linear-gradient(135deg, #C62A87, #E91E8C)' }}
+        size="md"
+        className="px-10 rounded-full font-bold"
       >
         {spinning ? (
           <span className="flex items-center gap-2">
@@ -265,7 +274,7 @@ export function SpinWheelDisplay({ phrase, options, onComplete, previewMode = fa
             Girando…
           </span>
         ) : winner ? 'Girar novamente' : 'Girar!'}
-      </button>
+      </Button>
 
       <AnimatePresence mode="wait">
         {winner && showResult && (

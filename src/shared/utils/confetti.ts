@@ -1,14 +1,14 @@
 import confettiLib from 'canvas-confetti'
 
-const COLORS = ['#C62A87', '#E91E8C', '#a855f7', '#f472b6', '#fbbf24', '#34d399', '#fff']
+const DEFAULT_COLORS = ['#C62A87', '#E91E8C', '#a855f7', '#f472b6', '#fbbf24', '#34d399', '#fff']
 
-export function fireConfettiFrom(el: HTMLElement) {
+export function fireConfettiFrom(el: HTMLElement, colors: string[] = DEFAULT_COLORS) {
   const rect = el.getBoundingClientRect()
   const originX = (rect.left + rect.width / 2) / window.innerWidth
   const originY = (rect.top + rect.height / 2) / window.innerHeight
 
   const desktop = window.innerWidth >= 1024
-  const base = { origin: { x: originX, y: originY }, colors: COLORS, disableForReducedMotion: true }
+  const base = { origin: { x: originX, y: originY }, colors, disableForReducedMotion: true }
 
   const p1 = desktop ? 140 : 80
   const p2 = desktop ? 100 : 60

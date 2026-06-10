@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { initScratchSound, setScratchActive } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
@@ -13,6 +15,7 @@ interface Props {
 
 
 export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, previewMode = false }: Props) {
+  const theme = useSiteTheme()
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const lastPosRef = useRef<{ x: number; y: number } | null>(null)
@@ -104,7 +107,7 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
       setRevealed(true)
       setScratchActive(false)
       if (!previewMode) {
-        if (containerRef.current) fireConfettiFrom(containerRef.current)
+        if (containerRef.current) fireConfettiFrom(containerRef.current, getThemeConfettiColors(theme))
         playWinSound()
       }
     }

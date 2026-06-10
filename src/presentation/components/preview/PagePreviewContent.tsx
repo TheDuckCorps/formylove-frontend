@@ -91,6 +91,7 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
         <SpinWheelDisplay
           phrase={d.phrase || undefined}
           options={validOptions}
+          colors={d.colors}
           previewMode={previewMode}
         />
       )

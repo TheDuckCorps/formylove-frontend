@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { playCorrectAnswer, playWrongAnswer } from '@/shared/utils/audioEffects'
 
 interface Answer {
@@ -34,6 +36,7 @@ function XIcon() {
 
 
 export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode = false }: Props) {
+  const theme = useSiteTheme()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const [shakeKey, setShakeKey] = useState(0)
@@ -45,7 +48,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode 
       completedRef.current = true
       onComplete?.()
       if (!previewMode && gridRef.current) {
-        fireConfettiFrom(gridRef.current)
+        fireConfettiFrom(gridRef.current, getThemeConfettiColors(theme))
       }
     }
     if (isCorrect === false) {
@@ -56,7 +59,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode 
       return () => clearTimeout(t)
     }
     return
-  }, [isCorrect, onComplete, previewMode])
+  }, [isCorrect, onComplete, previewMode, theme])
 
   function handleSelect(answer: Answer) {
     if (isCorrect === true) return
@@ -107,7 +110,7 @@ export function QuizAfetivoDisplay({ question, answers, onComplete, previewMode 
                   ? 'border-green-500 bg-green-50 text-green-700 shadow-[0_0_0_3px_rgba(34,197,94,0.2)]'
                   : wrong
                   ? 'border-red-400 bg-red-50 text-red-700'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-brand hover:bg-brand/5',
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-[var(--site-primary)] hover:bg-[var(--site-soft-fill)]',
                 isCorrect === true && !correct && 'opacity-50 cursor-not-allowed',
               ].join(' ')}
             >

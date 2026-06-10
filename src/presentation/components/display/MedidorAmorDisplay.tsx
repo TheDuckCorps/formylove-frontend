@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { playHeartClick, playMilestone } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
@@ -44,6 +46,7 @@ function getVisiblePercent(percent: number) {
 
 
 export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode = false }: Props) {
+  const theme = useSiteTheme()
   const [clicks, setClicks] = useState(0)
   const [hearts, setHearts] = useState<HeartMark[]>([])
   const [hasStarted, setHasStarted] = useState(false)
@@ -71,10 +74,10 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
       completedRef.current = true
       onComplete?.()
       if (!previewMode && imageContainerRef.current) {
-        fireConfettiFrom(imageContainerRef.current)
+        fireConfettiFrom(imageContainerRef.current, getThemeConfettiColors(theme))
       }
     }
-  }, [isComplete, onComplete, previewMode])
+  }, [isComplete, onComplete, previewMode, theme])
 
   function resetDecayTimer() {
     if (inactivityTimeoutRef.current) clearTimeout(inactivityTimeoutRef.current)
@@ -136,7 +139,8 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
       <div className="space-y-2">
         <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
           <motion.div
-            className={isComplete ? 'h-full bg-green-500' : 'h-full bg-brand'}
+            className={isComplete ? 'h-full bg-green-500' : 'h-full'}
+            style={isComplete ? undefined : { backgroundColor: theme.primary }}
             animate={{ width: `${percent}%` }}
             transition={{ duration: 0.2 }}
           />
@@ -177,8 +181,12 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
         {hearts.map((heart) => (
           <span
             key={heart.id}
-            className="absolute pointer-events-none text-brand animate-ping"
-            style={{ left: heart.x - 24 + heart.offset, top: heart.y - 72 }}
+            className="absolute pointer-events-none animate-ping"
+            style={{
+              color: theme.primary,
+              left: heart.x - 24 + heart.offset,
+              top: heart.y - 24,
+            }}
           >
             <svg className="w-12 h-12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M12 21s-7.2-4.56-9.6-9A5.6 5.6 0 0112 5.4 5.6 5.6 0 0121.6 12C19.2 16.44 12 21 12 21z" />

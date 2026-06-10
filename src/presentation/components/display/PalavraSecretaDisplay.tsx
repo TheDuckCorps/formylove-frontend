@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getContrastTextColor } from '@/shared/constants/colorPalette'
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { fireConfettiFrom } from '@/shared/utils/confetti'
+import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { playLetterFound, playLetterWrong } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
 
@@ -19,6 +22,8 @@ function stripAccents(str: string): string {
 }
 
 export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = false }: Props) {
+  const theme = useSiteTheme()
+
   // displaySecret keeps original accents for rendering
   const displaySecret = useMemo(() => secret.toUpperCase(), [secret])
   // normalizedSecret has accents stripped — used for game logic (A-Z only)
@@ -44,11 +49,11 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
       completedRef.current = true
       onComplete?.()
       if (!previewMode) {
-        if (wordRef.current) fireConfettiFrom(wordRef.current)
+        if (wordRef.current) fireConfettiFrom(wordRef.current, getThemeConfettiColors(theme))
         playWinSound()
       }
     }
-  }, [isComplete, onComplete, previewMode])
+  }, [isComplete, onComplete, previewMode, theme])
 
   function handleGuess(letter: string) {
     if (!hasWord || isComplete) return
@@ -206,15 +211,23 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
                 onClick={() => handleGuess(letter)}
                 animate={flashingWrong ? { x: [0, -5, 5, -4, 4, 0] } : {}}
                 transition={{ duration: 0.35 }}
+                style={
+                  selected
+                    ? {
+                        backgroundColor: theme.primary,
+                        borderColor: theme.primary,
+                        color: getContrastTextColor(theme.primary),
+                      }
+                    : undefined
+                }
                 className={[
                   'text-xs font-semibold rounded-md py-2.5 border transition',
-                  selected && 'bg-brand text-white border-brand',
                   flashingWrong && 'bg-red-50 text-red-600 border-red-400',
                   unavailable && 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50',
                   disabled && !selected && !flashingWrong && !unavailable &&
                     'bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed',
-                  !disabled && !flashingWrong &&
-                    'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand',
+                  !disabled && !selected && !flashingWrong &&
+                    'bg-white border-gray-300 text-gray-700 hover:border-[var(--site-primary)] hover:text-[var(--site-primary)]',
                 ].filter(Boolean).join(' ')}
               >
                 {letter}
