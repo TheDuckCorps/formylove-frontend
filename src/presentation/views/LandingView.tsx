@@ -317,10 +317,10 @@ export function LandingView() {
       <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative z-10 w-full px-6 pt-8 sm:pt-10 lg:pt-16 pb-8 sm:pb-10 lg:pb-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-14 lg:gap-16 items-center">
           {/* Left: copy + CTA */}
-          <div className="text-left order-1 min-w-0 lg:max-w-xl">
-            <h1 className="text-5xl font-extrabold text-gray-800 leading-tight mb-5">
+          <div className="text-left order-1 min-w-0 lg:max-w-xl flex flex-col gap-5 sm:gap-6">
+            <h1 className="text-5xl font-extrabold text-gray-800 leading-tight">
               <span className="text-brand">Surpreenda</span> com uma página{' '}
               <br className="hidden md:block" />
               tão única quanto
@@ -329,7 +329,7 @@ export function LandingView() {
                 <span className="animate-blink ml-0.5 text-brand">|</span>
               </span>
             </h1>
-            <p className="text-gray-500 text-sm md:text-base max-w-lg mb-8 leading-relaxed">
+            <p className="text-gray-500 text-sm md:text-base max-w-lg leading-relaxed">
               Crie uma{' '}
               <span className="text-brand font-semibold">experiência única e interativa</span> com raspadinhas,
               quizzes, músicas e muito mais —{' '}
@@ -364,21 +364,23 @@ export function LandingView() {
       </section>
 
       {/* ── How it works ──────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 pt-8 pb-16 sm:pt-10 lg:pt-16 overflow-hidden">
+      <section className="relative z-10 w-full px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pt-16 lg:pb-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <FloatingHearts hearts={HOW_HEARTS} />
         </div>
 
-        <div className="max-w-5xl mx-auto relative z-10">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-center text-gray-800 mb-2">
-            Descubra como criar o{' '}
-            <span className="text-brand">presente perfeito</span>{' '}
-            para quem você ama
-          </h2>
-          <p className="text-center text-sm text-gray-500 mb-12">
-            Siga estes <span className="font-semibold text-brand">4 passos simples</span> e surpreenda aquela pessoa
-            especial com uma lembrança única que ficará para sempre no coração
-          </p>
+        <div className="max-w-5xl mx-auto relative z-10 flex flex-col gap-8 sm:gap-10 md:gap-12 lg:gap-14">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl md:text-3xl font-extrabold text-center text-gray-800">
+              Descubra como criar o{' '}
+              <span className="text-brand">presente perfeito</span>{' '}
+              para quem você ama
+            </h2>
+            <p className="text-center text-sm text-gray-500">
+              Siga estes <span className="font-semibold text-brand">4 passos simples</span> e surpreenda aquela pessoa
+              especial com uma lembrança única que ficará para sempre no coração
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
             {HOW_IT_WORKS.map((step) => (
@@ -405,24 +407,26 @@ export function LandingView() {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="text-center">
             <Button size="lg" onClick={() => navigate(ROUTES.CRIAR)}>Criar agora</Button>
           </div>
         </div>
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          Planos e preços
-        </h2>
-        <p className="text-center text-sm text-gray-500 mb-12">
-          Escolha o plano que combina com a ocasião. Pagamento único via PIX.
-        </p>
+      <section className="relative z-10 w-full px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pt-16 lg:pb-16">
+        <div className="max-w-5xl mx-auto flex flex-col gap-8 sm:gap-10 md:gap-12 lg:gap-14">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold text-center text-gray-800">
+              Planos e preços
+            </h2>
+            <p className="text-center text-sm text-gray-500">
+              Escolha o plano que combina com a ocasião. Pagamento único via PIX.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {PLANS.map((plan) => {
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {PLANS.map((plan) => {
             const highlight = PLAN_HIGHLIGHT[plan.type]
             const features = PLAN_FEATURES[plan.type]
             const isPremium = plan.type === 'PREMIUM'
@@ -480,19 +484,19 @@ export function LandingView() {
                 </Button>
               </div>
             )
-          })}
-        </div>
+            })}
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 py-16">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-10 text-center">
+      <section className="relative z-10 w-full px-6 pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pt-16 lg:pb-16">
+        <div className="max-w-5xl mx-auto flex flex-col gap-8 sm:gap-10 md:gap-12 lg:gap-14">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 text-center">
             Perguntas Frequentes
           </h2>
 
-          <div className="flex flex-col md:flex-row gap-10 md:gap-14 items-start">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-10 lg:gap-12 items-start">
             {/* Animated illustration — desktop only, larger */}
             <div className="hidden md:flex md:w-96 lg:w-128 flex-shrink-0 justify-center md:sticky md:top-20">
               <img
@@ -517,13 +521,33 @@ export function LandingView() {
                       {item.q}
                     </span>
                     <span
-                      className="flex-shrink-0 w-7 h-7 rounded-full border-2 border-brand text-brand inline-flex items-center justify-center font-bold text-lg leading-none"
+                      className="flex-shrink-0 w-7 h-7 rounded-full border-2 border-brand text-brand inline-flex items-center justify-center"
                       aria-hidden
                     >
                       {openFaq === i ? (
-                        <span className="leading-none translate-y-[-0.5px]">×</span>
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          aria-hidden
+                        >
+                          <path d="M18 6 6 18M6 6l12 12" />
+                        </svg>
                       ) : (
-                        <span className="leading-none">+</span>
+                        <svg
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          aria-hidden
+                        >
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
                       )}
                     </span>
                   </button>
