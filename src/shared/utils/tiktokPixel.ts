@@ -34,5 +34,5 @@ export function ttqTrack(
   eventId?: string,
 ): void {
   if (!window.ttq) return
-  window.ttq.track(event, params, { event_id: eventId ?? generateEventId() })
+  window.ttq.track(event, params as unknown as Record<string, unknown>, { event_id: eventId ?? generateEventId() })
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ttqTrack, ttqIdentify, generateEventId } from '@/shared/utils/tiktokPixel'
+import { ttqTrack, ttqIdentify } from '@/shared/utils/tiktokPixel'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
