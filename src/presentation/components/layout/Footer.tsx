@@ -2,16 +2,24 @@ import { Link } from 'react-router-dom'
 import { Logo } from '../common/Logo'
 import { ROUTES } from '@/shared/constants/routes'
 
-export function Footer() {
+interface FooterProps {
+  seamless?: boolean
+}
+
+export function Footer({ seamless = false }: FooterProps) {
   return (
     <footer
-      className="w-full"
-      style={{
-        background: 'linear-gradient(to bottom, rgba(252,228,243,0.55) 0%, #ffffff 60%)',
-      }}
+      className="w-full relative overflow-hidden"
+      style={
+        seamless
+          ? undefined
+          : {
+              background: 'linear-gradient(to bottom, rgba(252,228,243,0.55) 0%, #ffffff 60%)',
+            }
+      }
     >
       {/* Tagline band */}
-      <div className="py-10 text-center px-4">
+      <div className="relative py-10 text-center px-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Simples. Emocionante. Inesquecível.
         </h2>
@@ -23,7 +31,7 @@ export function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-gray-100 py-3 px-6">
+      <div className="relative border-t border-gray-100/70 py-3 px-6">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400">
           <Logo size="sm" />
 

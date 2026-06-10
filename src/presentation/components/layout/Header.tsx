@@ -7,15 +7,21 @@ import { ROUTES } from '@/shared/constants/routes'
 
 interface HeaderProps {
   showCta?: boolean
+  seamless?: boolean
 }
 
-export function Header({ showCta = true }: HeaderProps) {
+export function Header({ showCta = true, seamless = false }: HeaderProps) {
   const navigate = useNavigate()
   const [showProfileModal, setShowProfileModal] = useState(false)
 
   return (
     <>
-      <header className="w-full border-b border-gray-100 bg-white/90 backdrop-blur-sm sticky top-0 z-40">
+      <header
+        className={[
+          'w-full sticky top-0 z-40 overflow-hidden',
+          seamless ? 'border-b border-transparent bg-transparent' : 'border-b border-gray-100 bg-white/90 backdrop-blur-sm',
+        ].join(' ')}
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 relative">
           {/* Left: CTA button */}
           {showCta ? (

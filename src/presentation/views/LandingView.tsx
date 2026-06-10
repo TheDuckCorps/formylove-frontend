@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
+import { FlowPageShell } from '../components/layout/FlowPageShell'
 import { Button } from '../components/common/Button'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
@@ -243,17 +244,11 @@ export function LandingView() {
   const typedText = useTypewriter(TYPEWRITER_PHRASES)
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <FlowPageShell>
+      <Header seamless />
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 pt-14 pb-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(252,228,243,0.45) 0%, rgba(255,255,255,0) 55%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 pt-14 pb-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
           {/* Left: copy + CTA */}
           <div className="text-left order-1">
@@ -289,13 +284,7 @@ export function LandingView() {
       </section>
 
       {/* ── How it works ──────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16 relative overflow-hidden"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 60% at 50% 50%, rgba(252,228,243,0.35) 0%, rgba(255,255,255,0) 65%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <FloatingHearts hearts={HOW_HEARTS} />
         </div>
@@ -343,13 +332,7 @@ export function LandingView() {
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 50% at 50% 50%, rgba(252,228,243,0.28) 0%, rgba(255,255,255,0) 65%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16">
         <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           Planos e preços
@@ -423,13 +406,7 @@ export function LandingView() {
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 50% at 50% 100%, rgba(252,228,243,0.4) 0%, rgba(255,255,255,0) 60%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-10 text-center">
             Perguntas Frequentes
@@ -481,7 +458,7 @@ export function LandingView() {
         </div>
       </section>
 
-      <Footer />
-    </div>
+      <Footer seamless />
+    </FlowPageShell>
   )
 }

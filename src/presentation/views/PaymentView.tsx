@@ -76,16 +76,16 @@ export function PaymentView() {
 
   if (!initialQrCode) {
     return (
-      <div className="page-wrapper">
-        <Header />
+      <>
+        <Header seamless />
         <main className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="text-center">
             <p className="text-gray-500 mb-4">Nenhuma cobrança encontrada.</p>
             <Button onClick={() => navigate(ROUTES.CRIAR)}>Recomeçar</Button>
           </div>
         </main>
-        <Footer />
-      </div>
+        <Footer seamless />
+      </>
     )
   }
 
@@ -96,8 +96,8 @@ export function PaymentView() {
   }
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <>
+      <Header seamless />
 
       <main className="flex-1 max-w-lg mx-auto w-full px-6 py-10">
         {/* Status badge */}
@@ -251,7 +251,7 @@ export function PaymentView() {
         </Button>
       </main>
 
-      <Footer />
-    </div>
+      <Footer seamless />
+    </>
   )
 }
