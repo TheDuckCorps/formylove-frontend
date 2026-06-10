@@ -79,7 +79,7 @@ export function StepIndicator({ currentStep }: Props) {
                 }}
                 disabled={!canNavigateToCreationStep(CREATION_STEPS[idx + 1].step, selectedPagesCount, planType)}
                 className={[
-                  'mx-0.5 mb-4 sm:mb-3 py-2 flex items-center flex-shrink-0 transition-opacity',
+                  'mx-0.5 sm:mb-3 py-2 flex items-center flex-shrink-0 self-center transition-opacity',
                   canNavigateToCreationStep(CREATION_STEPS[idx + 1].step, selectedPagesCount, planType)
                     ? 'cursor-pointer hover:opacity-80'
                     : 'cursor-not-allowed opacity-50',
