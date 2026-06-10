@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Block internal/editor routes from indexing
+Disallow: /criar
+Disallow: /editor
+Disallow: /pagamento
+Disallow: /painel
+Disallow: /qrcode
+Disallow: /plano
+Disallow: /preview
+Disallow: /sucesso
+
+Sitemap: https://www.formylove.com.br/sitemap.xml
