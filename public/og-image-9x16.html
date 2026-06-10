@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(170deg, #FF4B6E 0%, #FF6B8A 30%, #FF8FA3 60%, #FFB3C1 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.18;
+    }
+    .blob-1 { width: 640px; height: 640px; background: #fff; top: -200px; left: -140px; }
+    .blob-2 { width: 500px; height: 500px; background: #fff; bottom: -150px; right: -100px; }
+    .blob-3 { width: 320px; height: 320px; background: #fff; top: 45%; left: 30px; opacity: 0.10; }
+    .blob-4 { width: 260px; height: 260px; background: #fff; top: 60%; right: 20px; opacity: 0.12; }
+
+    .heart {
+      position: absolute;
+      opacity: 0.22;
+      transform: rotate(var(--r, 0deg));
+    }
+    .h1  { top: 100px;  left: 130px;  --r: -15deg; font-size: 40px; }
+    .h2  { top: 140px;  right: 150px; --r: 10deg;  font-size: 28px; }
+    .h3  { bottom: 120px; left: 100px; --r: 20deg; font-size: 56px; }
+    .h4  { bottom: 100px; right: 240px; --r: -8deg; font-size: 36px; }
+    .h5  { top: 500px; left: 70px;    --r: 5deg;   font-size: 26px; }
+    .h6  { top: 460px; right: 80px;   --r: -20deg; font-size: 30px; }
+    .h7  { bottom: 380px; right: 120px; --r: 12deg; font-size: 22px; }
+    .h8  { top: 900px;  left: 100px;  --r: -10deg; font-size: 22px; }
+    .h9  { top: 960px;  right: 90px;  --r: 15deg;  font-size: 32px; }
+    .h10 { top: 1300px; left: 80px;   --r: 8deg;   font-size: 20px; }
+    .h11 { top: 1350px; right: 100px; --r: -18deg; font-size: 26px; }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+      padding: 80px 80px;
+      width: 100%;
+    }
+
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo-text {
+      font-size: 40px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 8px rgba(180,0,40,0.18);
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.25);
+      border: 1.5px solid rgba(255,255,255,0.45);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 6px 20px;
+      border-radius: 99px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 44px;
+      padding: 72px 80px;
+      width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      box-shadow: 0 24px 80px rgba(200, 20, 60, 0.25), 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .divider {
+      width: 80px;
+      height: 4px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 99px;
+    }
+
+    .headline {
+      text-align: center;
+      color: #fff;
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 1.16;
+      letter-spacing: -1.5px;
+      text-shadow: 0 2px 20px rgba(180,0,40,0.25);
+    }
+
+    .headline em {
+      font-style: normal;
+      color: #FFE4EC;
+    }
+
+    .tagline {
+      text-align: center;
+      color: rgba(255,255,255,0.88);
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .feature-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 99px;
+      padding: 12px 26px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .cta-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .cta {
+      background: #fff;
+      color: #FF4B6E;
+      font-size: 24px;
+      font-weight: 800;
+      padding: 20px 64px;
+      border-radius: 99px;
+      letter-spacing: 0.2px;
+      box-shadow: 0 8px 32px rgba(200,20,60,0.25);
+    }
+
+    .domain {
+      color: rgba(255,255,255,0.75);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+
+  <div class="heart h1">💗</div>
+  <div class="heart h2">💝</div>
+  <div class="heart h3">❤️</div>
+  <div class="heart h4">💕</div>
+  <div class="heart h5">💖</div>
+  <div class="heart h6">🌹</div>
+  <div class="heart h7">💗</div>
+  <div class="heart h8">💓</div>
+  <div class="heart h9">💞</div>
+  <div class="heart h10">💝</div>
+  <div class="heart h11">❤️</div>
+
+  <div class="content">
+
+    <div class="logo-section">
+      <div class="logo-row">
+        <svg viewBox="0 0 24 24" fill="white" width="72" height="72">
+          <path d="M12 21s-7.2-4.56-9.6-9A5.6 5.6 0 0112 5.4 5.6 5.6 0 0121.6 12C19.2 16.44 12 21 12 21z"/>
+        </svg>
+        <span class="logo-text">For My Love</span>
+      </div>
+      <div class="badge">Presente Digital</div>
+    </div>
+
+    <div class="card">
+      <div class="divider"></div>
+
+      <h1 class="headline">
+        Crie um site<br/>
+        de presente<br/>
+        <em>único para<br/>quem você ama</em>
+      </h1>
+
+      <p class="tagline">
+        Surpreenda com uma experiência<br/>
+        digital inesquecível
+      </p>
+
+      <div class="features">
+        <div class="feature-row">
+          <div class="pill">🎰 Raspadinha Surpresa</div>
+          <div class="pill">🔑 Palavra Secreta</div>
+        </div>
+        <div class="feature-row">
+          <div class="pill">❤️ Medidor de Amor</div>
+          <div class="pill">📸 Fotos & Vídeos</div>
+        </div>
+        <div class="feature-row">
+          <div class="pill">🎵 Música</div>
+          <div class="pill">🎁 QR Code</div>
+          <div class="pill">✍️ Carta</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+    </div>
+
+    <div class="cta-section">
+      <div class="cta">Criar Presente Grátis</div>
+      <div class="domain">formylove.com.br</div>
+    </div>
+
+  </div>
+</body>
+</html>
