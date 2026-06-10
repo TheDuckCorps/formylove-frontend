@@ -10,7 +10,7 @@ export function PrivacidadeView() {
           Política de Privacidade
         </h1>
         <p className="text-xs text-gray-400 text-center mb-8">
-          Última atualização: [INSERIR DATA]
+          Última atualização: 10/06/2026
         </p>
         <p className="text-sm text-gray-500 text-center mb-10">
           Ao utilizar o For My Love, você concorda com esta política de privacidade. Leia-os atentamente.
@@ -24,7 +24,7 @@ export function PrivacidadeView() {
             },
             {
               title: '2. Uso das Informações',
-              body: `Seus dados são utilizados para:\n• Criar e manter suas páginas personalizadas (ex: jogos, quizzes, presentes virtuais).\n• Melhorar a navegação, personalização e funcionalidades do site.\n• Garantir a segurança e integridade do serviço.\n• Enviar comunicações sobre atualizações, suporte ou novidades (via e-mail ou WhatsApp).`,
+              body: `Seus dados são utilizados para:\n• Criar e manter suas páginas personalizadas (ex: jogos, quizzes, presentes virtuais).\n• Melhorar a navegação, personalização e funcionalidades do site.\n• Garantir a segurança e integridade do serviço.\n• Enviar comunicações sobre atualizações, suporte ou novidades (via e-mail).`,
             },
             {
               title: '3. Armazenamento e Proteção',
@@ -36,7 +36,7 @@ export function PrivacidadeView() {
             },
             {
               title: '5. Direitos dos Usuários',
-              body: `• Excluir seus dados: Solicite via e-mail [INSERIR E-MAIL] ou WhatsApp [INSERIR NÚMERO].\n• Gerenciar cookies: Ajuste as configurações no seu navegador.`,
+              body: `• Excluir seus dados: Solicite via e-mail contato@formylove.com.br\n• Gerenciar cookies: Ajuste as configurações no seu navegador.`,
             },
             {
               title: '6. Pagamentos e Segurança',
@@ -44,7 +44,7 @@ export function PrivacidadeView() {
             },
             {
               title: '7. Reembolsos',
-              body: `• Solicite reembolsos dentro de 24 horas após a compra, caso o serviço não tenha sido utilizado.\n• Após esse período, reembolsos não serão aceitos.\n• Contate-nos via [INSERIR E-MAIL] ou [INSERIR WHATSAPP] para solicitações.`,
+              body: `• Solicite reembolsos dentro de 24 horas após a compra, caso o serviço não tenha sido utilizado.\n• Após esse período, reembolsos não serão aceitos.\n• Contate-nos via contato@formylove.com.br para solicitações.`,
             },
             {
               title: '8. Interrupção do Serviço',
@@ -56,7 +56,7 @@ export function PrivacidadeView() {
             },
             {
               title: '10. Contato',
-              body: `Para dúvidas, suporte ou solicitações:\n• E-mail: [INSERIR E-MAIL]\n• WhatsApp: [INSERIR NÚMERO]`,
+              body: `Para dúvidas, suporte ou solicitações:\n• E-mail: contato@formylove.com.br`,
             },
           ].map((section) => (
             <div key={section.title}>
