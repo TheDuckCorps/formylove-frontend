@@ -5,6 +5,7 @@ import { fireConfettiFrom } from '@/shared/utils/confetti'
 import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { playHeartClick, playMilestone } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
+import { CROP_ASPECT_RATIO } from '@/shared/constants/cropAspect'
 
 interface HeartMark {
   id: string
@@ -155,7 +156,7 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
         className="relative w-full rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
         onClick={registerClick}
         onContextMenu={(e) => e.preventDefault()}
-        style={{ WebkitTouchCallout: 'none' }}
+        style={{ WebkitTouchCallout: 'none', aspectRatio: `${CROP_ASPECT_RATIO} / 1` }}
         role="button"
         aria-label="Clique várias vezes para revelar a imagem"
       >
@@ -164,10 +165,10 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full max-h-[600px] object-contain block pointer-events-none select-none"
+            className="w-full h-full object-cover block pointer-events-none select-none"
           />
         ) : (
-          <div className="w-full min-h-48 flex items-center justify-center text-gray-400 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
             Adicione uma imagem para o medidor
           </div>
         )}

@@ -5,6 +5,7 @@ import { fireConfettiFrom } from '@/shared/utils/confetti'
 import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { initScratchSound, setScratchActive } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
+import { CROP_ASPECT_RATIO, CROP_CANVAS_SIZE } from '@/shared/constants/cropAspect'
 
 interface Props {
   imageUrl: string | null
@@ -157,17 +158,17 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
         ref={containerRef}
         className="relative w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-100 touch-none select-none"
         onContextMenu={(e) => e.preventDefault()}
-        style={{ WebkitTouchCallout: 'none' }}
+        style={{ WebkitTouchCallout: 'none', aspectRatio: `${CROP_ASPECT_RATIO} / 1` }}
       >
         {imageUrl ? (
           <img
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full max-h-[600px] object-contain block pointer-events-none select-none"
+            className="w-full h-full object-cover block pointer-events-none select-none"
           />
         ) : (
-          <div className="w-full min-h-48 flex items-center justify-center text-gray-400 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
             Sem imagem definida
           </div>
         )}
@@ -175,10 +176,9 @@ export function RaspadinhaSurpresaDisplay({ imageUrl, title, onComplete, preview
         {!revealed && (
           <canvas
             ref={canvasRef}
-            width={600}
-            height={360}
+            width={CROP_CANVAS_SIZE}
+            height={CROP_CANVAS_SIZE}
             className="absolute inset-0 w-full h-full touch-none cursor-crosshair"
-            style={{ maxWidth: '100%' }}
             onMouseDown={startScratch}
             onMouseMove={scratch}
             onTouchStart={startScratch}
