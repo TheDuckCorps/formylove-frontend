@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
@@ -115,6 +115,13 @@ function PhoneMockup({
   videoSrc,
   videoZoom = 1,
 }: PhoneMockupProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoReady, setVideoReady] = useState(!videoSrc)
+
+  useEffect(() => {
+    setVideoReady(!videoSrc)
+  }, [videoSrc])
+
   return (
     <div
       className={[
@@ -128,12 +135,39 @@ function PhoneMockup({
         {videoSrc ? (
           <>
             <div
-              className="absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500"
+              className={[
+                'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500 transition-opacity duration-300',
+                videoReady ? 'opacity-0' : 'opacity-100',
+              ].join(' ')}
               aria-hidden
             />
+            {!videoReady && (
+              <div
+                className="absolute inset-0 z-[1] flex items-center justify-center bg-gradient-to-b from-purple-800/95 to-purple-500/95"
+                aria-hidden
+              >
+                <svg
+                  className="w-8 h-8 animate-spin text-white/90"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path
+                    className="opacity-90"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              </div>
+            )}
             <video
+              ref={videoRef}
               src={videoSrc}
-              className="absolute inset-0 w-full h-full object-cover"
+              className={[
+                'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
+                videoReady ? 'opacity-100' : 'opacity-0',
+              ].join(' ')}
               style={
                 videoZoom !== 1
                   ? { transform: `scale(${videoZoom})`, transformOrigin: 'center' }
@@ -143,7 +177,9 @@ function PhoneMockup({
               muted
               loop
               playsInline
-              preload="metadata"
+              preload="auto"
+              onCanPlay={() => setVideoReady(true)}
+              onLoadedData={() => setVideoReady(true)}
               aria-label="Demonstração do produto For My Love"
             />
           </>
@@ -310,14 +346,14 @@ export function LandingView() {
             <FloatingHearts hearts={HERO_HEARTS} />
             <PhoneMockup
               className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end"
-              videoSrc="/medidor-de-amor.mp4"
+              videoSrc="/medidor-de-amor.webm"
             />
             <PhoneMockup
               className="relative z-10 scale-100 shadow-2xl self-end"
-              videoSrc="/main-video.mp4"
+              videoSrc="/main-video.webm"
               videoZoom={1.3}
             />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" videoSrc="/medidor-de-amor-david.mp4"/>
+            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" videoSrc="/medidor-de-amor-david.webm"/>
           </div>
         </div>
       </section>
