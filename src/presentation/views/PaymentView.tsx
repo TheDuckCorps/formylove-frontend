@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { ttqTrack, ttqIdentify, generateEventId } from '@/shared/utils/tiktokPixel'
 import { z } from 'zod'
 import { useToast } from '@/shared/ui/ToastProvider'
 import { Header } from '../components/layout/Header'
@@ -65,14 +66,43 @@ export function PaymentView() {
     expiresIn,
   })
 
+  const addPaymentInfoFired = useRef(false)
   useEffect(() => {
-    if (isPaid) {
-      navigate(ROUTES.CRIAR_SUCESSO, {
-        state: { slug: siteSlug, email },
-        replace: true,
-      })
-    }
-  }, [isPaid, siteSlug, email, navigate])
+    if (addPaymentInfoFired.current) return
+    addPaymentInfoFired.current = true
+    if (email) ttqIdentify(email)
+    ttqTrack('AddPaymentInfo', {
+      contents: [{
+        content_id: planType.toLowerCase(),
+        content_type: 'product',
+        content_name: `Plano ${plan.label}`,
+      }],
+      value: displayAmount / 100,
+      currency: 'BRL',
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const purchaseFired = useRef(false)
+  useEffect(() => {
+    if (!isPaid || purchaseFired.current) return
+    purchaseFired.current = true
+
+    ttqTrack('Purchase', {
+      contents: [{
+        content_id: planType.toLowerCase(),
+        content_type: 'product',
+        content_name: `Plano ${plan.label}`,
+        price: displayAmount / 100,
+      }],
+      value: displayAmount / 100,
+      currency: 'BRL',
+    }, generateEventId())
+
+    navigate(ROUTES.CRIAR_SUCESSO, {
+      state: { slug: siteSlug, email },
+      replace: true,
+    })
+  }, [isPaid, siteSlug, email, navigate, planType, plan.label, displayAmount])
 
   if (!initialQrCode) {
     return (

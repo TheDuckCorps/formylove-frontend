@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ttqTrack, ttqIdentify, generateEventId } from '@/shared/utils/tiktokPixel'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
@@ -150,6 +151,18 @@ export function EscolherPlanoView() {
     }
 
     setPlan(chosen)
+
+    const selectedPlan = PLANS.find((p) => p.type === chosen)
+    ttqTrack('InitiateCheckout', {
+      contents: [{
+        content_id: chosen.toLowerCase(),
+        content_type: 'product',
+        content_name: `Plano ${selectedPlan?.label ?? chosen}`,
+      }],
+      value: selectedPlan ? selectedPlan.price / 100 : 0,
+      currency: 'BRL',
+    })
+
     setShowEmailModal(true)
   }
 
@@ -173,6 +186,8 @@ export function EscolherPlanoView() {
     if (!chosen) return
     createSite.reset()
     createPayment.reset()
+
+    await ttqIdentify(submittedEmail)
 
     const site = await createSite.mutateAsync({
       ownerEmail: submittedEmail,
@@ -209,6 +224,14 @@ export function EscolherPlanoView() {
   }
 
   const chosenPlan = chosen ? PLANS.find((p) => p.type === chosen) : null
+
+  useEffect(() => {
+    ttqTrack('ViewContent', {
+      contents: [{ content_id: 'planos', content_type: 'product', content_name: 'Escolha de Plano' }],
+      value: 0,
+      currency: 'BRL',
+    })
+  }, [])
 
   return (
     <>
