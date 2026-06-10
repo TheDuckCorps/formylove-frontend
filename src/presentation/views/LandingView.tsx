@@ -316,7 +316,7 @@ export function LandingView() {
 
       <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 pt-14 pb-8 sm:pb-10 lg:pb-16">
+      <section className="relative z-10 w-full px-6 pt-8 sm:pt-10 lg:pt-16 pb-8 sm:pb-10 lg:pb-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left: copy + CTA */}
           <div className="text-left order-1 min-w-0 lg:max-w-xl">
