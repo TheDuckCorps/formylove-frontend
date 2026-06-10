@@ -77,6 +77,7 @@ export function EscolherPaginasView() {
 
   function handleContinuar() {
     if (selectedPages.length === 0) return
+    useSiteBuilderStore.getState().setCurrentPageIndex(0)
     navigate(ROUTES.CRIAR_EDITOR)
   }
 
@@ -229,7 +230,7 @@ export function EscolherPaginasView() {
         </Button>
       </div>
 
-      <Footer seamless />
+      <Footer seamless className="pb-20 md:pb-0" />
     </>
   )
 }

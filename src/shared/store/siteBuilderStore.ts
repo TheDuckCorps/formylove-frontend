@@ -97,7 +97,12 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
 
       removePage: (id) => {
         const pages = get().selectedPages.filter((p) => p.id !== id)
-        set({ selectedPages: pages.map((p, i) => ({ ...p, order: i })) })
+        const nextIndex =
+          pages.length === 0 ? 0 : Math.min(get().currentPageIndex, pages.length - 1)
+        set({
+          selectedPages: pages.map((p, i) => ({ ...p, order: i })),
+          currentPageIndex: nextIndex,
+        })
       },
 
       reorderPages: (fromIndex, toIndex) => {

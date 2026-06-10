@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { SiteThemeProvider, useSiteTheme } from '@/shared/context/SiteThemeContext'
@@ -9,14 +8,18 @@ import { LivePreviewPanel } from '../components/preview/LivePreviewPanel'
 function PreviewViewContent() {
   const navigate = useNavigate()
   const theme = useSiteTheme()
-  const { selectedPages } = useSiteBuilderStore()
-  const [currentIdx, setCurrentIdx] = useState(0)
+  const { selectedPages, currentPageIndex, setCurrentPageIndex } = useSiteBuilderStore()
 
-  const currentPage = selectedPages[currentIdx]
+  const currentPage = selectedPages[currentPageIndex]
 
   if (selectedPages.length === 0) {
     navigate(-1)
     return null
+  }
+
+  function goToPage(index: number) {
+    if (index < 0 || index >= selectedPages.length) return
+    setCurrentPageIndex(index)
   }
 
   return (
@@ -37,7 +40,7 @@ function PreviewViewContent() {
 
           <div className="w-24 text-right">
             <span className="text-xs text-gray-400">
-              {currentIdx + 1} / {selectedPages.length}
+              {currentPageIndex + 1} / {selectedPages.length}
             </span>
           </div>
         </div>
@@ -54,7 +57,7 @@ function PreviewViewContent() {
           {currentPage && (
             <LivePreviewPanel
               page={currentPage}
-              pageIndex={currentIdx}
+              pageIndex={currentPageIndex}
               totalPages={selectedPages.length}
             />
           )}
@@ -63,8 +66,8 @@ function PreviewViewContent() {
             <Button
               variant="outline"
               size="sm"
-              disabled={currentIdx === 0}
-              onClick={() => setCurrentIdx((i) => i - 1)}
+              disabled={currentPageIndex === 0}
+              onClick={() => goToPage(currentPageIndex - 1)}
             >
               ← Anterior
             </Button>
@@ -73,12 +76,12 @@ function PreviewViewContent() {
               {selectedPages.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setCurrentIdx(i)}
+                  onClick={() => goToPage(i)}
                   className={[
                     'h-2 rounded-full transition-all',
-                    i === currentIdx ? 'w-4' : 'w-2 bg-gray-300',
+                    i === currentPageIndex ? 'w-4' : 'w-2 bg-gray-300',
                   ].join(' ')}
-                  style={i === currentIdx ? { backgroundColor: theme.primary } : undefined}
+                  style={i === currentPageIndex ? { backgroundColor: theme.primary } : undefined}
                 />
               ))}
             </div>
@@ -86,8 +89,8 @@ function PreviewViewContent() {
             <Button
               variant="outline"
               size="sm"
-              disabled={currentIdx === selectedPages.length - 1}
-              onClick={() => setCurrentIdx((i) => i + 1)}
+              disabled={currentPageIndex === selectedPages.length - 1}
+              onClick={() => goToPage(currentPageIndex + 1)}
             >
               Próxima →
             </Button>
