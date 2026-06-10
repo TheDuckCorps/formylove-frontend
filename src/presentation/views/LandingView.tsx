@@ -278,6 +278,7 @@ export function LandingView() {
     <FlowPageShell>
       <Header seamless />
 
+      <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="relative z-10 w-full px-6 pt-14 pb-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
@@ -468,6 +469,7 @@ export function LandingView() {
                   <button
                     type="button"
                     className="w-full flex items-center justify-between gap-4 text-left group min-h-[2rem]"
+                    aria-expanded={openFaq === i}
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
                     <span className="text-sm font-semibold text-gray-700 group-hover:text-brand transition-colors flex-1">
@@ -496,6 +498,7 @@ export function LandingView() {
         </div>
       </section>
 
+      </main>
       <Footer seamless />
     </FlowPageShell>
   )

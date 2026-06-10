@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #FF4B6E 0%, #FF8FA3 45%, #FFB3C1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Decorative blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.18;
+    }
+    .blob-1 {
+      width: 420px; height: 420px;
+      background: #fff;
+      top: -120px; left: -80px;
+    }
+    .blob-2 {
+      width: 300px; height: 300px;
+      background: #fff;
+      bottom: -80px; right: -60px;
+    }
+    .blob-3 {
+      width: 180px; height: 180px;
+      background: #fff;
+      bottom: 60px; left: 200px;
+      opacity: 0.10;
+    }
+
+    /* Floating hearts */
+    .heart {
+      position: absolute;
+      font-size: 22px;
+      opacity: 0.22;
+      transform: rotate(var(--r, 0deg));
+    }
+    .h1  { top: 48px;  left: 120px;  --r: -15deg; font-size: 28px; }
+    .h2  { top: 80px;  right: 160px; --r: 10deg;  font-size: 18px; }
+    .h3  { bottom: 70px; left: 80px; --r: 20deg;  font-size: 36px; }
+    .h4  { bottom: 50px; right: 240px; --r: -8deg; font-size: 24px; }
+    .h5  { top: 200px; left: 60px;   --r: 5deg;   font-size: 16px; }
+    .h6  { top: 150px; right: 80px;  --r: -20deg; font-size: 20px; }
+    .h7  { bottom: 140px; right: 100px; --r: 12deg; font-size: 14px; }
+
+    /* Main card */
+    .card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 32px;
+      padding: 52px 64px;
+      width: 920px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 24px 80px rgba(200, 20, 60, 0.25), 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* Logo row */
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-heart {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 8px rgba(180,0,40,0.18);
+    }
+
+    /* Divider */
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 99px;
+    }
+
+    /* Headline */
+    .headline {
+      text-align: center;
+      color: #fff;
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      text-shadow: 0 2px 16px rgba(180,0,40,0.22);
+      max-width: 740px;
+    }
+
+    .headline em {
+      font-style: normal;
+      color: #FFE4EC;
+    }
+
+    /* Tagline */
+    .tagline {
+      text-align: center;
+      color: rgba(255,255,255,0.88);
+      font-size: 21px;
+      font-weight: 500;
+      line-height: 1.4;
+      max-width: 620px;
+    }
+
+    /* Features pills */
+    .pills {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .pill {
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 99px;
+      padding: 7px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* Domain badge */
+    .domain {
+      margin-top: 4px;
+      background: rgba(255,255,255,0.95);
+      color: #FF4B6E;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 8px 24px;
+      border-radius: 99px;
+      letter-spacing: 0.2px;
+      box-shadow: 0 4px 16px rgba(200,20,60,0.18);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Floating hearts -->
+  <div class="heart h1">💗</div>
+  <div class="heart h2">💝</div>
+  <div class="heart h3">❤️</div>
+  <div class="heart h4">💕</div>
+  <div class="heart h5">💖</div>
+  <div class="heart h6">🌹</div>
+  <div class="heart h7">💗</div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Logo -->
+    <div class="logo-row">
+      <div class="logo-heart">
+        <svg viewBox="0 0 24 24" fill="white" width="52" height="52">
+          <path d="M12 21s-7.2-4.56-9.6-9A5.6 5.6 0 0112 5.4 5.6 5.6 0 0121.6 12C19.2 16.44 12 21 12 21z"/>
+        </svg>
+      </div>
+      <span class="logo-text">For My Love</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Headline -->
+    <h1 class="headline">
+      Crie um site de presente<br/>
+      <em>único para quem você ama</em>
+    </h1>
+
+    <!-- Tagline -->
+    <p class="tagline">
+      Raspadinha surpresa, palavra secreta, medidor de amor,<br/>
+      fotos, músicas e muito mais. Gratuito para começar.
+    </p>
+
+    <!-- Feature pills -->
+    <div class="pills">
+      <div class="pill">🎰 Raspadinha Surpresa</div>
+      <div class="pill">🔑 Palavra Secreta</div>
+      <div class="pill">❤️ Medidor de Amor</div>
+      <div class="pill">📸 Fotos</div>
+      <div class="pill">🎵 Música</div>
+      <div class="pill">🎁 QR Code</div>
+    </div>
+
+    <!-- Domain -->
+    <div class="domain">formylove.com.br</div>
+
+  </div>
+
+</body>
+</html>
