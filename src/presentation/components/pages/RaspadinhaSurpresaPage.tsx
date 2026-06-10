@@ -3,6 +3,7 @@ import type { RaspadinhaSurpresaData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
 import { CropModal } from '../common/CropModal'
+import { CroppedImagePreview } from '../common/CroppedImagePreview'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
@@ -90,7 +91,8 @@ export function RaspadinhaSurpresaPage({ data, onChange, fieldErrors = {}, onErr
             onDragEnter={handleDragOver}
             onDragLeave={handleDragLeave}
             className={[
-              'upload-zone h-72 md:h-96 cursor-pointer',
+              'upload-zone cursor-pointer',
+              data.imageUrl ? 'aspect-square w-full p-0 overflow-hidden border-0' : 'h-72 md:h-96',
               isDragging ? 'border-brand bg-brand/5 scale-[1.01]' : '',
               fieldErrors.imageUrl ? 'border-red-400 ring-1 ring-red-200' : '',
             ].join(' ')}
@@ -99,10 +101,10 @@ export function RaspadinhaSurpresaPage({ data, onChange, fieldErrors = {}, onErr
             onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
           >
             {data.imageUrl ? (
-              <img
+              <CroppedImagePreview
                 src={data.imageUrl}
                 alt="Raspadinha"
-                className="w-full h-full object-cover rounded-xl"
+                className="rounded-none h-full"
               />
             ) : (
               <>

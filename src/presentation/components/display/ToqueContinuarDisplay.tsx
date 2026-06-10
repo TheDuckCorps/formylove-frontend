@@ -1,3 +1,4 @@
+import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { Button } from '../common/Button'
 import { useTypewriter } from '@/shared/hooks/useTypewriter'
 
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function ToqueContinuarDisplay({ phrase, onContinue }: Props) {
+  const theme = useSiteTheme()
   const text = phrase || 'Toque para continuar'
   const displayed = useTypewriter(text, { speed: 40 })
 
@@ -15,7 +17,7 @@ export function ToqueContinuarDisplay({ phrase, onContinue }: Props) {
       <p className="text-lg font-medium text-gray-800 min-h-[2rem] max-w-sm">
         {displayed}
         {displayed.length < text.length && (
-          <span className="animate-blink text-brand" aria-hidden>
+          <span className="animate-blink" style={{ color: theme.primary }} aria-hidden>
             |
           </span>
         )}

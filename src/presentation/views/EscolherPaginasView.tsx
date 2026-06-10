@@ -15,6 +15,7 @@ const VALID_PLANS: PlanType[] = ['BASIC', 'INTERMEDIATE', 'PREMIUM']
 
 const CARD_RADIAL_BG =
   'radial-gradient(ellipse 50% 50% at 40% 40%, rgba(252,228,243,0.95) 0%, rgba(255,255,255,1) 75%)'
+
 export function EscolherPaginasView() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -80,12 +81,12 @@ export function EscolherPaginasView() {
   }
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <>
+      <Header seamless />
       <StepIndicator currentStep={1} />
 
       {planMeta && (
-        <div className="bg-brand/5 border-b border-brand/20 px-4 py-2 text-center">
+        <div className="bg-white/45 border-y border-brand/10 px-4 py-2 text-center backdrop-blur-sm">
           <p className="text-xs text-brand font-medium">
             Plano <strong>{planMeta.label}</strong> selecionado — até {MAX_PAGES_PER_PLAN[planType!]}{' '}
             páginas · {planMeta.description.split('·')[1]?.trim()}
@@ -144,7 +145,7 @@ export function EscolherPaginasView() {
                 }}
                 className={[
                   'relative w-full max-w-[360px] flex flex-col items-center text-center rounded-2xl border-2 p-6 pt-10 gap-4 transition-all outline-none',
-                  hasAny ? 'border-brand border-brand-100 shadow-sm' : 'border-gray-200',
+                  hasAny ? 'border-brand shadow-sm' : 'border-gray-200',
                   isDisabled
                     ? 'cursor-not-allowed opacity-50'
                     : canAdd
@@ -220,7 +221,7 @@ export function EscolherPaginasView() {
       </main>
 
       {/* Floating continue bar — mobile only */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur border-t border-gray-100 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/65 backdrop-blur-md px-4 py-3">
         <Button size="lg" fullWidth disabled={selectedPages.length === 0} onClick={handleContinuar}>
           {selectedPages.length === 0
             ? 'Selecione ao menos uma página'
@@ -228,7 +229,7 @@ export function EscolherPaginasView() {
         </Button>
       </div>
 
-      <Footer />
-    </div>
+      <Footer seamless />
+    </>
   )
 }

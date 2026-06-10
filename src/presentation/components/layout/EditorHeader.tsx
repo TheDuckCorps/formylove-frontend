@@ -7,6 +7,7 @@ interface EditorHeaderProps {
   totalPages: number
   onPrev?: () => void
   onNext?: () => void
+  seamless?: boolean
 }
 
 const navBtnClass =
@@ -16,9 +17,15 @@ export function EditorHeader({
   title,
   onPrev,
   onNext,
+  seamless = false,
 }: EditorHeaderProps) {
   return (
-    <header className="w-full border-b border-gray-100 bg-white sticky top-0 z-40">
+    <header
+      className={[
+        'w-full sticky top-0 z-40',
+        seamless ? 'border-b border-transparent bg-transparent' : 'border-b border-gray-100 bg-white',
+      ].join(' ')}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-center relative">
         <Link to="/" className="flex-shrink-0">
           <Logo size="sm" />

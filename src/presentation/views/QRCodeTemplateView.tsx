@@ -4,6 +4,8 @@ import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
 import { StepIndicator } from '../components/layout/StepIndicator'
 import { QRCodeViewer } from '../components/common/QRCodeViewer'
+import { SiteColorSelector } from '../components/common/SiteColorSelector'
+import { SiteColorPreview } from '../components/common/SiteColorPreview'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { ROUTES } from '@/shared/constants/routes'
 
@@ -28,15 +30,15 @@ const TEMPLATES: TemplateOption[] = [
 
 export function QRCodeTemplateView() {
   const navigate = useNavigate()
-  const { qrTemplate, setQrTemplate } = useSiteBuilderStore()
+  const { qrTemplate, setQrTemplate, siteColor, setSiteColor } = useSiteBuilderStore()
 
   function handleSelect(t: TemplateOption) {
     setQrTemplate(t.id, false)
   }
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <>
+      <Header seamless />
       <StepIndicator currentStep={3} />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
@@ -53,20 +55,23 @@ export function QRCodeTemplateView() {
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Template grid */}
           <div className="flex-1 min-w-0 w-full">
-            <div className="grid grid-cols-3 gap-4 mb-10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => handleSelect(t)}
-                  className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition flex items-center justify-center text-3xl ${t.style} ${
+                  className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition flex flex-col items-center justify-center pb-8 ${t.style} ${
                     qrTemplate === t.id
                       ? 'border-brand shadow-card scale-[1.02]'
                       : 'border-transparent hover:border-brand/40'
                   }`}
                 >
-                  {t.emoji && <span className="text-3xl select-none">{t.emoji}</span>}
+                  {t.emoji && (
+                    <span className="text-4xl sm:text-5xl select-none leading-none mt-1">
+                      {t.emoji}
+                    </span>
+                  )}
 
-                  {/* Selected checkmark */}
                   {qrTemplate === t.id && (
                     <span className="absolute top-1.5 right-1.5 w-5 h-5 bg-brand rounded-full flex items-center justify-center">
                       <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +80,7 @@ export function QRCodeTemplateView() {
                     </span>
                   )}
 
-                  <span className="absolute bottom-1 left-0 right-0 text-center text-[10px] text-gray-500 truncate px-1">
+                  <span className="absolute bottom-2 left-0 right-0 text-center text-xs text-gray-500 truncate px-1.5">
                     {t.label}
                   </span>
                 </button>
@@ -100,22 +105,32 @@ export function QRCodeTemplateView() {
             </div>
           </div>
 
-          {/* Live preview */}
-          <div className="lg:sticky lg:top-8 flex flex-row lg:flex-col items-center gap-4 lg:gap-3 w-full lg:w-56 shrink-0 bg-gray-50 lg:bg-transparent rounded-2xl lg:rounded-none p-4 lg:p-0">
-            <div className="w-24 h-24 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl [&>div]:w-full [&>div]:h-full">
-              <QRCodeViewer slug="meu-presente" qrTemplate={qrTemplate ?? 'template-1'} size={200} />
+          {/* Live preview + color picker */}
+          <div className="lg:sticky lg:top-8 w-full lg:w-64 shrink-0 bg-gray-50 lg:bg-transparent rounded-2xl lg:rounded-none p-4 lg:p-0">
+            <div className="flex flex-row lg:flex-col items-center lg:gap-3">
+              <div className="w-24 h-24 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl [&>div]:w-full [&>div]:h-full">
+                <QRCodeViewer slug="meu-presente" qrTemplate={qrTemplate ?? 'template-1'} size={200} />
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                <p className="text-xs text-gray-500 font-medium">Prévia do QR Code</p>
+                <p className="text-[11px] text-gray-400 leading-relaxed">
+                  Selecione um design para ver a prévia
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-gray-500 font-medium">Prévia do QR Code</p>
+
+            <div className="mt-5 pt-5 border-t border-gray-200 lg:border-gray-100 flex flex-col items-stretch gap-3 w-full">
+              <SiteColorSelector value={siteColor} onChange={setSiteColor} placement="left" />
               <p className="text-[11px] text-gray-400 leading-relaxed">
-                Selecione um design para ver a prévia
+                Afeta botões, fundo em gradiente, destaques e barras de progresso do site.
               </p>
+              <SiteColorPreview color={siteColor} />
             </div>
           </div>
         </div>
       </main>
 
-      <Footer />
-    </div>
+      <Footer seamless />
+    </>
   )
 }

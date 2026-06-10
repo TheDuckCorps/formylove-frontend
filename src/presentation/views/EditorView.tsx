@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { EditorHeader } from '../components/layout/EditorHeader'
 import { Footer } from '../components/layout/Footer'
@@ -9,7 +9,7 @@ import { LivePreviewPanel } from '../components/preview/LivePreviewPanel'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { ROUTES } from '@/shared/constants/routes'
 import { PAGE_TYPES_META } from '@/core/entities/Page'
-
+import { SiteColorSelector } from '../components/common/SiteColorSelector'
 import { DesenhoLivrePage } from '../components/pages/DesenhoLivrePage'
 import { MedidorAmorPage } from '../components/pages/MedidorAmorPage'
 import { ToqueContinuarPage } from '../components/pages/ToqueContinuarPage'
@@ -77,15 +77,14 @@ export function EditorView() {
     setCurrentPageIndex,
     updatePageData,
     validationResults,
+    siteColor,
+    setSiteColor,
   } = useSiteBuilderStore()
 
   const openPagesList = useRef<(() => void) | null>(null)
   const currentPage = selectedPages[currentPageIndex]
 
-  if (!currentPage) {
-    navigate(ROUTES.CRIAR)
-    return null
-  }
+  if (!currentPage) return <Navigate to={ROUTES.CRIAR} replace />
 
   const meta = PAGE_TYPES_META.find((m) => m.type === currentPage.type)
   const pageLabel = `${currentPageIndex + 1}. ${meta?.label ?? currentPage.type}`
@@ -113,13 +112,14 @@ export function EditorView() {
   const isLastPage = currentPageIndex === selectedPages.length - 1
 
   return (
-    <div className="editor-wrapper">
+    <>
       <EditorHeader
         title={pageLabel}
         currentIndex={currentPageIndex}
         totalPages={selectedPages.length}
         onPrev={handlePrev}
         onNext={handleNext}
+        seamless
       />
 
       <StepIndicator currentStep={2} />
@@ -129,6 +129,13 @@ export function EditorView() {
           validationResults={validationResults}
           hideMobileButton
           externalMobileOpen={openPagesList}
+          sidebarContent={
+            <SiteColorSelector 
+              value={siteColor}
+              onChange={setSiteColor}
+              className="rounded-2xl border border-gray-100 bg-white/80 px-3 py-1.5 shadow-sm overflow-visible"
+            />
+          }
         />
 
         <div className="flex-1 min-w-0 lg:max-w-2xl">
@@ -203,8 +210,8 @@ export function EditorView() {
       </div>
 
       <div className="hidden md:block">
-        <Footer />
+        <Footer seamless />
       </div>
-    </div>
+    </>
   )
 }

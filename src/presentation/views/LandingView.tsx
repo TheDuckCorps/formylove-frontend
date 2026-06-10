@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
+import { FlowPageShell } from '../components/layout/FlowPageShell'
 import { Button } from '../components/common/Button'
 import { ROUTES } from '@/shared/constants/routes'
 import { PLANS } from '@/core/entities/Site'
@@ -103,9 +104,17 @@ function FloatingHearts({ hearts }: { hearts: readonly HeartPosition[] }) {
 interface PhoneMockupProps {
   className?: string
   mediaClassName?: string
+  videoSrc?: string
+  /** Scale factor for video content (e.g. 1.08 = slight zoom in) */
+  videoZoom?: number
 }
 
-function PhoneMockup({ className = '', mediaClassName = '' }: PhoneMockupProps) {
+function PhoneMockup({
+  className = '',
+  mediaClassName = '',
+  videoSrc,
+  videoZoom = 1,
+}: PhoneMockupProps) {
   return (
     <div
       className={[
@@ -116,15 +125,38 @@ function PhoneMockup({ className = '', mediaClassName = '' }: PhoneMockupProps) 
         .join(' ')}
     >
       <div className="absolute inset-0 overflow-hidden rounded-[1.15rem]">
-        {/* Swap placeholder with <img> or <video className="w-full h-full object-cover" /> */}
-        <div
-          className={[
-            'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500',
-            mediaClassName,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        />
+        {videoSrc ? (
+          <>
+            <div
+              className="absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500"
+              aria-hidden
+            />
+            <video
+              src={videoSrc}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={
+                videoZoom !== 1
+                  ? { transform: `scale(${videoZoom})`, transformOrigin: 'center' }
+                  : undefined
+              }
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Demonstração do produto For My Love"
+            />
+          </>
+        ) : (
+          <div
+            className={[
+              'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500',
+              mediaClassName,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          />
+        )}
       </div>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1/3 h-1 rounded-full bg-white/60 z-10" />
     </div>
@@ -243,18 +275,12 @@ export function LandingView() {
   const typedText = useTypewriter(TYPEWRITER_PHRASES)
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <FlowPageShell>
+      <Header seamless />
 
       <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 pt-14 pb-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(252,228,243,0.45) 0%, rgba(255,255,255,0) 55%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 pt-14 pb-16">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
           {/* Left: copy + CTA */}
           <div className="text-left order-1">
@@ -282,21 +308,22 @@ export function LandingView() {
           {/* Right: mockups + hearts */}
           <div className="relative flex justify-center items-end min-h-[260px] md:min-h-[340px] order-2">
             <FloatingHearts hearts={HERO_HEARTS} />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end" />
-            <PhoneMockup className="relative z-10 scale-100 shadow-2xl self-end" />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" />
+            <PhoneMockup
+              className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end"
+              videoSrc="/medidor-de-amor.mp4"
+            />
+            <PhoneMockup
+              className="relative z-10 scale-100 shadow-2xl self-end"
+              videoSrc="/main-video.mp4"
+              videoZoom={1.3}
+            />
+            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" videoSrc="/medidor-de-amor-david.mp4"/>
           </div>
         </div>
       </section>
 
       {/* ── How it works ──────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16 relative overflow-hidden"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 60% at 50% 50%, rgba(252,228,243,0.35) 0%, rgba(255,255,255,0) 65%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <FloatingHearts hearts={HOW_HEARTS} />
         </div>
@@ -344,13 +371,7 @@ export function LandingView() {
       </section>
 
       {/* ── Pricing ───────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 50% at 50% 50%, rgba(252,228,243,0.28) 0%, rgba(255,255,255,0) 65%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16">
         <div className="max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           Planos e preços
@@ -424,13 +445,7 @@ export function LandingView() {
       </section>
 
       {/* ── FAQ ───────────────────────────────────────────────────── */}
-      <section
-        className="w-full px-6 py-16"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 50% at 50% 100%, rgba(252,228,243,0.4) 0%, rgba(255,255,255,0) 60%)',
-        }}
-      >
+      <section className="relative z-10 w-full px-6 py-16">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-10 text-center">
             Perguntas Frequentes
@@ -484,8 +499,7 @@ export function LandingView() {
       </section>
 
       </main>
-
-      <Footer />
-    </div>
+      <Footer seamless />
+    </FlowPageShell>
   )
 }

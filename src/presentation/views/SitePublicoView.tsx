@@ -12,7 +12,9 @@ import { QuizAfetivoDisplay } from '../components/display/QuizAfetivoDisplay'
 import { RaspadinhaSurpresaDisplay } from '../components/display/RaspadinhaSurpresaDisplay'
 import { MensagemMultimidiaDisplay } from '../components/display/MensagemMultimidiaDisplay'
 import { useGetSiteBySlug } from '@/infrastructure/queries/siteQueries'
+import { DEFAULT_SITE_COLOR } from '@/shared/constants/colorPalette'
 import { ROUTES } from '@/shared/constants/routes'
+import { SiteThemeProvider, useSiteTheme } from '@/shared/context/SiteThemeContext'
 import { getFriendlyMessage } from '@/shared/errors/getFriendlyMessage'
 
 type LoadState = 'loading' | 'ready' | 'not-found' | 'error'
@@ -34,6 +36,9 @@ interface BackendSite {
   plan?: string
   planType?: string
   pages?: BackendPage[]
+  globalSettings?: {
+    primaryColor?: string
+  }
 }
 
 interface RenderResult {
@@ -96,6 +101,7 @@ function renderPage(
             <SpinWheelDisplay
               options={options}
               phrase={(page.content.phrase as string) ?? undefined}
+              colors={(page.content.colors as string[] | undefined) ?? undefined}
               onComplete={onPageComplete}
             />
           </PageCard>
@@ -231,13 +237,33 @@ function renderPage(
 
 export function SitePublicoView() {
   const { slug } = useParams<{ slug: string }>()
+  const { data: siteData, isLoading, error } = useGetSiteBySlug(slug)
+  const site = siteData as unknown as BackendSite | undefined
+  const primaryColor = site?.globalSettings?.primaryColor ?? DEFAULT_SITE_COLOR
+
+  return (
+    <SiteThemeProvider color={primaryColor}>
+      <SitePublicoViewBody slug={slug} site={site} isLoading={isLoading} error={error} />
+    </SiteThemeProvider>
+  )
+}
+
+function SitePublicoViewBody({
+  slug,
+  site,
+  isLoading,
+  error,
+}: {
+  slug: string | undefined
+  site: BackendSite | undefined
+  isLoading: boolean
+  error: unknown
+}) {
+  const theme = useSiteTheme()
   const navigate = useNavigate()
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completedPageIds, setCompletedPageIds] = useState<Set<string>>(new Set())
   const directionRef = useRef(1)
-
-  const { data: siteData, isLoading, error } = useGetSiteBySlug(slug)
-  const site = siteData as unknown as BackendSite | undefined
 
   const loadState: LoadState = !slug
     ? 'not-found'
@@ -274,13 +300,16 @@ export function SitePublicoView() {
 
   if (loadState === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-page-gradient">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: theme.pageGradient }}
+      >
         <div className="relative flex items-center justify-center">
-          {/* Ripple rings */}
           {[0, 1, 2].map((i) => (
             <motion.span
               key={i}
-              className="absolute rounded-full border-2 border-brand"
+              className="absolute rounded-full border-2"
+              style={{ borderColor: theme.primary, width: 48, height: 48 }}
               initial={{ opacity: 0.6, scale: 0.6 }}
               animate={{ opacity: 0, scale: 2.4 }}
               transition={{
@@ -289,14 +318,13 @@ export function SitePublicoView() {
                 delay: i * 0.5,
                 ease: 'easeOut',
               }}
-              style={{ width: 48, height: 48 }}
             />
           ))}
-          {/* Heartbeat */}
           <motion.svg
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-12 h-12 text-brand relative z-10 drop-shadow-md"
+            className="w-12 h-12 relative z-10 drop-shadow-md"
+            style={{ color: theme.primary }}
             animate={{
               scale: [1, 1.25, 1, 1.15, 1],
             }}
@@ -317,7 +345,10 @@ export function SitePublicoView() {
 
   if (loadState === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-page-gradient px-6">
+      <div
+        className="min-h-screen flex items-center justify-center px-6"
+        style={{ background: theme.pageGradient }}
+      >
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">😔</div>
           <h2 className="text-xl font-bold text-gray-700 mb-2">Ops, algo deu errado</h2>
@@ -330,7 +361,10 @@ export function SitePublicoView() {
 
   if (loadState === 'not-found' || !site) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-page-gradient px-6">
+      <div
+        className="min-h-screen flex items-center justify-center px-6"
+        style={{ background: theme.pageGradient }}
+      >
         <div className="text-center">
           <div className="text-5xl mb-4">💔</div>
           <h2 className="text-xl font-bold text-gray-700 mb-2">Presente não encontrado</h2>
@@ -345,7 +379,10 @@ export function SitePublicoView() {
 
   if (pages.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-page-gradient px-6">
+      <div
+        className="min-h-screen flex items-center justify-center px-6"
+        style={{ background: theme.pageGradient }}
+      >
         <div className="text-center">
           <div className="text-5xl mb-4">🎁</div>
           <h2 className="text-xl font-bold text-gray-700">Este presente está vazio</h2>
@@ -364,35 +401,55 @@ export function SitePublicoView() {
     : false
 
   return (
-    <div className="min-h-screen bg-page-gradient flex flex-col">
+    <div className="min-h-screen flex flex-col relative" style={{ background: theme.pageGradient }}>
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: theme.radialAccent }}
+        aria-hidden
+      />
+
       {musicPages[0] ? (
         <MusicaFundoDisplay
           youtubeUrl={(musicPages[0].content.trackUrl as string) ?? ''}
         />
       ) : null}
 
-      <div className="flex justify-center pt-5 pb-2 relative z-10 bg-page-gradient/80">
-        <Logo size="sm" />
-      </div>
-
-      {storyCount > 1 && (
-        <div className="flex justify-center gap-1.5 pb-2 relative z-10">
-          {storyPages.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => { directionRef.current = i > currentIdx ? 1 : -1; setCurrentIdx(i) }}
-              aria-label={`Ir para página ${i + 1}`}
-              className={[
-                'h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
-                i === currentIdx ? 'w-6 bg-brand' : 'w-1.5 bg-gray-300 hover:bg-gray-400',
-              ].join(' ')}
-            />
-          ))}
+      <header className="relative z-10 shrink-0">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(180deg, ${theme.lighter} 0%, transparent 50%)`,
+          }}
+          aria-hidden
+        />
+        <div className="relative flex justify-center pt-5 pb-2">
+          <Logo size="sm" color={theme.primary} />
         </div>
-      )}
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto overflow-x-hidden">
+        {storyCount > 1 && (
+          <div className="relative flex justify-center gap-1.5 pb-3">
+            {storyPages.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => { directionRef.current = i > currentIdx ? 1 : -1; setCurrentIdx(i) }}
+                aria-label={`Ir para página ${i + 1}`}
+                className={[
+                  'h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2',
+                  i === currentIdx ? 'w-6' : 'w-1.5 bg-gray-300 hover:bg-gray-400',
+                ].join(' ')}
+                style={
+                  i === currentIdx
+                    ? { backgroundColor: theme.primary, outlineColor: theme.primary }
+                    : { outlineColor: theme.primary }
+                }
+              />
+            ))}
+          </div>
+        )}
+      </header>
+
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto overflow-x-hidden">
         {storyCount === 0 ? (
           <p className="text-center text-gray-400 text-sm">Este presente ainda não tem páginas.</p>
         ) : currentIdx >= storyCount ? (
@@ -441,7 +498,8 @@ export function SitePublicoView() {
                     <button
                       type="button"
                       onClick={() => navigate(ROUTES.HOME)}
-                      className="text-xs text-brand underline hover:text-brand/80 transition mt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
+                      className="text-xs underline transition mt-2 focus-visible:outline-none focus-visible:ring-2 rounded"
+                      style={{ color: theme.primary, outlineColor: theme.primary }}
                     >
                       Crie um presente inesquecível como este no For My Love →
                     </button>
@@ -459,7 +517,8 @@ export function SitePublicoView() {
         <p className="text-xs text-gray-400">
           Criado com{' '}
           <span
-            className="text-brand font-semibold cursor-pointer hover:underline"
+            className="font-semibold cursor-pointer hover:underline"
+            style={{ color: theme.primary }}
             onClick={() => navigate(ROUTES.HOME)}
             role="link"
             tabIndex={0}

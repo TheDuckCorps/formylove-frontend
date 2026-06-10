@@ -10,7 +10,7 @@ export function TermosUsoView() {
           Termos de Uso
         </h1>
         <p className="text-xs text-gray-400 text-center mb-8">
-          Última atualização: [INSERIR DATA]
+          Última atualização: 10/06/2026
         </p>
         <p className="text-sm text-gray-500 text-center mb-10">
           Ao utilizar o For My Love, você concorda com estes Termos de Uso. Leia-os atentamente.
@@ -60,11 +60,11 @@ export function TermosUsoView() {
             },
             {
               title: '11. Lei Aplicável',
-              body: `• Estes Termos são regidos pela legislação brasileira (Lei nº 13.709/2018 - LGPD). Disputas serão resolvidas no foro de [INSERIR CIDADE/ESTADO].`,
+              body: `• Estes Termos são regidos pela legislação brasileira (Lei nº 13.709/2018 - LGPD). Disputas serão resolvidas no foro de Brasília/DF.`,
             },
             {
               title: '12. Contato',
-              body: `Para dúvidas ou suporte:\n• E-mail: [INSERIR E-MAIL]\n• WhatsApp: [INSERIR NÚMERO]`,
+              body: `Para dúvidas ou suporte:\n• E-mail: contato@formylove.com.br`,
             },
           ].map((section) => (
             <div key={section.title}>

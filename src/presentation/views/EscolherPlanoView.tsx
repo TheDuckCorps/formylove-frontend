@@ -103,6 +103,7 @@ export function EscolherPlanoView() {
     selectedPages,
     qrTemplate,
     qrCodeDetailed,
+    siteColor,
     planType,
     setValidationResults,
     setCurrentPageIndex,
@@ -178,6 +179,7 @@ export function EscolherPlanoView() {
       planType: chosen,
       pages: selectedPages,
       qrTemplate,
+      siteColor,
     }).catch(() => null)
 
     if (!site) return
@@ -209,8 +211,8 @@ export function EscolherPlanoView() {
   const chosenPlan = chosen ? PLANS.find((p) => p.type === chosen) : null
 
   return (
-    <div className="page-wrapper">
-      <Header />
+    <>
+      <Header seamless />
       <StepIndicator currentStep={4} />
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-6 py-8">
@@ -331,7 +333,7 @@ export function EscolherPlanoView() {
         </p>
       </main>
 
-      <Footer />
+      <Footer seamless />
 
       {showPageLimitModal && chosenPlan && (
         <PageLimitModal
@@ -359,6 +361,6 @@ export function EscolherPlanoView() {
           onClose={() => setShowValidationModal(false)}
         />
       )}
-    </div>
+    </>
   )
 }

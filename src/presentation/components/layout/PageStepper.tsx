@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { cloneElement, isValidElement, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { PAGE_TYPES_META } from '@/core/entities/Page'
 import type { PageValidationResult } from '@/core/validation/pageSchemas'
@@ -7,6 +7,7 @@ interface Props {
   validationResults?: PageValidationResult[]
   hideMobileButton?: boolean
   externalMobileOpen?: React.MutableRefObject<(() => void) | null>
+  sidebarContent?: ReactNode
 }
 
 interface StepperItemProps {
@@ -18,14 +19,14 @@ interface StepperItemProps {
   invalid: boolean
   dragIndex: number | null
   forceShowLabel?: boolean
+  enableNativeDrag?: boolean
+  mobileSheet?: boolean
   onSelect: (index: number) => void
   onRemove: (id: string) => void
   onDragStart: (index: number) => void
   onDragOver: (e: React.DragEvent, index: number) => void
   onDragEnd: () => void
   onTouchStart: (e: React.TouchEvent, index: number) => void
-  onTouchMove: (e: React.TouchEvent) => void
-  onTouchEnd: () => void
 }
 
 function StepperItem({
@@ -37,18 +38,20 @@ function StepperItem({
   invalid,
   dragIndex,
   forceShowLabel = false,
+  enableNativeDrag = true,
+  mobileSheet = false,
   onSelect,
   onRemove,
   onDragStart,
   onDragOver,
   onDragEnd,
   onTouchStart,
-  onTouchMove,
-  onTouchEnd,
 }: StepperItemProps) {
   const meta = PAGE_TYPES_META.find((m) => m.type === page.type)
 
-  const labelPanelClass = forceShowLabel
+  const labelPanelClass = mobileSheet
+    ? 'flex-1 min-w-0 flex items-center justify-between gap-2'
+    : forceShowLabel
     ? 'flex-1 min-w-0 pb-4 pt-1.5 flex items-start justify-between gap-2 opacity-100 max-h-none pointer-events-auto'
     : [
         'flex-1 min-w-0 pb-4 pt-1.5 flex items-start justify-between gap-2',
@@ -57,29 +60,45 @@ function StepperItem({
         'transition-all duration-200',
       ].join(' ')
 
+  const rowClass = mobileSheet
+    ? [
+        'flex gap-3 rounded-xl border-2 px-3 py-2.5 transition-all',
+        dragIndex === index ? 'opacity-50' : '',
+        isActive
+          ? 'border-brand bg-brand/10 shadow-sm ring-1 ring-brand/20'
+          : invalid
+            ? 'border-red-200 bg-red-50/80'
+            : 'border-gray-100 bg-white/90',
+      ].join(' ')
+    : [
+        'flex gap-3 group/step',
+        enableNativeDrag ? 'cursor-grab active:cursor-grabbing' : '',
+        dragIndex === index ? 'opacity-50' : '',
+      ].join(' ')
+
   return (
     <div
-      draggable
-      onDragStart={() => onDragStart(index)}
-      onDragOver={(e) => onDragOver(e, index)}
-      onDragEnd={onDragEnd}
-      className={[
-        'flex gap-3 group/step cursor-grab active:cursor-grabbing',
-        dragIndex === index ? 'opacity-50' : '',
-      ].join(' ')}
+      data-stepper-index={index}
+      draggable={enableNativeDrag}
+      onDragStart={enableNativeDrag ? () => onDragStart(index) : undefined}
+      onDragOver={enableNativeDrag ? (e) => onDragOver(e, index) : undefined}
+      onDragEnd={enableNativeDrag ? onDragEnd : undefined}
+      className={rowClass}
     >
-      {/* drag handle — touch-action: none tells the browser not to scroll on this element,
-          allowing our touch handlers to fire and drive reorder on mobile */}
       <div
-        className="flex items-center justify-center flex-shrink-0 h-11"
+        className={[
+          'flex items-center justify-center flex-shrink-0',
+          mobileSheet ? 'h-full self-center' : 'h-11',
+        ].join(' ')}
         style={{ touchAction: 'none' }}
         onTouchStart={(e) => onTouchStart(e, index)}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
       >
         <svg
           aria-hidden
-          className="w-3.5 h-3.5 text-gray-300 group-hover/step:text-gray-400 transition-colors"
+          className={[
+            'w-3.5 h-3.5 transition-colors',
+            mobileSheet ? 'text-gray-400' : 'text-gray-300 group-hover/step:text-gray-400',
+          ].join(' ')}
           viewBox="0 0 10 16" fill="currentColor"
         >
           <circle cx="2.5" cy="2" r="1.5" />
@@ -90,14 +109,15 @@ function StepperItem({
           <circle cx="7.5" cy="14" r="1.5" />
         </svg>
       </div>
-      <div className="flex flex-col items-center flex-shrink-0">
+      <div className={mobileSheet ? 'flex items-center flex-shrink-0' : 'flex flex-col items-center flex-shrink-0'}>
         <button
           type="button"
           onClick={() => onSelect(index)}
           aria-label={`${meta?.label ?? 'Página'} ${index + 1}${invalid ? ', incompleto' : ''}`}
           aria-current={isActive ? 'step' : undefined}
           className={[
-            'relative w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all',
+            'relative rounded-full border-2 flex items-center justify-center transition-all',
+            mobileSheet ? 'w-12 h-12' : 'w-11 h-11',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
             isActive
               ? 'border-brand bg-white shadow-md scale-105 ring-2 ring-brand/20'
@@ -110,7 +130,7 @@ function StepperItem({
             <img
               src={meta.svgIcon}
               alt=""
-              className="w-6 h-6 object-contain pointer-events-none"
+              className={mobileSheet ? 'w-7 h-7 object-contain pointer-events-none' : 'w-6 h-6 object-contain pointer-events-none'}
               draggable={false}
             />
           ) : (
@@ -123,7 +143,7 @@ function StepperItem({
             />
           )}
         </button>
-        {!isLast && (
+        {!isLast && !mobileSheet && (
           <div
             className={[
               'w-0.5 flex-1 min-h-[24px] my-1',
@@ -142,13 +162,16 @@ function StepperItem({
         >
           <p
             className={[
-              'text-sm font-semibold truncate',
+              mobileSheet ? 'text-base font-semibold' : 'text-sm font-semibold truncate',
               isActive ? 'text-brand' : 'text-gray-800',
             ].join(' ')}
           >
             {meta?.label}
           </p>
-          <p className="text-xs text-gray-400">Página {index + 1}</p>
+          <p className="text-xs text-gray-400">
+            Página {index + 1}
+            {isActive && mobileSheet ? ' · editando agora' : ''}
+          </p>
         </button>
 
         <button
@@ -169,7 +192,20 @@ function StepperItem({
   )
 }
 
-export function PageStepper({ validationResults = [], hideMobileButton = false, externalMobileOpen }: Props) {
+function findStepperIndexFromPoint(x: number, y: number): number | null {
+  const el = document.elementFromPoint(x, y)
+  const row = el?.closest('[data-stepper-index]')
+  if (!row) return null
+  const index = Number(row.getAttribute('data-stepper-index'))
+  return Number.isFinite(index) ? index : null
+}
+
+export function PageStepper({
+  validationResults = [],
+  hideMobileButton = false,
+  externalMobileOpen,
+  sidebarContent,
+}: Props) {
   const {
     selectedPages,
     currentPageIndex,
@@ -180,13 +216,28 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Touch drag state — tracked in refs to avoid stale closures during touchmove
   const touchDragIndexRef = useRef<number | null>(null)
-  const touchStartYRef = useRef<number>(0)
-  const itemHeightRef = useRef<number>(0)
+  const touchCleanupRef = useRef<(() => void) | null>(null)
+  const mobileNavRef = useRef<HTMLElement>(null)
 
-  // Expose open function to parent so it can trigger the drawer from a shared bottom bar
   if (externalMobileOpen) externalMobileOpen.current = () => setMobileOpen(true)
+
+  useEffect(() => {
+    return () => {
+      touchCleanupRef.current?.()
+      touchCleanupRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mobileOpen) return
+    requestAnimationFrame(() => {
+      const el = mobileNavRef.current?.querySelector(
+        `[data-stepper-index="${currentPageIndex}"]`,
+      )
+      el?.scrollIntoView({ block: 'nearest' })
+    })
+  }, [mobileOpen, currentPageIndex])
 
   function isPageInvalid(pageId: string) {
     return validationResults.some((r) => r.pageId === pageId && !r.isValid)
@@ -209,40 +260,54 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
     setDragIndex(index)
   }
 
-  // --- Touch drag handlers (mobile reorder) ---
-  // touch-action: none on the drag handle prevents the browser from claiming the
-  // touchmove event for scrolling, so these handlers reliably fire on mobile.
-  function handleTouchStart(e: React.TouchEvent, index: number) {
-    touchDragIndexRef.current = index
-    touchStartYRef.current = e.touches[0].clientY
-    // Measure approximate row height from the touch target's parent row
-    const row = (e.currentTarget as HTMLElement).closest('[draggable]') as HTMLElement | null
-    itemHeightRef.current = row ? row.getBoundingClientRect().height : 48
-    setDragIndex(index)
-  }
-
-  function handleTouchMove(e: React.TouchEvent) {
-    if (touchDragIndexRef.current === null) return
-    const currentY = e.touches[0].clientY
-    const delta = currentY - touchStartYRef.current
-    const height = itemHeightRef.current || 48
-    const steps = Math.round(delta / height)
-    if (steps === 0) return
-    const newIndex = Math.max(0, Math.min(selectedPages.length - 1, touchDragIndexRef.current + steps))
-    if (newIndex !== touchDragIndexRef.current) {
-      reorderPages(touchDragIndexRef.current, newIndex)
-      touchDragIndexRef.current = newIndex
-      touchStartYRef.current = currentY
-      setDragIndex(newIndex)
-    }
-  }
-
-  function handleTouchEnd() {
+  function endTouchDrag() {
+    touchCleanupRef.current?.()
+    touchCleanupRef.current = null
     touchDragIndexRef.current = null
     setDragIndex(null)
   }
 
-  function renderStepperItems(forceShowLabel: boolean) {
+  function handleTouchStart(_e: React.TouchEvent, index: number) {
+    endTouchDrag()
+
+    touchDragIndexRef.current = index
+    setDragIndex(index)
+
+    function handleDocumentTouchMove(ev: TouchEvent) {
+      if (touchDragIndexRef.current === null) return
+      ev.preventDefault()
+
+      const touch = ev.touches[0]
+      if (!touch) return
+
+      const targetIndex = findStepperIndexFromPoint(touch.clientX, touch.clientY)
+      if (targetIndex === null || targetIndex === touchDragIndexRef.current) return
+
+      reorderPages(touchDragIndexRef.current, targetIndex)
+      touchDragIndexRef.current = targetIndex
+      setDragIndex(targetIndex)
+    }
+
+    function handleDocumentTouchEnd() {
+      endTouchDrag()
+    }
+
+    document.addEventListener('touchmove', handleDocumentTouchMove, { passive: false })
+    document.addEventListener('touchend', handleDocumentTouchEnd)
+    document.addEventListener('touchcancel', handleDocumentTouchEnd)
+
+    touchCleanupRef.current = () => {
+      document.removeEventListener('touchmove', handleDocumentTouchMove)
+      document.removeEventListener('touchend', handleDocumentTouchEnd)
+      document.removeEventListener('touchcancel', handleDocumentTouchEnd)
+    }
+  }
+
+  function renderStepperItems(
+    forceShowLabel: boolean,
+    enableNativeDrag: boolean,
+    mobileSheet = false,
+  ) {
     return selectedPages.map((page, i) => (
       <StepperItem
         key={page.id}
@@ -254,38 +319,56 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
         invalid={isPageInvalid(page.id)}
         dragIndex={dragIndex}
         forceShowLabel={forceShowLabel}
+        enableNativeDrag={enableNativeDrag}
+        mobileSheet={mobileSheet}
         onSelect={handleSelect}
         onRemove={removePage}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={() => setDragIndex(null)}
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       />
     ))
   }
 
+  function renderMobileSidebarContent() {
+    if (!sidebarContent) return null
+    if (isValidElement(sidebarContent)) {
+      return cloneElement(sidebarContent, { placement: 'above-right' } as Record<string, unknown>)
+    }
+    return sidebarContent
+  }
+
   return (
     <>
-      <aside className="hidden lg:block w-52 flex-shrink-0 sticky top-24">
+      <aside className="hidden lg:block w-52 flex-shrink-0 sticky top-24 overflow-visible">
         <p className="text-xs font-semibold text-brand uppercase tracking-wide mb-4">
           Suas páginas
         </p>
+        {sidebarContent && (
+          <div className="relative z-[80] mb-6 overflow-visible">
+            {sidebarContent}
+          </div>
+        )}
+        <div className="mb-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            Páginas do presente
+          </p>
+          {selectedPages.length > 1 && (
+            <p className="mt-1 text-[11px] text-gray-400 flex items-center gap-1">
+              <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              Arraste para reordenar
+            </p>
+          )}
+        </div>
         <nav aria-label="Navegação entre páginas" className="flex flex-col">
-          {renderStepperItems(true)}
+          {renderStepperItems(true, true)}
           {selectedPages.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-4">Nenhuma página ainda.</p>
           )}
         </nav>
-        {selectedPages.length > 1 && (
-          <p className="mt-3 text-xs text-gray-400 flex items-center gap-1">
-            <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-            Arraste para reordenar
-          </p>
-        )}
       </aside>
 
       {!hideMobileButton && <div className="lg:hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-30">
@@ -309,29 +392,48 @@ export function PageStepper({ validationResults = [], hideMobileButton = false, 
 
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-50 bg-black/40"
+          className="lg:hidden fixed inset-0 z-[60] bg-black/40"
           onClick={() => setMobileOpen(false)}
         >
           <div
-            className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-modal max-h-[70vh] overflow-y-auto p-6 animate-fade-in"
+            className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm rounded-t-2xl shadow-modal max-h-[88vh] flex flex-col animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800">Suas páginas</h2>
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                aria-label="Fechar"
-                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+            <div className="flex-shrink-0 px-5 pt-5 pb-3">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-bold text-gray-800">Suas páginas</h2>
+                <button
+                  type="button"
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="Fechar"
+                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Páginas do presente
+                </p>
+                {selectedPages.length > 1 && (
+                  <p className="mt-1 text-[11px] text-gray-400">Toque e segure a alça para reordenar.</p>
+                )}
+              </div>
             </div>
-            <nav aria-label="Navegação entre páginas" className="flex flex-col">
-              {renderStepperItems(true)}
+            <nav
+              ref={mobileNavRef}
+              aria-label="Navegação entre páginas"
+              className="flex flex-col flex-1 min-h-0 overflow-y-auto px-5 gap-2 pb-4"
+            >
+              {renderStepperItems(true, false, true)}
             </nav>
+            {sidebarContent && (
+              <div className="relative z-[80] flex-shrink-0 px-5 pt-3 pb-5 border-t border-gray-100 overflow-visible">
+                {renderMobileSidebarContent()}
+              </div>
+            )}
           </div>
         </div>
       )}

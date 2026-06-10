@@ -1,6 +1,8 @@
 import type { RoletaEscolhasData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
+import { ColorPicker } from '../common/ColorPicker'
+import { normalizeWheelColors, WHEEL_COLOR_SLOTS } from '@/shared/constants/colorPalette'
 
 interface Props {
   data: RoletaEscolhasData
@@ -11,6 +13,8 @@ interface Props {
 const MAX_PHRASE = 100
 
 export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) {
+  const colors = normalizeWheelColors(data.colors)
+
   function updateOption(index: number, value: string) {
     const updated = [...data.options]
     updated[index] = value
@@ -25,6 +29,12 @@ export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) 
   function removeOption(index: number) {
     if (data.options.length <= 2) return
     onChange({ options: data.options.filter((_, i) => i !== index) })
+  }
+
+  function updateColor(index: number, hex: string) {
+    const updated = [...colors]
+    updated[index] = hex
+    onChange({ colors: updated })
   }
 
   return (
@@ -45,6 +55,23 @@ export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) 
         <div className="flex flex-col gap-2">
           {data.options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
+              {i < WHEEL_COLOR_SLOTS ? (
+                <ColorPicker
+                  value={colors[i]}
+                  onChange={(hex) => updateColor(i, hex)}
+                />
+              ) : (
+                <span
+                  className="w-8 h-8 rounded-lg border border-gray-200 shrink-0 flex items-center justify-center"
+                  aria-hidden
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full"
+                    style={{ backgroundColor: colors[i % colors.length] }}
+                  />
+                </span>
+              )}
+
               <input
                 className={[
                   'input-base flex-1 text-sm py-2',

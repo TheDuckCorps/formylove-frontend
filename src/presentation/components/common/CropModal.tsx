@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
+import { CROP_ASPECT_RATIO } from '@/shared/constants/cropAspect'
 
 interface Props {
   imageSrc: string
@@ -58,7 +59,7 @@ export function CropModal({ imageSrc, onConfirm, onCancel }: Props) {
           image={imageSrc}
           crop={crop}
           zoom={zoom}
-          aspect={1}
+          aspect={CROP_ASPECT_RATIO}
           onCropChange={setCrop}
           onZoomChange={setZoom}
           onCropComplete={onCropComplete}

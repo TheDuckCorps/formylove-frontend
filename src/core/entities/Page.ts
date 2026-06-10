@@ -62,6 +62,7 @@ export interface RaspadinhaSurpresaData {
 export interface RoletaEscolhasData {
   phrase: string
   options: string[]
+  colors: string[]
 }
 
 export interface MensagemMultimidiaData {
@@ -159,7 +160,11 @@ export const PAGE_TYPES_META: PageTypeMeta[] = [
     label: 'Roleta das Escolhas',
     description: 'Gire a roleta para sortear entre opções do casal.',
     svgIcon: '/lucky-choose.svg',
-    defaultData: { phrase: '', options: ['', '', ''] } satisfies RoletaEscolhasData,
+    defaultData: {
+      phrase: '',
+      options: ['', '', ''],
+      colors: ['#C62A87', '#8B5CF6', '#DC2626', '#F97316'],
+    } satisfies RoletaEscolhasData,
   },
   {
     type: 'MENSAGEM_MULTIMIDIA',

@@ -91,7 +91,11 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
       const d = data as RoletaEscolhasData
       const validOptions = d.options.filter((o) => o.trim().length > 0)
       while (validOptions.length < 2) validOptions.push(`Opção ${validOptions.length + 1}`)
-      return { phrase: d.phrase || '', options: validOptions }
+      return {
+        phrase: d.phrase || '',
+        options: validOptions,
+        colors: d.colors?.length ? d.colors : undefined,
+      }
     }
 
     case 'MENSAGEM_MULTIMIDIA': {
@@ -105,6 +109,42 @@ function transformContent(type: PageType, data: AnyPageData): Record<string, unk
 
     default:
       return {}
+  }
+}
+
+interface RawGetSiteBySlugResponse {
+  site?: {
+    id: string
+    slug: string
+    status: string
+    plan?: string
+    globalSettings?: {
+      primaryColor?: string
+      backgroundUrl?: string | null
+      musicUrl?: string | null
+      transition?: string | null
+      qrTemplate?: string | null
+    }
+    [key: string]: unknown
+  }
+  pages?: Array<{
+    id: string
+    type: string
+    order: number
+    content: Record<string, unknown>
+  }>
+}
+
+function normalizeGetBySlugResponse(data: RawGetSiteBySlugResponse | Site): Site {
+  if (!data || typeof data !== 'object' || !('site' in data) || !data.site) {
+    return data as Site
+  }
+
+  return {
+    ...(data.site as unknown as Site),
+    planType: (data.site.plan ?? (data.site as { planType?: string }).planType) as Site['planType'],
+    pages: (data.pages ?? []) as unknown as Site['pages'],
+    globalSettings: data.site.globalSettings as Site['globalSettings'],
   }
 }
 
@@ -125,7 +165,7 @@ export class SiteRepository implements ISiteRepository {
       userEmail: input.ownerEmail,
       plan: input.planType,
       globalSettings: {
-        primaryColor: '#C62A87',
+        primaryColor: input.siteColor ?? '#C62A87',
         backgroundUrl: null,
         musicUrl: null,
         transition: null,
@@ -138,8 +178,8 @@ export class SiteRepository implements ISiteRepository {
   }
 
   async getBySlug({ slug }: ISiteRepository.GetBySlugInput): Promise<Site> {
-    const { data } = await httpClient.get<Site>(`/api/v1/sites/${slug}`)
-    return data
+    const { data } = await httpClient.get<RawGetSiteBySlugResponse | Site>(`/api/v1/sites/${slug}`)
+    return normalizeGetBySlugResponse(data)
   }
 
   async listByEmail({ email }: ISiteRepository.ListByEmailInput): Promise<ISiteRepository.ListByEmailOutput> {

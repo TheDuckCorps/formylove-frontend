@@ -3,6 +3,7 @@ import type { MedidorAmorData } from '@/core/entities/Page'
 import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
 import { CropModal } from '../common/CropModal'
+import { CroppedImagePreview } from '../common/CroppedImagePreview'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
@@ -99,7 +100,8 @@ export function MedidorAmorPage({ data, onChange, fieldErrors = {}, onError }: P
             onDragEnter={handleDragOver}
             onDragLeave={handleDragLeave}
             className={[
-              'upload-zone h-56 md:h-80 cursor-pointer',
+              'upload-zone cursor-pointer',
+              data.imageUrl ? 'aspect-square w-full p-0 overflow-hidden border-0' : 'h-56 md:h-80',
               isDragging ? 'border-brand bg-brand/5 scale-[1.01]' : '',
               fieldErrors.imageUrl ? 'border-red-400 ring-1 ring-red-200' : '',
             ].join(' ')}
@@ -108,10 +110,10 @@ export function MedidorAmorPage({ data, onChange, fieldErrors = {}, onError }: P
             onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
           >
             {data.imageUrl ? (
-              <img
+              <CroppedImagePreview
                 src={data.imageUrl}
                 alt="Imagem principal"
-                className="w-full h-full object-cover rounded-xl"
+                className="rounded-none h-full"
               />
             ) : (
               <>
