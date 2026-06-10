@@ -58,6 +58,8 @@ export function playMilestone(level: 1 | 2 | 3) {
 
 // ─── Scratch Card ──────────────────────────────────────────────────────────
 
+const SCRATCH_GAIN = 0.01
+
 let scratchCtx: AudioContext | null = null
 let scratchGain: GainNode | null = null
 
@@ -98,8 +100,19 @@ export function initScratchSound(): () => void {
 /** Toggle scratch noise on/off. */
 export function setScratchActive(active: boolean) {
   if (!scratchCtx || !scratchGain) return
-  const now = scratchCtx.currentTime
-  scratchGain.gain.setTargetAtTime(active ? 0.13 : 0, now, 0.012)
+
+  const applyGain = () => {
+    if (!scratchCtx || !scratchGain) return
+    const now = scratchCtx.currentTime
+    scratchGain.gain.setTargetAtTime(active ? SCRATCH_GAIN : 0, now, 0.012)
+  }
+
+  if (active && scratchCtx.state === 'suspended') {
+    void scratchCtx.resume().then(applyGain).catch(() => { /* noop */ })
+    return
+  }
+
+  applyGain()
 }
 
 // ─── Quiz ──────────────────────────────────────────────────────────────────

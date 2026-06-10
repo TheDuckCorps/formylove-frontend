@@ -107,11 +107,11 @@ export function QRCodeTemplateView() {
           </div>
 
           <div className="lg:sticky lg:top-8 w-full lg:w-64 shrink-0 bg-gray-50 lg:bg-transparent rounded-2xl lg:rounded-none p-4 lg:p-0">
-            <div className="flex flex-row lg:flex-col items-center lg:gap-3">
-              <div className="w-24 h-24 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl">
+            <div className="flex flex-row lg:flex-col items-center gap-3">
+              <div className="w-40 h-40 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl">
                 <QRCodeViewer slug="meu-presente" qrTemplate={qrTemplate ?? 'template-1'} size={200} />
               </div>
-              <div className="flex flex-col gap-1.5 min-w-0">
+              <div className="flex flex-col gap-1 min-w-0">
                 <p className="text-xs text-gray-500 font-medium">Prévia do QR Code</p>
                 <p className="text-[11px] text-gray-400 leading-relaxed">
                   Selecione um design para ver a prévia
