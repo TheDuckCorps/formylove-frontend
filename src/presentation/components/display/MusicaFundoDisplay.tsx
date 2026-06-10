@@ -24,18 +24,21 @@ function getYoutubeVideoId(url: string): string | null {
 }
 
 const PAD = 16
+const IFRAME_ID = 'music-background-player'
 
 export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   const theme = useSiteTheme()
 
   /* ── audio state ─────────────────────────────────────────────── */
   const [playing, setPlaying] = useState(false)
-  const [volume, setVolume] = useState(70)
+  const [volume, setVolume] = useState(50)
   const [showVolume, setShowVolume] = useState(false)
   const [playerReady, setPlayerReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hasUserInteracted = useRef(false)
+  const volumeRef = useRef(volume)
+  const playingRef = useRef(playing)
 
   /* ── UI / drag state ─────────────────────────────────────────── */
   // 'text'  → intro pill with "Música" label visible
@@ -62,16 +65,39 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     return () => clearTimeout(t)
   }, [])
 
+  useEffect(() => {
+    volumeRef.current = volume
+  }, [volume])
+
+  useEffect(() => {
+    playingRef.current = playing
+  }, [playing])
+
   /* ── youtube iframe api ───────────────────────────────────────── */
   const videoId = useMemo(() => getYoutubeVideoId(youtubeUrl), [youtubeUrl])
 
   const playerUrl = useMemo(() => {
     if (!videoId) return null
-    return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1&loop=1&playlist=${videoId}&controls=0&disablekb=1&fs=0&iv_load_policy=3&modestbranding=1&rel=0&playsinline=1`
+    const params = new URLSearchParams({
+      enablejsapi: '1',
+      widgetid: IFRAME_ID,
+      autoplay: '1',
+      loop: '1',
+      playlist: videoId,
+      controls: '0',
+      disablekb: '1',
+      fs: '0',
+      iv_load_policy: '3',
+      modestbranding: '1',
+      rel: '0',
+      playsinline: '1',
+    })
+    if (typeof window !== 'undefined') {
+      params.set('origin', window.location.origin)
+    }
+    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`
   }, [videoId])
 
-  // All origins YouTube iframes can post messages from.
-  // youtu.be is a share shortener only — embeds always use www.youtube.com.
   const YOUTUBE_ORIGINS = new Set([
     'https://www.youtube.com',
     'https://youtube.com',
@@ -81,8 +107,28 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   function postToPlayer(command: string, args: unknown[] = []) {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: command, args }),
-      'https://www.youtube.com',
+'https://www.youtube.com',      
     )
+  }
+
+  function startPlayerListening() {
+    iframeRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'listening', id: IFRAME_ID, channel: 'widget' }),
+      '*',
+    )
+  }
+
+  function syncPlayerCommands() {
+    postToPlayer('setVolume', [volumeRef.current])
+    postToPlayer(playingRef.current ? 'playVideo' : 'pauseVideo')
+  }
+
+  function handleIframeLoad() {
+    startPlayerListening()
+    window.setTimeout(() => {
+      startPlayerListening()
+      syncPlayerCommands()
+    }, 300)
   }
 
   useEffect(() => {
@@ -91,7 +137,10 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
       if (!e.data) return
       try {
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data
-        if (data.event === 'onReady') setPlayerReady(true)
+        if (data.event === 'onReady' || data.event === 'initialDelivery') {
+          setPlayerReady(true)
+          postToPlayer('setVolume', [volumeRef.current])
+        }
         if (data.event === 'onStateChange') {
           if (data.info === 1) setPlaying(true)
           if (data.info === 2) setPlaying(false)
@@ -104,12 +153,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  // On player ready: attempt autoplay and optimistically mark as playing.
-  // We set playing=true here because onStateChange(info=1) is unreliable when
-  // autoplay=1 starts the video before the postMessage listener is ready.
-  // If the browser actually blocks autoplay, onStateChange(info=2) will fire
-  // and correct the state back to false.
-  // hasUserInteracted stays false so the sync effect below won't race with this.
   useEffect(() => {
     if (!playerReady) return
     postToPlayer('playVideo')
@@ -118,8 +161,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerReady])
 
-  // Sync play/pause ONLY after an explicit widget interaction.
-  // hasUserInteracted guards this so it never races with the onReady effect above.
   useEffect(() => {
     if (!playerReady || !hasUserInteracted.current) return
     postToPlayer(playing ? 'playVideo' : 'pauseVideo')
@@ -180,7 +221,10 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   }
 
   function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setVolume(Number(e.target.value))
+    const next = Number(e.target.value)
+    setVolume(next)
+    volumeRef.current = next
+    postToPlayer('setVolume', [next])
     setShowVolume(true)
     scheduleHideVolume()
   }
@@ -214,9 +258,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
         </button>
         {playerUrl ? (
           <iframe
+            id={IFRAME_ID}
             ref={iframeRef}
             title="Música de fundo"
             src={playerUrl}
+            onLoad={handleIframeLoad}
             className="w-0 h-0 opacity-0 pointer-events-none absolute"
             allow="autoplay; encrypted-media"
           />
@@ -332,34 +378,19 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
                 </button>
 
                 {/* volume — horizontal slider */}
-                <AnimatePresence>
-                  {showVolume && (
-                    <motion.div
-                      key="volume"
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 80, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      className="flex items-center overflow-hidden flex-shrink-0"
-                    >
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        value={volume}
-                        onChange={handleVolumeChange}
-                        aria-label="Volume da música"
-                        className="cursor-pointer w-full"
-                        style={{ accentColor: theme.primary }}
-                        // Stop the pointer event from bubbling to the framer-motion
-                        // drag handler on the parent widget — otherwise dragging the
-                        // slider is treated as dragging the entire widget and the
-                        // slider's onChange never fires.
-                        onPointerDown={e => e.stopPropagation()}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <div className="flex items-center overflow-hidden flex-shrink-0 w-20">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    aria-label="Volume da música"
+                    className="cursor-pointer w-full"
+                    style={{ accentColor: theme.primary }}
+                    onPointerDown={e => e.stopPropagation()}
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -368,9 +399,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
       {playerUrl ? (
         <iframe
+          id={IFRAME_ID}
           ref={iframeRef}
           title="Música de fundo"
           src={playerUrl}
+          onLoad={handleIframeLoad}
           className="w-0 h-0 opacity-0 pointer-events-none fixed"
           allow="autoplay; encrypted-media"
         />
