@@ -152,7 +152,7 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
 
       <div
         ref={imageContainerRef}
-        className="relative w-full h-80 md:h-96 lg:h-[520px] rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
+        className="relative w-full rounded-xl overflow-hidden bg-gray-100 cursor-pointer select-none touch-none"
         onClick={registerClick}
         onContextMenu={(e) => e.preventDefault()}
         style={{ WebkitTouchCallout: 'none' }}
@@ -164,10 +164,10 @@ export function MedidorAmorDisplay({ question, imageUrl, onComplete, previewMode
             src={imageUrl}
             alt=""
             draggable={false}
-            className="w-full h-full object-cover pointer-events-none select-none"
+            className="w-full max-h-[600px] object-contain block pointer-events-none select-none"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+          <div className="w-full min-h-48 flex items-center justify-center text-gray-400 text-sm">
             Adicione uma imagem para o medidor
           </div>
         )}
