@@ -55,7 +55,10 @@ export function getThemeConfettiColors(theme: SiteTheme): string[] {
 }
 
 export function buildSiteTheme(color: string): SiteTheme {
-  const primary = parseHex(color) ? color : '#C62A87'
+  const normalized = parseHex(color)
+  const primary = normalized
+    ? color.startsWith('#') ? color : `#${color.replace('#', '')}`
+    : '#C62A87'
   const light = mixWithWhite(primary, 0.55)
   const lighter = mixWithWhite(primary, 0.88)
   const dark = mixWithBlack(primary, 0.18)

@@ -223,6 +223,13 @@ export function PageStepper({
   if (externalMobileOpen) externalMobileOpen.current = () => setMobileOpen(true)
 
   useEffect(() => {
+    return () => {
+      touchCleanupRef.current?.()
+      touchCleanupRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
     if (!mobileOpen) return
     requestAnimationFrame(() => {
       const el = mobileNavRef.current?.querySelector(
