@@ -18,7 +18,7 @@ interface TemplateOption {
 
 const TEMPLATES: TemplateOption[] = [
   { id: 'template-1', label: 'Fundo branco', style: 'bg-white border border-gray-200' },
-  { id: 'template-2', label: 'Flores coloridas', style: 'bg-[url("/templates/t2.png")] bg-cover', emoji: '🌸🎨' },
+  { id: 'template-2', label: 'Flores coloridas', style: 'bg-gradient-to-br from-pink-100 via-rose-50 to-violet-100', emoji: '🌸🎨' },
   { id: 'template-3', label: 'Fundo claro', style: 'bg-gray-50 border border-gray-200' },
   { id: 'template-4', label: 'Corações rosa', style: 'bg-pink-100', emoji: '💗' },
   { id: 'template-5', label: 'Nuvens', style: 'bg-sky-100', emoji: '☁️' },

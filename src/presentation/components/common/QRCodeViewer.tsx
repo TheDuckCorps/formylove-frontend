@@ -15,7 +15,7 @@ interface TemplateConfig {
 
 const TEMPLATE_MAP: Record<string, TemplateConfig> = {
   'template-1': { bgColor: '#ffffff', dotsColor: '#1a1a1a', cornersColor: '#1a1a1a', dotsType: 'rounded', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-white' },
-  'template-2': { bgColor: '#ffffff', dotsColor: '#C62A87', cornersColor: '#C62A87', dotsType: 'extra-rounded', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-[url("/templates/t2.png")] bg-cover bg-center', emoji: '🌸' },
+  'template-2': { bgColor: '#ffffff', dotsColor: '#C62A87', cornersColor: '#C62A87', dotsType: 'extra-rounded', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-gradient-to-br from-pink-100 via-rose-50 to-violet-100', emoji: '🌸' },
   'template-3': { bgColor: '#f9fafb', dotsColor: '#374151', cornersColor: '#374151', dotsType: 'classy-rounded', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-gray-50' },
   'template-4': { bgColor: '#fce7f3', dotsColor: '#9d174d', cornersColor: '#be185d', dotsType: 'dots', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-pink-100', emoji: '💗' },
   'template-5': { bgColor: '#e0f2fe', dotsColor: '#0369a1', cornersColor: '#0284c7', dotsType: 'rounded', cornersSquareType: 'extra-rounded', cornersDotType: 'dot', containerClass: 'bg-sky-100', emoji: '☁️' },
