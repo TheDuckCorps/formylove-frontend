@@ -104,9 +104,17 @@ function FloatingHearts({ hearts }: { hearts: readonly HeartPosition[] }) {
 interface PhoneMockupProps {
   className?: string
   mediaClassName?: string
+  videoSrc?: string
+  /** Scale factor for video content (e.g. 1.08 = slight zoom in) */
+  videoZoom?: number
 }
 
-function PhoneMockup({ className = '', mediaClassName = '' }: PhoneMockupProps) {
+function PhoneMockup({
+  className = '',
+  mediaClassName = '',
+  videoSrc,
+  videoZoom = 1,
+}: PhoneMockupProps) {
   return (
     <div
       className={[
@@ -117,15 +125,38 @@ function PhoneMockup({ className = '', mediaClassName = '' }: PhoneMockupProps) 
         .join(' ')}
     >
       <div className="absolute inset-0 overflow-hidden rounded-[1.15rem]">
-        {/* Swap placeholder with <img> or <video className="w-full h-full object-cover" /> */}
-        <div
-          className={[
-            'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500',
-            mediaClassName,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        />
+        {videoSrc ? (
+          <>
+            <div
+              className="absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500"
+              aria-hidden
+            />
+            <video
+              src={videoSrc}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={
+                videoZoom !== 1
+                  ? { transform: `scale(${videoZoom})`, transformOrigin: 'center' }
+                  : undefined
+              }
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Demonstração do produto For My Love"
+            />
+          </>
+        ) : (
+          <div
+            className={[
+              'absolute inset-0 w-full h-full bg-gradient-to-b from-purple-800 to-purple-500',
+              mediaClassName,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          />
+        )}
       </div>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1/3 h-1 rounded-full bg-white/60 z-10" />
     </div>
@@ -276,9 +307,16 @@ export function LandingView() {
           {/* Right: mockups + hearts */}
           <div className="relative flex justify-center items-end min-h-[260px] md:min-h-[340px] order-2">
             <FloatingHearts hearts={HERO_HEARTS} />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end" />
-            <PhoneMockup className="relative z-10 scale-100 shadow-2xl self-end" />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" />
+            <PhoneMockup
+              className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end"
+              videoSrc="/medidor-de-amor.mp4"
+            />
+            <PhoneMockup
+              className="relative z-10 scale-100 shadow-2xl self-end"
+              videoSrc="/main-video.mp4"
+              videoZoom={1.3}
+            />
+            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" videoSrc="/medidor-de-amor-david.mp4"/>
           </div>
         </div>
       </section>
