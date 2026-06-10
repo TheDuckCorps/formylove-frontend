@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ttqTrack, ttqIdentify, generateEventId } from '@/shared/utils/tiktokPixel'
+import { trackGoogleAdsPurchase } from '@/shared/utils/googleAds'
 import { z } from 'zod'
 import { useToast } from '@/shared/ui/ToastProvider'
 import { Header } from '../components/layout/Header'
@@ -97,6 +98,11 @@ export function PaymentView() {
       value: displayAmount / 100,
       currency: 'BRL',
     }, generateEventId())
+
+    trackGoogleAdsPurchase({
+      transactionId: siteId ?? '',
+      value: displayAmount / 100,
+    })
 
     navigate(ROUTES.CRIAR_SUCESSO, {
       state: { slug: siteSlug, email },
