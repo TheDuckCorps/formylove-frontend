@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
+import { ImageWithLoader } from '../components/common/ImageWithLoader'
 import { StepIndicator } from '../components/layout/StepIndicator'
 import { useSiteBuilderStore, MAX_PAGES_PER_PLAN } from '@/shared/store/siteBuilderStore'
 import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
@@ -171,14 +172,16 @@ export function EscolherPaginasView() {
                   </div>
                 </div>
 
-                <div className="w-full max-w-[328px] min-h-[104px] rounded-2xl bg-white flex items-center justify-center p-4 shadow-sm border border-brand-50 pointer-events-none">
-                  <img
+                <div className="w-full max-w-[328px] min-h-[104px] rounded-2xl bg-white flex items-center justify-center p-4 shadow-sm border border-brand-50 pointer-events-none overflow-hidden">
+                  <ImageWithLoader
                     src={meta.svgIcon}
                     alt=""
+                    wrapperClassName="w-full h-full min-h-[104px] max-h-[104px]"
                     className="w-full h-full min-h-[104px] max-h-[104px] object-contain"
                     width={328}
                     height={104}
                     draggable={false}
+                    loaderTone="light"
                   />
                 </div>
 
