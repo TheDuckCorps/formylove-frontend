@@ -12,6 +12,7 @@ export function useSiteViewModel(slug?: string) {
       planType: store.planType ?? 'BASIC',
       pages: store.selectedPages,
       qrTemplate: store.qrTemplate,
+      siteColor: store.siteColor,
     })
   }
 

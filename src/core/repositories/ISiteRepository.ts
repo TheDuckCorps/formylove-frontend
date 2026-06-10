@@ -7,6 +7,7 @@ export namespace ISiteRepository {
     planType: PlanType
     pages: PageItem[]
     qrTemplate: string
+    siteColor?: string
   }
   export type CreateOutput = Site
 

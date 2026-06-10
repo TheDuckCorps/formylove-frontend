@@ -5,6 +5,7 @@ import type { PageItem, PageType, AnyPageData } from '@/core/entities/Page'
 import { PAGE_TYPES_META, getPageTypeMaxInstances } from '@/core/entities/Page'
 import { validateAllPages } from '@/core/validation/pageSchemas'
 import type { PlanType } from '@/core/entities/Site'
+import { DEFAULT_SITE_COLOR } from '@/shared/constants/colorPalette'
 import type { PageValidationResult } from '@/core/validation/pageSchemas'
 
 const MAX_FREE_PAGES = 50  // users pick freely; plan is chosen at the end
@@ -23,6 +24,7 @@ interface SiteBuilderState {
 
   qrTemplate: string
   qrCodeDetailed: boolean
+  siteColor: string
 
   maxPages: number
 }
@@ -39,6 +41,7 @@ interface SiteBuilderActions {
   setCurrentPageIndex: (idx: number) => void
 
   setQrTemplate: (template: string, detailed: boolean) => void
+  setSiteColor: (color: string) => void
   setValidationResults: (results: PageValidationResult[]) => void
   clearValidationResults: () => void
 
@@ -60,6 +63,7 @@ const initialState: SiteBuilderState = {
   validationResults: [],
   qrTemplate: 'template-2',
   qrCodeDetailed: false,
+  siteColor: DEFAULT_SITE_COLOR,
   maxPages: MAX_FREE_PAGES,
 }
 
@@ -117,6 +121,8 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
       setCurrentPageIndex: (currentPageIndex) => set({ currentPageIndex }),
 
       setQrTemplate: (qrTemplate, qrCodeDetailed) => set({ qrTemplate, qrCodeDetailed }),
+
+      setSiteColor: (siteColor) => set({ siteColor }),
 
       setValidationResults: (validationResults) => set({ validationResults }),
       clearValidationResults: () => set({ validationResults: [] }),
