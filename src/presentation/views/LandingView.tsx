@@ -246,6 +246,7 @@ export function LandingView() {
     <div className="page-wrapper">
       <Header />
 
+      <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section
         className="w-full px-6 pt-14 pb-16"
@@ -453,6 +454,7 @@ export function LandingView() {
                   <button
                     type="button"
                     className="w-full flex items-center justify-between gap-4 text-left group min-h-[2rem]"
+                    aria-expanded={openFaq === i}
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   >
                     <span className="text-sm font-semibold text-gray-700 group-hover:text-brand transition-colors flex-1">
@@ -480,6 +482,8 @@ export function LandingView() {
           </div>
         </div>
       </section>
+
+      </main>
 
       <Footer />
     </div>
