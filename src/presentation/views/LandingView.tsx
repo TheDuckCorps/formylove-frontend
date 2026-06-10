@@ -125,7 +125,7 @@ function PhoneMockup({
   return (
     <div
       className={[
-        'relative w-32 md:w-44 h-64 md:h-80 rounded-3xl border-4 border-white shadow-card overflow-hidden flex-shrink-0',
+        'relative aspect-[1/2] w-32 sm:w-[176px] md:w-[192px] lg:w-[208px] rounded-3xl border-4 border-white shadow-card overflow-hidden flex-shrink-0',
         className,
       ]
         .filter(Boolean)
@@ -316,10 +316,10 @@ export function LandingView() {
 
       <main>
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 pt-14 pb-16">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-center">
+      <section className="relative z-10 w-full px-6 pt-14 pb-8 sm:pb-10 lg:pb-16">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left: copy + CTA */}
-          <div className="text-left order-1">
+          <div className="text-left order-1 min-w-0 lg:max-w-xl">
             <h1 className="text-5xl font-extrabold text-gray-800 leading-tight mb-5">
               <span className="text-brand">Surpreenda</span> com uma página{' '}
               <br className="hidden md:block" />
@@ -342,24 +342,29 @@ export function LandingView() {
           </div>
 
           {/* Right: mockups + hearts */}
-          <div className="relative flex justify-center items-end min-h-[260px] md:min-h-[340px] order-2">
-            <FloatingHearts hearts={HERO_HEARTS} />
-            <PhoneMockup
-              className="relative z-0 scale-[0.82] opacity-75 -mr-10 md:-mr-14 self-end"
-              videoSrc="/medidor-de-amor.webm"
-            />
-            <PhoneMockup
-              className="relative z-10 scale-100 shadow-2xl self-end"
-              videoSrc="/main-video.webm"
-              videoZoom={1.3}
-            />
-            <PhoneMockup className="relative z-0 scale-[0.82] opacity-75 -ml-10 md:-ml-14 self-end" videoSrc="/medidor-de-amor-david.webm"/>
+          <div className="relative order-2 min-w-0 w-full flex justify-center lg:justify-end pt-4 lg:pt-0">
+            <div className="relative inline-flex max-w-full justify-center items-center min-h-[280px] min-[375px]:min-h-[320px] sm:min-h-[360px] md:min-h-[390px] lg:min-h-[400px] px-1 overflow-visible">
+              <FloatingHearts hearts={HERO_HEARTS} />
+              <PhoneMockup
+                className="relative z-0 scale-[1] sm:scale-[0.84] opacity-75 -mr-4 min-[375px]:-mr-6 sm:-mr-10 lg:-mr-12 self-center"
+                videoSrc="/medidor-de-amor.webm"
+              />
+              <PhoneMockup
+                className="relative z-20 scale-[1.3] sm:scale-[1.14] md:scale-[1.16] lg:scale-[1.1] shadow-2xl self-center"
+                videoSrc="/main-video.webm"
+                videoZoom={1.3}
+              />
+              <PhoneMockup
+                className="relative z-0 scale-[1] sm:scale-[0.84] opacity-75 -ml-4 min-[375px]:-ml-6 sm:-ml-10 lg:-ml-12 self-center"
+                videoSrc="/medidor-de-amor-david.webm"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── How it works ──────────────────────────────────────────── */}
-      <section className="relative z-10 w-full px-6 py-16 overflow-hidden">
+      <section className="relative z-10 w-full px-6 pt-8 pb-16 sm:pt-10 lg:pt-16 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <FloatingHearts hearts={HOW_HEARTS} />
         </div>
