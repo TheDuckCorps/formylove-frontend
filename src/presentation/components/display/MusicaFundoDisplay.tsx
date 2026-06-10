@@ -32,10 +32,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   /* ── audio state ─────────────────────────────────────────────── */
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(50)
-  const [showVolume, setShowVolume] = useState(false)
   const [playerReady, setPlayerReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hasUserInteracted = useRef(false)
   const volumeRef = useRef(volume)
   const playingRef = useRef(playing)
@@ -184,12 +182,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerReady])
 
-  useEffect(() => {
-    return () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-    }
-  }, [])
-
   /* ── drag → snap to nearest corner ──────────────────────────── */
   function snapToNearestCorner() {
     const el = dragRef.current
@@ -206,18 +198,11 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   }
 
   /* ── controls ────────────────────────────────────────────────── */
-  function scheduleHideVolume() {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
-    hideTimerRef.current = setTimeout(() => setShowVolume(false), 3000)
-  }
-
   function handleToggle() {
     hasUserInteracted.current = true
     const next = !playing
     setPlaying(next)
     postToPlayer(next ? 'playVideo' : 'pauseVideo')
-    setShowVolume(true)
-    scheduleHideVolume()
   }
 
   function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -225,8 +210,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     setVolume(next)
     volumeRef.current = next
     postToPlayer('setVolume', [next])
-    setShowVolume(true)
-    scheduleHideVolume()
   }
 
   /* ── compact mode (used in previews) ─────────────────────────── */
@@ -314,7 +297,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
           className="flex items-center rounded-full bg-white/85 backdrop-blur-md shadow-lg border px-4 gap-0 overflow-hidden h-12"
           style={{ borderColor: theme.borderSoft, boxShadow: theme.buttonShadow }}
           onMouseEnter={() => introPhase === 'idle' && setExpanded(true)}
-          onMouseLeave={() => { setExpanded(false); setShowVolume(false) }}
+          onMouseLeave={() => setExpanded(false)}
           onPointerUp={(e) => {
             // toggle only for touch — desktop expansion is handled by hover
             if (e.pointerType !== 'touch') return
