@@ -11,6 +11,7 @@ import { PalavraSecretaDisplay } from '../components/display/PalavraSecretaDispl
 import { QuizAfetivoDisplay } from '../components/display/QuizAfetivoDisplay'
 import { RaspadinhaSurpresaDisplay } from '../components/display/RaspadinhaSurpresaDisplay'
 import { MensagemMultimidiaDisplay } from '../components/display/MensagemMultimidiaDisplay'
+import { PresentEndScreen } from '../components/display/PresentEndScreen'
 import { useGetSiteBySlug } from '@/infrastructure/queries/siteQueries'
 import { DEFAULT_SITE_COLOR } from '@/shared/constants/colorPalette'
 import { ROUTES } from '@/shared/constants/routes'
@@ -91,6 +92,7 @@ function renderPage(
   page: BackendPage,
   onNext: () => void,
   onPageComplete: () => void,
+  options?: { continueLabel?: string },
 ): RenderResult {
   switch (page.type) {
     case 'SPIN_WHEEL': {
@@ -114,7 +116,11 @@ function renderPage(
       return {
         node: (
           <PageCard>
-            <ToqueContinuarDisplay phrase={(page.content.message as string) ?? ''} onContinue={onNext} />
+            <ToqueContinuarDisplay
+              phrase={(page.content.message as string) ?? ''}
+              onContinue={onNext}
+              continueLabel={options?.continueLabel}
+            />
           </PageCard>
         ),
         showNextButton: false,
@@ -282,7 +288,7 @@ function SitePublicoViewBody({
 
   const handleNext = useCallback(() => {
     directionRef.current = 1
-    setCurrentIdx((i) => Math.min(i + 1, storyCount - 1))
+    setCurrentIdx((i) => Math.min(i + 1, storyCount))
   }, [storyCount])
 
   const markPageComplete = useCallback((pageId: string) => {
@@ -296,6 +302,7 @@ function SitePublicoViewBody({
 
   const currentPage = storyPages[currentIdx]
   const isLast = currentIdx === storyCount - 1
+  const isFinished = currentIdx >= storyCount
 
 
   if (loadState === 'loading') {
@@ -392,13 +399,10 @@ function SitePublicoViewBody({
     )
   }
 
-  const sitePlan = (site.planType ?? site.plan) as string | undefined
-  const showLeadCta =
-    isLast && (sitePlan === 'BASIC' || sitePlan === 'INTERMEDIATE')
-
   const isCurrentComplete = currentPage
     ? completedPageIds.has(currentPage.id)
     : false
+  const finishLabel = 'Concluir ❤️'
 
   return (
     <div className="min-h-screen flex flex-col relative" style={{ background: theme.pageGradient }}>
@@ -426,7 +430,7 @@ function SitePublicoViewBody({
           <Logo size="sm" color={theme.primary} />
         </div>
 
-        {storyCount > 1 && (
+        {storyCount > 1 && !isFinished && (
           <div className="relative flex justify-center gap-1.5 pb-3">
             {storyPages.map((_, i) => (
               <button
@@ -452,13 +456,8 @@ function SitePublicoViewBody({
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-6 overflow-y-auto overflow-x-hidden">
         {storyCount === 0 ? (
           <p className="text-center text-gray-400 text-sm">Este presente ainda não tem páginas.</p>
-        ) : currentIdx >= storyCount ? (
-          <PageCard>
-            <p className="text-center text-lg font-semibold text-gray-800">Fim do presente</p>
-            <p className="text-center text-sm text-gray-500 mt-2">
-              Esperamos que tenha amado essa surpresa.
-            </p>
-          </PageCard>
+        ) : isFinished ? (
+          <PresentEndScreen />
         ) : (
           <AnimatePresence mode="wait" custom={directionRef.current}>
           <motion.div
@@ -477,11 +476,12 @@ function SitePublicoViewBody({
           >
             {(() => {
               const onPageComplete = () => markPageComplete(currentPage.id)
-              const render = renderPage(currentPage, handleNext, onPageComplete)
+              const render = renderPage(currentPage, handleNext, onPageComplete, {
+                continueLabel: isLast ? finishLabel : undefined,
+              })
               const needsCompletion = render.requiresCompletion ?? COMPLETION_PAGE_TYPES.has(currentPage.type)
               const canShowNext =
                 render.showNextButton !== false &&
-                !isLast &&
                 (!needsCompletion || isCurrentComplete)
 
               return (
@@ -490,19 +490,9 @@ function SitePublicoViewBody({
                   {canShowNext && (
                     <div className="flex justify-center">
                       <Button onClick={handleNext}>
-                        Próxima página →
+                        {isLast ? finishLabel : 'Próxima página →'}
                       </Button>
                     </div>
-                  )}
-                  {showLeadCta && (
-                    <button
-                      type="button"
-                      onClick={() => navigate(ROUTES.HOME)}
-                      className="text-xs underline transition mt-2 focus-visible:outline-none focus-visible:ring-2 rounded"
-                      style={{ color: theme.primary, outlineColor: theme.primary }}
-                    >
-                      Crie um presente inesquecível como este no For My Love →
-                    </button>
                   )}
                 </>
               )

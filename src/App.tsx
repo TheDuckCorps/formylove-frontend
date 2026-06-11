@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
 import { ROUTES } from '@/shared/constants/routes'
 import { ToastProvider } from '@/shared/ui/ToastProvider'
@@ -44,10 +45,21 @@ function SuccessView() {
   )
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [pathname])
+
+  return null
+}
+
 export default function App() {
   return (
     <ToastProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
         {/* ── Public ─────────────────────────────────────── */}
         <Route path={ROUTES.HOME} element={<LandingView />} />

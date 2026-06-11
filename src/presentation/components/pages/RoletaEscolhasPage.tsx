@@ -55,26 +55,30 @@ export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) 
         <div className="flex flex-col gap-2">
           {data.options.map((opt, i) => (
             <div key={i} className="flex items-center gap-2">
-              {i < WHEEL_COLOR_SLOTS ? (
-                <ColorPicker
-                  value={colors[i]}
-                  onChange={(hex) => updateColor(i, hex)}
-                />
-              ) : (
-                <span
-                  className="w-8 h-8 rounded-lg border border-gray-200 shrink-0 flex items-center justify-center"
-                  aria-hidden
-                >
-                  <span
-                    className="w-3.5 h-3.5 rounded-full"
-                    style={{ backgroundColor: colors[i % colors.length] }}
+              <div className="w-11 h-11 shrink-0 flex items-center justify-center">
+                {i < WHEEL_COLOR_SLOTS ? (
+                  <ColorPicker
+                    value={colors[i]}
+                    onChange={(hex) => updateColor(i, hex)}
                   />
-                </span>
-              )}
+                ) : (
+                  <div className="relative inline-flex p-1.5 rounded-xl">
+                    <span
+                      className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center"
+                      aria-hidden
+                    >
+                      <span
+                        className="w-3.5 h-3.5 rounded-full"
+                        style={{ backgroundColor: colors[i % colors.length] }}
+                      />
+                    </span>
+                  </div>
+                )}
+              </div>
 
               <input
                 className={[
-                  'input-base flex-1 text-sm py-2',
+                  'input-base flex-1 min-w-0 h-11 py-0 text-sm',
                   fieldErrors.options ? 'border-red-400' : '',
                 ].join(' ')}
                 placeholder={`OPÇÃO ${i + 1}`}
@@ -96,15 +100,19 @@ export function RoletaEscolhasPage({ data, onChange, fieldErrors = {} }: Props) 
         <FieldError message={fieldErrors.options} />
 
         {data.options.length < 8 && (
-          <button
-            type="button"
-            onClick={addOption}
-            className="mt-3 w-8 h-8 rounded-full bg-brand-gradient text-white flex items-center justify-center hover:opacity-90 transition"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
-            </svg>
-          </button>
+          <div className="mt-3 flex">
+            <div className="w-11 shrink-0 flex justify-center">
+              <button
+                type="button"
+                onClick={addOption}
+                className="w-8 h-8 rounded-full bg-brand-gradient text-white flex items-center justify-center hover:opacity-90 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -12,74 +12,84 @@ export const BASE_COLORS: BaseColor[] = [
     hex: '#171717',
     shades: ['#F5F5F5', '#D4D4D4', '#737373', '#171717', '#0A0A0A'],
   },
+
   {
     id: 'vermelho',
     name: 'Vermelho',
-    hex: '#DC2626',
-    shades: ['#FEE2E2', '#FCA5A5', '#F87171', '#DC2626', '#991B1B'],
+    hex: '#E11D48',
+    shades: ['#FFE4EA', '#FDA4AF', '#FB7185', '#E11D48', '#881337'],
   },
+
+  {
+    id: 'laranja',
+    name: 'Laranja',
+    hex: '#FF7A00',
+    shades: ['#FFF2E5', '#FFD0A3', '#FFA94D', '#FF7A00', '#A64E00'],
+  },
+
   {
     id: 'coral',
     name: 'Coral',
-    hex: '#F97316',
-    shades: ['#FFEDD5', '#FDBA74', '#FB923C', '#F97316', '#9A3412'],
+    hex: '#FF5A5F',
+    shades: ['#FFE5E6', '#FFB3B6', '#FF858A', '#FF5A5F', '#A1262A'],
   },
-  {
-    id: 'rosa',
-    name: 'Rosa',
-    hex: '#C62A87',
-    shades: ['#FCE4F3', '#F9B8E0', '#E879B8', '#C62A87', '#8B1D5F'],
-  },
-  {
-    id: 'pink',
-    name: 'Pink',
-    hex: '#E91E8C',
-    shades: ['#FCE7F3', '#F9A8D4', '#F472B6', '#E91E8C', '#9D174D'],
-  },
-  {
-    id: 'lilas',
-    name: 'Lilás',
-    hex: '#8B5CF6',
-    shades: ['#F5F3FF', '#DDD6FE', '#A78BFA', '#8B5CF6', '#6D28D9'],
-  },
-  {
-    id: 'roxo',
-    name: 'Roxo',
-    hex: '#7C3AED',
-    shades: ['#EDE9FE', '#C4B5FD', '#8B5CF6', '#7C3AED', '#4C1D95'],
-  },
-  {
-    id: 'azul',
-    name: 'Azul',
-    hex: '#2563EB',
-    shades: ['#DBEAFE', '#93C5FD', '#60A5FA', '#2563EB', '#1E40AF'],
-  },
-  {
-    id: 'ciano',
-    name: 'Ciano',
-    hex: '#0891B2',
-    shades: ['#CFFAFE', '#67E8F9', '#22D3EE', '#0891B2', '#155E75'],
-  },
-  {
-    id: 'ambar',
-    name: 'Âmbar',
-    hex: '#D97706',
-    shades: ['#FEF3C7', '#FCD34D', '#FBBF24', '#D97706', '#92400E'],
-  },
+
   {
     id: 'verde',
     name: 'Verde',
     hex: '#16A34A',
     shades: ['#DCFCE7', '#86EFAC', '#4ADE80', '#16A34A', '#166534'],
   },
+
+  {
+    id: 'turquesa',
+    name: 'Turquesa',
+    hex: '#00C2A8',
+    shades: ['#D9FFF8', '#7CF4E2', '#33E2C6', '#00C2A8', '#0F766E'],
+  },
+
+  {
+    id: 'ciano',
+    name: 'Ciano',
+    hex: '#06B6D4',
+    shades: ['#CFFAFE', '#67E8F9', '#22D3EE', '#06B6D4', '#155E75'],
+  },
+
+  {
+    id: 'azul',
+    name: 'Azul',
+    hex: '#2563EB',
+    shades: ['#DBEAFE', '#93C5FD', '#60A5FA', '#2563EB', '#1E40AF'],
+  },
+
+  {
+    id: 'lilas',
+    name: 'Lilás',
+    hex: '#8B5CF6',
+    shades: ['#F5F3FF', '#DDD6FE', '#A78BFA', '#8B5CF6', '#6D28D9'],
+  },
+
   {
     id: 'magenta',
     name: 'Magenta',
-    hex: '#D946EF',
-    shades: ['#FAE8FF', '#F0ABFC', '#E879F9', '#D946EF', '#86198F'],
+    hex: '#C026D3',
+    shades: ['#FAE8FF', '#F5D0FE', '#E879F9', '#C026D3', '#701A75'],
+  },
+
+  {
+    id: 'pink',
+    name: 'Pink',
+    hex: '#FF1493',
+    shades: ['#FFE5F4', '#FFB3DB', '#FF66BF', '#FF1493', '#9F0B5D'],
+  },
+
+  {
+    id: 'rosa',
+    name: 'Rosa',
+    hex: '#C62A87',
+    shades: ['#FCE4F3', '#F9B8E0', '#E879B8', '#C62A87', '#8B1D5F'],
   }
 ]
-
 export const COLOR_GRID_COLUMNS = 3
 export const COLOR_GRID_ROWS = 4
 

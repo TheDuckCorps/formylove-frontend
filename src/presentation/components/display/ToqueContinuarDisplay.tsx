@@ -5,9 +5,10 @@ import { useTypewriter } from '@/shared/hooks/useTypewriter'
 interface Props {
   phrase: string
   onContinue?: () => void
+  continueLabel?: string
 }
 
-export function ToqueContinuarDisplay({ phrase, onContinue }: Props) {
+export function ToqueContinuarDisplay({ phrase, onContinue, continueLabel = 'Próxima página →' }: Props) {
   const theme = useSiteTheme()
   const text = phrase || 'Toque para continuar'
   const displayed = useTypewriter(text, { speed: 40 })
@@ -24,7 +25,7 @@ export function ToqueContinuarDisplay({ phrase, onContinue }: Props) {
       </p>
 
       <Button onClick={onContinue} disabled={!onContinue}>
-        Próxima página →
+        {continueLabel}
       </Button>
     </div>
   )

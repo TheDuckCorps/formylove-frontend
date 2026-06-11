@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from 'react-router-dom'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { EditorHeader } from '../components/layout/EditorHeader'
 import { Footer } from '../components/layout/Footer'
 import { Button } from '../components/common/Button'
@@ -82,18 +82,26 @@ export function EditorView() {
   } = useSiteBuilderStore()
 
   const openPagesList = useRef<(() => void) | null>(null)
-  const currentPage = selectedPages[currentPageIndex]
+  const pageIndex =
+    selectedPages.length === 0 ? 0 : Math.min(currentPageIndex, selectedPages.length - 1)
+  const currentPage = selectedPages[pageIndex]
+
+  useEffect(() => {
+    if (selectedPages.length > 0 && currentPageIndex !== pageIndex) {
+      setCurrentPageIndex(pageIndex)
+    }
+  }, [currentPageIndex, pageIndex, selectedPages.length, setCurrentPageIndex])
 
   if (!currentPage) return <Navigate to={ROUTES.CRIAR} replace />
 
   const meta = PAGE_TYPES_META.find((m) => m.type === currentPage.type)
-  const pageLabel = `${currentPageIndex + 1}. ${meta?.label ?? currentPage.type}`
+  const pageLabel = `${pageIndex + 1}. ${meta?.label ?? currentPage.type}`
   const currentValidation = validationResults.find((r) => r.pageId === currentPage.id)
   const fieldErrors = currentValidation?.fieldErrors ?? {}
 
   function handleNext() {
-    if (currentPageIndex < selectedPages.length - 1) {
-      setCurrentPageIndex(currentPageIndex + 1)
+    if (pageIndex < selectedPages.length - 1) {
+      setCurrentPageIndex(pageIndex + 1)
       window.scrollTo(0, 0)
     } else {
       navigate(ROUTES.CRIAR_QRCODE)
@@ -101,21 +109,21 @@ export function EditorView() {
   }
 
   function handlePrev() {
-    if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1)
+    if (pageIndex > 0) {
+      setCurrentPageIndex(pageIndex - 1)
       window.scrollTo(0, 0)
     } else {
       navigate(ROUTES.CRIAR)
     }
   }
 
-  const isLastPage = currentPageIndex === selectedPages.length - 1
+  const isLastPage = pageIndex === selectedPages.length - 1
 
   return (
     <>
       <EditorHeader
         title={pageLabel}
-        currentIndex={currentPageIndex}
+        currentIndex={pageIndex}
         totalPages={selectedPages.length}
         onPrev={handlePrev}
         onNext={handleNext}
@@ -173,40 +181,44 @@ export function EditorView() {
           </p>
           <LivePreviewPanel
             page={currentPage}
-            pageIndex={currentPageIndex}
+            pageIndex={pageIndex}
             totalPages={selectedPages.length}
           />
         </div>
       </main>
 
       {/* Mobile bottom action bar — replaces both floating buttons */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur border-t border-gray-100 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] flex items-center gap-3">
-        <button
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur border-t border-gray-100 px-4 py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] flex items-stretch gap-3">
+        <Button
           type="button"
+          variant="outline"
+          size="md"
           onClick={() => openPagesList.current?.()}
-          className="flex items-center gap-2 flex-1 justify-center bg-brand/10 text-brand text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-brand/20 active:scale-95 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+          className="flex-1 min-w-0 bg-brand/10 border-brand/30 hover:bg-brand/20 whitespace-nowrap"
         >
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          Suas páginas
-          <span className="bg-brand text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none">
+          <span className="truncate">Páginas</span>
+          <span className="bg-brand text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none flex-shrink-0">
             {selectedPages.length}
           </span>
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="brand"
+          size="md"
           onClick={() => navigate(ROUTES.CRIAR_PREVIEW)}
-          className="flex items-center gap-2 flex-1 justify-center bg-brand text-white text-sm font-semibold px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 active:scale-95 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+          className="flex-1 min-w-0 whitespace-nowrap"
           aria-label="Pré-visualizar presente"
         >
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          Pré-visualizar
-        </button>
+          <span className="truncate">Pré-visualizar</span>
+        </Button>
       </div>
 
       <div className="hidden md:block">

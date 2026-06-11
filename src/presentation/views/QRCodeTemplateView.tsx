@@ -18,7 +18,7 @@ interface TemplateOption {
 
 const TEMPLATES: TemplateOption[] = [
   { id: 'template-1', label: 'Fundo branco', style: 'bg-white border border-gray-200' },
-  { id: 'template-2', label: 'Flores coloridas', style: 'bg-[url("/templates/t2.png")] bg-cover', emoji: '🌸🎨' },
+  { id: 'template-2', label: 'Flores coloridas', style: 'bg-gradient-to-br from-pink-100 via-rose-50 to-violet-100', emoji: '🌸🎨' },
   { id: 'template-3', label: 'Fundo claro', style: 'bg-gray-50 border border-gray-200' },
   { id: 'template-4', label: 'Corações rosa', style: 'bg-pink-100', emoji: '💗' },
   { id: 'template-5', label: 'Nuvens', style: 'bg-sky-100', emoji: '☁️' },
@@ -53,12 +53,12 @@ export function QRCodeTemplateView() {
         </p>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* Template grid */}
           <div className="flex-1 min-w-0 w-full">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
               {TEMPLATES.map((t) => (
                 <button
                   key={t.id}
+                  type="button"
                   onClick={() => handleSelect(t)}
                   className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition flex flex-col items-center justify-center pb-8 ${t.style} ${
                     qrTemplate === t.id
@@ -97,6 +97,7 @@ export function QRCodeTemplateView() {
                 Escolher plano e finalizar →
               </Button>
               <button
+                type="button"
                 onClick={() => navigate(ROUTES.CRIAR_PREVIEW)}
                 className="text-sm text-brand hover:underline"
               >
@@ -105,10 +106,9 @@ export function QRCodeTemplateView() {
             </div>
           </div>
 
-          {/* Live preview + color picker */}
           <div className="lg:sticky lg:top-8 w-full lg:w-64 shrink-0 bg-gray-50 lg:bg-transparent rounded-2xl lg:rounded-none p-4 lg:p-0">
-            <div className="flex flex-row lg:flex-col items-center lg:gap-3">
-              <div className="w-24 h-24 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl [&>div]:w-full [&>div]:h-full">
+            <div className="flex flex-row lg:flex-col items-center gap-3">
+              <div className="w-40 h-40 lg:w-52 lg:h-52 shrink-0 overflow-hidden rounded-2xl">
                 <QRCodeViewer slug="meu-presente" qrTemplate={qrTemplate ?? 'template-1'} size={200} />
               </div>
               <div className="flex flex-col gap-1 min-w-0">

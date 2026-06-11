@@ -22,35 +22,38 @@ export function Header({ showCta = true, seamless = false }: HeaderProps) {
           seamless ? 'border-b border-transparent bg-transparent' : 'border-b border-gray-100 bg-white/90 backdrop-blur-sm',
         ].join(' ')}
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 relative">
-          {/* Left: CTA button */}
-          {showCta ? (
-            <Button
-              size="sm"
-              onClick={() => navigate(ROUTES.CRIAR)}
-              className="whitespace-nowrap flex-shrink-0"
-            >
-              <span className="hidden sm:inline">Criar meu presente agora</span>
-              <span className="sm:hidden">Criar</span>
-            </Button>
-          ) : (
-            <div className="flex-shrink-0 w-8" />
-          )}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 sm:gap-2">
+          <div className="flex justify-start min-w-0">
+            {showCta ? (
+              <Button
+                size="sm"
+                onClick={() => navigate(ROUTES.CRIAR)}
+                className="whitespace-nowrap flex-shrink-0"
+              >
+                <span className="hidden sm:inline">Criar meu presente agora</span>
+                <span className="sm:hidden">Criar agora</span>
+              </Button>
+            ) : (
+              <div className="w-8 flex-shrink-0" aria-hidden />
+            )}
+          </div>
 
-          {/* Center: Logo (absolute so it's always truly centered) */}
-          <Link to={ROUTES.HOME} className="absolute left-1/2 -translate-x-1/2 flex-shrink-0">
+          <Link to={ROUTES.HOME} className="justify-self-center flex-shrink-0">
             <Logo size="sm" />
           </Link>
 
-          {/* Right: Meus links */}
-          <button
-            onClick={() => setShowProfileModal(true)}
-            className="flex-shrink-0 text-sm font-semibold text-brand border-2 border-brand rounded-xl px-3 sm:px-4 py-1 hover:bg-brand hover:text-white transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
-            aria-label="Acessar meus links por e-mail"
-            title="Acessar meus links por e-mail"
-          >
-            Meus links
-          </button>
+          <div className="flex justify-end min-w-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowProfileModal(true)}
+              className="flex-shrink-0 whitespace-nowrap"
+              aria-label="Acessar meus links por e-mail"
+              title="Acessar meus links por e-mail"
+            >
+              Meus links
+            </Button>
+          </div>
         </div>
       </header>
 

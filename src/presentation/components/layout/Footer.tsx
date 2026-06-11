@@ -4,12 +4,13 @@ import { ROUTES } from '@/shared/constants/routes'
 
 interface FooterProps {
   seamless?: boolean
+  className?: string
 }
 
-export function Footer({ seamless = false }: FooterProps) {
+export function Footer({ seamless = false, className = '' }: FooterProps) {
   return (
     <footer
-      className="w-full relative overflow-hidden"
+      className={['w-full relative overflow-hidden', className].filter(Boolean).join(' ')}
       style={
         seamless
           ? undefined
