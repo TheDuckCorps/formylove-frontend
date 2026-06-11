@@ -14,10 +14,10 @@ export function ImageWithLoader({
   loaderTone = 'light',
   ...imgProps
 }: Props) {
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(() => !src)
 
   useEffect(() => {
-    setReady(false)
+    setReady(!src)
   }, [src])
 
   return (

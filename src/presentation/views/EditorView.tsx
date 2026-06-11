@@ -199,7 +199,7 @@ export function EditorView() {
           <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          <span className="truncate">Suas páginas</span>
+          <span className="truncate">Páginas</span>
           <span className="bg-brand text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center leading-none flex-shrink-0">
             {selectedPages.length}
           </span>

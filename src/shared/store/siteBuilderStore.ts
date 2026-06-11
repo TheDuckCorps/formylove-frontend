@@ -96,12 +96,22 @@ export const useSiteBuilderStore = create<SiteBuilderState & SiteBuilderActions>
       },
 
       removePage: (id) => {
-        const pages = get().selectedPages.filter((p) => p.id !== id)
-        const nextIndex =
-          pages.length === 0 ? 0 : Math.min(get().currentPageIndex, pages.length - 1)
+        const { selectedPages, currentPageIndex } = get()
+        const removedIndex = selectedPages.findIndex((p) => p.id === id)
+        if (removedIndex === -1) return
+
+        const pages = selectedPages.filter((p) => p.id !== id)
+        let nextIndex = currentPageIndex
+
+        if (removedIndex < currentPageIndex) {
+          nextIndex = currentPageIndex - 1
+        } else if (removedIndex === currentPageIndex) {
+          nextIndex = Math.min(currentPageIndex, Math.max(pages.length - 1, 0))
+        }
+
         set({
           selectedPages: pages.map((p, i) => ({ ...p, order: i })),
-          currentPageIndex: nextIndex,
+          currentPageIndex: pages.length === 0 ? 0 : nextIndex,
         })
       },
 

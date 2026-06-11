@@ -37,7 +37,7 @@ export const QR_TEMPLATE_OPTIONS: { id: QrTemplateId; label: string }[] = [
 ]
 
 export function getQrTemplateImagePath(id: string): string {
-  if (id in QR_TEMPLATE_IMAGE) {
+  if (Object.prototype.hasOwnProperty.call(QR_TEMPLATE_IMAGE, id)) {
     return QR_TEMPLATE_IMAGE[id as QrTemplateId]
   }
   return QR_TEMPLATE_IMAGE['template-1']

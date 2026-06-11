@@ -105,14 +105,14 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   function postToPlayer(command: string, args: unknown[] = []) {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'command', func: command, args }),
-'https://www.youtube.com',      
+      'https://www.youtube.com',
     )
   }
 
   function startPlayerListening() {
     iframeRef.current?.contentWindow?.postMessage(
       JSON.stringify({ event: 'listening', id: IFRAME_ID, channel: 'widget' }),
-      '*',
+      'https://www.youtube.com',
     )
   }
 
