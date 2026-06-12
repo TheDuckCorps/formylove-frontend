@@ -50,8 +50,20 @@ export function PagePreviewContent({ type, data }: { type: PageType; data: AnyPa
     case 'MUSICA_FUNDO': {
       const d = data as MusicaFundoData
       return (
-        <div className="flex flex-col min-h-[220px] justify-end items-center pt-6">
-          <MusicaFundoDisplay youtubeUrl={d.youtubeUrl} compact />
+        <div className="space-y-3">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800 leading-snug">
+            No preview, a música toca apenas nesta página. No presente final, ela ficará disponível
+            durante todo o presente.
+          </div>
+          {d.youtubeUrl ? (
+            <div className="relative min-h-[240px] overflow-hidden rounded-xl">
+              <MusicaFundoDisplay youtubeUrl={d.youtubeUrl} embedded />
+            </div>
+          ) : (
+            <div className="h-32 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-sm">
+              Insira uma URL do YouTube
+            </div>
+          )}
         </div>
       )
     }
