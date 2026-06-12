@@ -2,6 +2,7 @@ import { cloneElement, isValidElement, useEffect, useRef, useState, type ReactNo
 import { useSiteBuilderStore } from '@/shared/store/siteBuilderStore'
 import { PAGE_TYPES_META } from '@/core/entities/Page'
 import type { PageValidationResult } from '@/core/validation/pageSchemas'
+import { PageTypeAnimatedPreview } from '../pages/PageTypeAnimatedPreview'
 
 interface Props {
   validationResults?: PageValidationResult[]
@@ -127,12 +128,14 @@ function StepperItem({
           ].join(' ')}
         >
           {meta?.svgIcon ? (
-            <img
-              src={meta.svgIcon}
-              alt=""
-              className={mobileSheet ? 'w-7 h-7 object-contain pointer-events-none' : 'w-6 h-6 object-contain pointer-events-none'}
-              draggable={false}
-            />
+            <div
+              className={[
+                'pointer-events-none',
+                mobileSheet ? 'w-9 h-9' : 'w-8 h-8',
+              ].join(' ')}
+            >
+              <PageTypeAnimatedPreview type={page.type} variant="stepper" />
+            </div>
           ) : (
             <span className="text-xs font-bold text-gray-500">{index + 1}</span>
           )}
