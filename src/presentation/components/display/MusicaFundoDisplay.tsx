@@ -5,6 +5,8 @@ import { useSiteTheme } from '@/shared/context/SiteThemeContext'
 interface Props {
   youtubeUrl: string
   compact?: boolean
+  /** Renders inside a relative parent instead of fixed viewport overlay (preview mockup). */
+  embedded?: boolean
 }
 
 function getYoutubeVideoId(url: string): string | null {
@@ -26,7 +28,7 @@ function getYoutubeVideoId(url: string): string | null {
 const PAD = 16
 const IFRAME_ID = 'music-background-player'
 
-export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
+export function MusicaFundoDisplay({ youtubeUrl, compact = false, embedded = false }: Props) {
   const theme = useSiteTheme()
 
   /* ── audio state ─────────────────────────────────────────────── */
@@ -37,11 +39,13 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   const hasUserInteracted = useRef(false)
   const volumeRef = useRef(volume)
   const playingRef = useRef(playing)
+  const introCompleteRef = useRef(false)
 
   /* ── UI / drag state ─────────────────────────────────────────── */
   // 'text'  → intro pill with "Música" label visible
   // 'idle'  → collapsed to icon only; expands on hover
-  const [introPhase, setIntroPhase] = useState<'text' | 'idle'>('text')
+  const [introPhase, setIntroPhase] = useState<'text' | 'idle'>(compact ? 'idle' : 'text')
+  const [introComplete, setIntroComplete] = useState(compact)
   const [expanded, setExpanded] = useState(false)
   const [mounted, setMounted] = useState(false)
   const dragRef = useRef<HTMLDivElement>(null)
@@ -59,9 +63,10 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
   // intro: show label, then collapse to icon after 2.2 s
   useEffect(() => {
+    if (compact) return
     const t = setTimeout(() => setIntroPhase('idle'), 2200)
     return () => clearTimeout(t)
-  }, [])
+  }, [compact])
 
   useEffect(() => {
     volumeRef.current = volume
@@ -71,6 +76,16 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     playingRef.current = playing
   }, [playing])
 
+  useEffect(() => {
+    introCompleteRef.current = introComplete
+  }, [introComplete])
+
+  useEffect(() => {
+    if (compact) introCompleteRef.current = true
+  }, [compact])
+
+  const iframeId = embedded ? 'music-background-player-preview' : IFRAME_ID
+
   /* ── youtube iframe api ───────────────────────────────────────── */
   const videoId = useMemo(() => getYoutubeVideoId(youtubeUrl), [youtubeUrl])
 
@@ -78,8 +93,8 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     if (!videoId) return null
     const params = new URLSearchParams({
       enablejsapi: '1',
-      widgetid: IFRAME_ID,
-      autoplay: '1',
+      widgetid: iframeId,
+      autoplay: '0',
       loop: '1',
       playlist: videoId,
       controls: '0',
@@ -94,7 +109,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
       params.set('origin', window.location.origin)
     }
     return `https://www.youtube.com/embed/${videoId}?${params.toString()}`
-  }, [videoId])
+  }, [videoId, iframeId])
 
   const YOUTUBE_ORIGINS = new Set([
     'https://www.youtube.com',
@@ -111,14 +126,16 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
   function startPlayerListening() {
     iframeRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'listening', id: IFRAME_ID, channel: 'widget' }),
+      JSON.stringify({ event: 'listening', id: iframeId, channel: 'widget' }),
       'https://www.youtube.com',
     )
   }
 
   function syncPlayerCommands() {
     postToPlayer('setVolume', [volumeRef.current])
-    postToPlayer(playingRef.current ? 'playVideo' : 'pauseVideo')
+    if (hasUserInteracted.current) {
+      postToPlayer(playingRef.current ? 'playVideo' : 'pauseVideo')
+    }
   }
 
   function handleIframeLoad() {
@@ -140,7 +157,14 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
           postToPlayer('setVolume', [volumeRef.current])
         }
         if (data.event === 'onStateChange') {
-          if (data.info === 1) setPlaying(true)
+          if (data.info === 1) {
+            if (!introCompleteRef.current) {
+              postToPlayer('pauseVideo')
+              return
+            }
+            hasUserInteracted.current = true
+            setPlaying(true)
+          }
           if (data.info === 2) setPlaying(false)
         }
       } catch {
@@ -152,14 +176,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   }, [])
 
   useEffect(() => {
-    if (!playerReady) return
-    postToPlayer('playVideo')
-    postToPlayer('setVolume', [volume])
-    setPlaying(true)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerReady])
-
-  useEffect(() => {
     if (!playerReady || !hasUserInteracted.current) return
     postToPlayer(playing ? 'playVideo' : 'pauseVideo')
   }, [playing, playerReady])
@@ -168,19 +184,6 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     if (!playerReady) return
     postToPlayer('setVolume', [volume])
   }, [volume, playerReady])
-
-  // Mobile: browser blocks autoplay without user gesture — start on first touch anywhere.
-  useEffect(() => {
-    if (!playerReady) return
-    function onFirstTouch() {
-      hasUserInteracted.current = true
-      postToPlayer('playVideo')
-      setPlaying(true)
-    }
-    document.addEventListener('touchstart', onFirstTouch, { once: true, passive: true })
-    return () => document.removeEventListener('touchstart', onFirstTouch)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerReady])
 
   /* ── drag → snap to nearest corner ──────────────────────────── */
   function snapToNearestCorner() {
@@ -198,14 +201,27 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
   }
 
   /* ── controls ────────────────────────────────────────────────── */
-  function handleToggle() {
+  function startPlaybackFromUserGesture() {
+    if (!introComplete) return
     hasUserInteracted.current = true
-    const next = !playing
-    setPlaying(next)
-    postToPlayer(next ? 'playVideo' : 'pauseVideo')
+    postToPlayer('setVolume', [volumeRef.current])
+    postToPlayer('playVideo')
+    setPlaying(true)
+  }
+
+  function handleToggle() {
+    if (!introComplete) return
+    hasUserInteracted.current = true
+    if (playing) {
+      setPlaying(false)
+      postToPlayer('pauseVideo')
+    } else {
+      startPlaybackFromUserGesture()
+    }
   }
 
   function handleVolumeChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!introComplete) return
     const next = Number(e.target.value)
     setVolume(next)
     volumeRef.current = next
@@ -218,12 +234,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
       <div className="relative inline-flex flex-col items-center select-none gap-2">
         <button
           type="button"
-          onClick={() => {
-            hasUserInteracted.current = true
-            const next = !playing
-            setPlaying(next)
-            postToPlayer(next ? 'playVideo' : 'pauseVideo')
-          }}
+          onClick={handleToggle}
           className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[var(--site-primary)] transition focus-visible:outline-none focus-visible:ring-2 rounded-full"
           style={{ outlineColor: theme.primary }}
           aria-label={playing ? 'Pausar música' : 'Retomar música'}
@@ -241,7 +252,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
         </button>
         {playerUrl ? (
           <iframe
-            id={IFRAME_ID}
+            id={iframeId}
             ref={iframeRef}
             title="Música de fundo"
             src={playerUrl}
@@ -274,12 +285,12 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
     <>
       <motion.div
         ref={dragRef}
-        drag
+        drag={introComplete}
         dragMomentum={false}
         dragElastic={0.06}
         onDragEnd={snapToNearestCorner}
         style={{
-          position: 'fixed',
+          position: embedded ? 'absolute' : 'fixed',
           top: 0,
           left: 0,
           x: posX,
@@ -287,7 +298,10 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
           zIndex: 50,
         }}
         whileDrag={{ scale: 1.06, cursor: 'grabbing' }}
-        className="select-none touch-none cursor-grab"
+        className={[
+          'select-none touch-none',
+          introComplete ? 'cursor-grab' : 'cursor-default pointer-events-none',
+        ].join(' ')}
         data-testid="music-pill"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -296,13 +310,14 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
         <div
           className="flex items-center rounded-full bg-white/85 backdrop-blur-md shadow-lg border px-4 gap-0 overflow-hidden h-12"
           style={{ borderColor: theme.borderSoft, boxShadow: theme.buttonShadow }}
-          onMouseEnter={() => introPhase === 'idle' && setExpanded(true)}
+          onMouseEnter={() => introComplete && setExpanded(true)}
           onMouseLeave={() => setExpanded(false)}
           onPointerUp={(e) => {
+            if (!introComplete) return
             // toggle only for touch — desktop expansion is handled by hover
             if (e.pointerType !== 'touch') return
             if ((e.target as HTMLElement).closest('[data-testid="music-controls"]')) return
-            if (introPhase === 'idle') setExpanded(v => !v)
+            setExpanded(v => !v)
           }}
         >
           {/* Music icon — always visible, same height as controls button */}
@@ -311,7 +326,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
           </div>
 
           {/* ── intro label "Música" ── */}
-          <AnimatePresence>
+          <AnimatePresence onExitComplete={() => setIntroComplete(true)}>
             {introPhase === 'text' && (
               <motion.span
                 key="label"
@@ -328,7 +343,7 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
           {/* ── controls (hover / click after intro) ── */}
           <AnimatePresence>
-            {expanded && introPhase === 'idle' && (
+            {expanded && introComplete && (
               <motion.div
                 key="controls"
                 initial={{ width: 0, opacity: 0, marginLeft: 0 }}
@@ -382,12 +397,15 @@ export function MusicaFundoDisplay({ youtubeUrl, compact = false }: Props) {
 
       {playerUrl ? (
         <iframe
-          id={IFRAME_ID}
+          id={iframeId}
           ref={iframeRef}
           title="Música de fundo"
           src={playerUrl}
           onLoad={handleIframeLoad}
-          className="w-0 h-0 opacity-0 pointer-events-none fixed"
+          className={[
+            'w-0 h-0 opacity-0 pointer-events-none',
+            embedded ? 'absolute' : 'fixed',
+          ].join(' ')}
           allow="autoplay; encrypted-media"
         />
       ) : null}
