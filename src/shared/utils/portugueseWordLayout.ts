@@ -7,6 +7,13 @@ export const LETTER_SLOT = {
   fontSize: 16,
 } as const
 
+export const KEYBOARD_COLS = 7
+export const KEYBOARD_GAP = 8
+
+/** Largura natural do teclado (7 colunas) — usada para centralizar sem esticar em telas grandes. */
+export const KEYBOARD_WIDTH =
+  KEYBOARD_COLS * LETTER_SLOT.width + (KEYBOARD_COLS - 1) * KEYBOARD_GAP
+
 export interface DisplayRow {
   chars: string[]
   endsWithHyphen: boolean

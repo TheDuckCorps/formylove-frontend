@@ -7,6 +7,8 @@ import { getThemeConfettiColors } from '@/shared/utils/siteTheme'
 import { playLetterFound, playLetterWrong } from '@/shared/utils/audioEffects'
 import { playWinSound } from '@/shared/utils/spinWheelAudio'
 import {
+  KEYBOARD_GAP,
+  KEYBOARD_WIDTH,
   LETTER_SLOT,
   layoutWordRows,
   type DisplayRow,
@@ -25,7 +27,6 @@ const DIGITS = '0123456789'.split('')
 const GUESSABLE = /[A-Z0-9]/
 
 const PREVIEW_MAX_WIDTH = 250
-const PUBLIC_MAX_WIDTH = 340
 
 // Strips diacritics so Ã→A, Ç→C, É→E, etc.
 function stripAccents(str: string): string {
@@ -178,21 +179,23 @@ function WordRows({
   return (
     <div className="flex flex-col items-center gap-y-2 w-full">
       {rows.map((row, rowIdx) => (
-        <div key={`row-${rowIdx}`} className="relative w-full max-w-full">
-          <div className="flex justify-center max-w-full" style={{ gap: LETTER_SLOT.gap }}>
-            {row.chars.map((char, cellIdx) => (
-              <LetterCell
-                key={`${rowIdx}-${cellIdx}-${char}`}
-                char={char}
-                isComplete={isComplete}
-                guessedSet={guessedSet}
-                animationIndex={rowIdx * 10 + cellIdx}
-              />
-            ))}
-          </div>
+        <div
+          key={`row-${rowIdx}`}
+          className="flex items-center justify-center"
+          style={{ gap: LETTER_SLOT.gap, maxWidth: KEYBOARD_WIDTH }}
+        >
+          {row.chars.map((char, cellIdx) => (
+            <LetterCell
+              key={`${rowIdx}-${cellIdx}-${char}`}
+              char={char}
+              isComplete={isComplete}
+              guessedSet={guessedSet}
+              animationIndex={rowIdx * 10 + cellIdx}
+            />
+          ))}
           {row.endsWithHyphen && (
             <span
-              className="absolute right-0 top-1/2 -translate-y-1/2 font-bold text-gray-500"
+              className="font-bold text-gray-500 flex-shrink-0 ml-0.5"
               style={{ fontSize: LETTER_SLOT.fontSize }}
               aria-hidden
             >
@@ -223,7 +226,7 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
   const wrongGuessedSet = useMemo(() => new Set(wrongGuessed), [wrongGuessed])
   const wrongFlashSet = useMemo(() => new Set(wrongFlash), [wrongFlash])
 
-  const maxWidth = previewMode ? PREVIEW_MAX_WIDTH : PUBLIC_MAX_WIDTH
+  const maxWidth = previewMode ? PREVIEW_MAX_WIDTH : KEYBOARD_WIDTH
 
   const wordLayouts = useMemo(() => {
     return displaySecret.split('\n').flatMap((line) => {
@@ -271,13 +274,13 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full space-y-4" style={{ maxWidth: KEYBOARD_WIDTH }}>
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
         <p className="text-xs text-yellow-700 font-semibold uppercase tracking-wide mb-1">Dica</p>
         <p className="text-sm text-gray-800">{hint || 'Sem dica definida'}</p>
       </div>
 
-      <div ref={wordRef} className="flex flex-col items-center gap-y-3 w-full overflow-hidden">
+      <div ref={wordRef} className="flex flex-col items-center gap-y-3 w-full">
         {wordLayouts.length > 0 ? (
           wordLayouts.map(({ word, rows }, layoutIdx) => (
             <WordRows
@@ -325,8 +328,11 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
       {!hasWord ? (
         <p className="text-sm text-gray-400 text-center">Palavra secreta não configurada</p>
       ) : (
-        <div className="space-y-2 pt-6">
-          <div className="grid grid-cols-7 gap-2">
+        <div className="space-y-2 pt-6 w-full">
+          <div
+            className="grid grid-cols-7 w-full"
+            style={{ gap: KEYBOARD_GAP, width: KEYBOARD_WIDTH }}
+          >
             {DIGITS.slice(0, 7).map((digit) => (
               <GuessKey
                 key={digit}
@@ -341,7 +347,10 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
               />
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-2">
+          <div
+            className="flex justify-center w-full"
+            style={{ gap: KEYBOARD_GAP, width: KEYBOARD_WIDTH }}
+          >
             {DIGITS.slice(7).map((digit) => (
               <GuessKey
                 key={digit}
@@ -357,7 +366,10 @@ export function PalavraSecretaDisplay({ hint, secret, onComplete, previewMode = 
             ))}
           </div>
           <div className="border-t border-gray-200 mt-3 pt-3" />
-          <div className="grid grid-cols-7 gap-2">
+          <div
+            className="grid grid-cols-7 w-full"
+            style={{ gap: KEYBOARD_GAP, width: KEYBOARD_WIDTH }}
+          >
             {ALPHABET.map((letter) => (
               <GuessKey
                 key={letter}

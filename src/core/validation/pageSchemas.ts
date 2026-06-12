@@ -71,6 +71,13 @@ const quizAfetivoSchema = z
         path: ['answers'],
       })
     }
+    if (data.answers.length > 4) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'O quiz aceita no máximo 4 opções',
+        path: ['answers'],
+      })
+    }
   })
 
 const raspadinhaSchema = z.object({
