@@ -3,6 +3,9 @@ import type { QuizAfetivoData, QuizAfetivoAnswer } from '@/core/entities/Page'
 import { Input } from '../common/Input'
 import { FieldError } from '../common/FieldError'
 
+const MAX_ANSWERS = 4
+const MIN_ANSWERS = 2
+
 interface Props {
   data: QuizAfetivoData
   onChange: (data: Partial<QuizAfetivoData>) => void
@@ -23,12 +26,12 @@ export function QuizAfetivoPage({ data, onChange, fieldErrors = {} }: Props) {
   }
 
   function addAnswer() {
-    if (data.answers.length >= 6) return
+    if (data.answers.length >= MAX_ANSWERS) return
     onChange({ answers: [...data.answers, { id: nanoid(), text: '', isCorrect: false }] })
   }
 
   function removeAnswer(id: string) {
-    if (data.answers.length <= 2) return
+    if (data.answers.length <= MIN_ANSWERS) return
     onChange({ answers: data.answers.filter((a) => a.id !== id) })
   }
 
@@ -88,7 +91,7 @@ export function QuizAfetivoPage({ data, onChange, fieldErrors = {} }: Props) {
         </div>
         <FieldError message={fieldErrors.answers} />
 
-        {data.answers.length < 6 && (
+        {data.answers.length < MAX_ANSWERS && (
           <button
             type="button"
             onClick={addAnswer}
