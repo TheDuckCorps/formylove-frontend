@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
+import { Analytics } from '@vercel/analytics/react'
 import { ROUTES } from '@/shared/constants/routes'
 import { ToastProvider } from '@/shared/ui/ToastProvider'
 
@@ -60,6 +61,7 @@ export default function App() {
     <ToastProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <Analytics />
         <Routes>
         {/* ── Public ─────────────────────────────────────── */}
         <Route path={ROUTES.HOME} element={<LandingView />} />
